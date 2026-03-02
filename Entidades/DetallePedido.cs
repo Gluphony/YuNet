@@ -8,15 +8,15 @@ namespace Entidades
 {
     public class DetallePedido
     {
-        public int IdDetallePedido { get; set; }
-        public int IdPedido { get; set; }
-        public int IdProducto { get; set; }
-        public string? Producto { get; set; } // Nombre del producto para mostrar en el ticket
-        public string? ImeiVendido { get; set; }
-        public int Cantidad { get; set; }
-        public decimal PrecioUnitario { get; set; }
+        public int ID_DETALLE_PEDIDO { get; set; }
+        public int ID_PEDIDO { get; set; }
+        public int ID_PRODUCTO { get; set; }
+        public string? PRODUCTO { get; set; } // Nombre del producto para mostrar en el ticket
+        public string? IMEI_VENDIDO { get; set; }
+        public int CANTIDAD { get; set; }
+        public decimal PRECIO_UNITARIO { get; set; }
 
         // Propiedad calculada en memoria
-        public decimal Subtotal => Cantidad * PrecioUnitario;
+        public decimal SUBTOTAL => CANTIDAD * PRECIO_UNITARIO;
     }
 }

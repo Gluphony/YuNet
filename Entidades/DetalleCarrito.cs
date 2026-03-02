@@ -8,16 +8,16 @@ namespace Entidades
 {
     public class DetalleCarrito
     {
-        public int IdDetalle { get; set; }
-        public int IdCarrito { get; set; }
-        public int IdProducto { get; set; }
-        public int Cantidad { get; set; }
-        public decimal PrecioUnitario { get; set; }
+        public int ID_DETALLE { get; set; }
+        public int ID_CARRITO { get; set; }
+        public int ID_PRODUCTO { get; set; }
+        public int CANTIDAD { get; set; }
+        public decimal PRECIO_UNITARIO { get; set; }
 
         // Propiedad calculada: No necesita 'set' porque se calcula sola
-        public decimal Subtotal => Cantidad * PrecioUnitario;
+        public decimal SUBTOTAL => CANTIDAD * PRECIO_UNITARIO;
 
         // Propiedad de navegación para mostrar el nombre en la tabla
-        public string? NombreProducto { get; set; }
+        public string? NOMBRE_PRODUCTO { get; set; }
     }
 }

@@ -33,12 +33,12 @@ namespace Datos
                             {
                                 olista.Add(new DetalleCarrito()
                                 {
-                                    IdDetalle = Convert.ToInt32(reader["Id_Detalle"]),
-                                    IdProducto = Convert.ToInt32(reader["Id_Producto"]),
+                                    ID_DETALLE = Convert.ToInt32(reader["Id_Detalle"]),
+                                    ID_PRODUCTO = Convert.ToInt32(reader["Id_Producto"]),
                                     // "Producto" es el alias que pusiste en el SELECT de tu SP
-                                    NombreProducto = reader["Producto"].ToString(),
-                                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
-                                    PrecioUnitario = Convert.ToDecimal(reader["Precio_Unitario"])
+                                    NOMBRE_PRODUCTO = reader["Producto"].ToString(),
+                                    CANTIDAD = Convert.ToInt32(reader["Cantidad"]),
+                                    PRECIO_UNITARIO = Convert.ToDecimal(reader["Precio_Unitario"])
 
                                 });
                             }

@@ -8,8 +8,8 @@ namespace Entidades
 {
     public class Marca
     {
-        public int IdMarca { get; set; }
-        public string? Nombre { get; set; }
-        public bool Estado { get; set; }
+        public int ID_MARCA { get; set; }
+        public string? NOMBRE { get; set; }
+        public bool ESTADO { get; set; }
     }
 }

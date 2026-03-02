@@ -34,11 +34,11 @@ namespace Datos
                             {
                                 objeto = new Carrito()
                                 {
-                                    IdCarrito = Convert.ToInt32(reader["ID_CARRITO"]),
-                                    IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                                    FechaCreacion = Convert.ToDateTime(reader["FECHA_CREACION"]),
-                                    Total = Convert.ToDecimal(reader["TOTAL"]),
-                                    Estado = reader["ESTADO"].ToString()
+                                    ID_CARRITO = Convert.ToInt32(reader["ID_CARRITO"]),
+                                    ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
+                                    FECHA_CREACION = Convert.ToDateTime(reader["FECHA_CREACION"]),
+                                    TOTAL = Convert.ToDecimal(reader["TOTAL"]),
+                                    ESTADO = reader["ESTADO"].ToString()
                                 };
                             }
                         }

@@ -8,14 +8,11 @@ namespace Entidades
 {
     public class Pedido
     {
-        public int IdPedido { get; set; }
-        public int IdUsuario { get; set; }
-        public int? IdMetodoPago { get; set; } // Puede ser null inicialmente
-        public DateTime FechaPedido { get; set; }
-        public string? Estado { get; set; }
-        public decimal Total
-        {
-            get; set;
-        }
+        public int ID_PEDIDO { get; set; }
+        public int ID_USUARIO { get; set; }
+        public int? ID_METODO_PAGO { get; set; } // Puede ser null inicialmente
+        public DateTime FECHA_PEDIDO { get; set; }
+        public string? ESTADO { get; set; }
+        public decimal TOTAL        { get; set; }
     }
 }

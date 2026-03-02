@@ -8,11 +8,11 @@ namespace Entidades
 {
     public class UnidadExistencia
     {
-        public int IdUnidad { get; set; }
-        public int IdProducto { get; set; }
-        public string? Imei { get; set; }
-        public string? EstadoFisico { get; set; }
-        public DateTime FechaIngreso { get; set; }
-        public bool Vendido { get; set; }
+        public int ID_UNIDAD { get; set; }
+        public int ID_PRODUCTO { get; set; }
+        public string? IMEI { get; set; }
+        public string? ESTADO_FISICO { get; set; }
+        public DateTime FECHA_INGRESO { get; set; }
+        public bool VENDIDO { get; set; }
     }
 }

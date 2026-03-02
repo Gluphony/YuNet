@@ -11,12 +11,12 @@ namespace Datos
 {
     public class DataAuditoria
     {
-        public Conexion con = new Conexion();
+        public Conexion _con = new Conexion();
         // 1. LISTADO GENERAL (Ya lo tienes, aquí consolidado)
         public List<Auditoria> ListarAuditoriaGeneral()
         {
             var olista = new List<Auditoria>();
-            using (SqlConnection connection = new SqlConnection(con.GetCadena()))
+            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
                 using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoria", connection))
                 {
@@ -42,7 +42,7 @@ namespace Datos
         public List<Auditoria> ListarAuditoriaPorUsuario(int idUsuario)
         {
             var olista = new List<Auditoria>();
-            using (SqlConnection connection = new SqlConnection(con.GetCadena()))
+            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
                 using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoriaPorUsuario", connection))
                 {
@@ -71,7 +71,7 @@ namespace Datos
         public List<Auditoria> ListarAuditoriaPorFecha(DateTime fechaInicio, DateTime fechaFin)
         {
             var olista = new List<Auditoria>();
-            using (SqlConnection connection = new SqlConnection(con.GetCadena()))
+            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
                 using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoriaPorFecha", connection))
                 {
@@ -103,14 +103,14 @@ namespace Datos
         {
             return new Auditoria()
             {
-                IdAuditoria = Convert.ToInt64(reader["Id_Auditoria"]),
-                FechaRegistro = Convert.ToDateTime(reader["Fecha_Registro"]),
-                IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                Accion = reader["ACCION"].ToString(),
-                TablaAfectada = reader["TABLA_AFECTADA"].ToString(),
-                DetalleActividad = reader["DETALLE_ACTIVIDAD"].ToString(),
-                DireccionIp = reader["DIRECCION_IP"].ToString(),
-                Nombre_Usuario = reader["Nombre_Usuario"].ToString()
+                ID_AUDITORIA = Convert.ToInt64(reader["Id_Auditoria"]),
+                FECHA_REGISTRO = Convert.ToDateTime(reader["Fecha_Registro"]),
+                ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
+                ACCION = reader["ACCION"].ToString(),
+                TABLA_AFECTADA = reader["TABLA_AFECTADA"].ToString(),
+                DETALLE_ACTIVIDAD = reader["DETALLE_ACTIVIDAD"].ToString(),
+                DIRECCION_IP = reader["DIRECCION_IP"].ToString(),
+                NOMBRE_USUARIO = reader["Nombre_Usuario"].ToString()
             };
         }
     }

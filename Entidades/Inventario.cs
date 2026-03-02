@@ -8,12 +8,12 @@ namespace Entidades
 {
     public class Inventario
     {
-        public int IdInventario { get; set; }
-        public int IdProducto { get; set; }
-        public int IdUsuario { get; set; }
-        public string? TipoMovimiento { get; set; }
-        public int Cantidad { get; set; }
-        public string? Motivo { get; set; }
-        public DateTime FechaMovimiento { get; set; }
+        public int ID_INVENTARIO { get; set; }
+        public int ID_PRODUCTO { get; set; }
+        public int ID_USUARIO { get; set; }
+        public string? TIPO_MOVIMIENTO { get; set; }
+        public int CANTIDAD { get; set; }
+        public string? MOTIVO { get; set; }
+        public DateTime FECHA_MOVIMIENTO { get; set; }
     }
 }

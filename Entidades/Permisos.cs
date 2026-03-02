@@ -8,9 +8,9 @@ namespace Entidades
 {
     public class Permisos
     {
-        public int IdPermiso { get; set; }
-        public string? ClavePermiso { get; set; }
-        public string? Descripcion { get; set; }
-        public bool Estado { get; set; }
+        public int ID_PERMISO { get; set; }
+        public string? CLAVE_PERMISO { get; set; }
+        public string? DESCRIPCION { get; set; }
+        public bool ESTADO { get; set; }
     }
 }

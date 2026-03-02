@@ -8,8 +8,8 @@ namespace Entidades
 {
     public class Categoria
     {
-        public int IdCategoria { get; set; }
-        public string? NombreCategoria { get; set; }
-        public bool Estado { get; set; }
+        public int ID_CATEGORIA { get; set; }
+        public string? NOMBRE_CATEGORIA { get; set; }
+        public bool ESTADO { get; set; }
     }
 }

@@ -8,14 +8,14 @@ namespace Entidades
 {
     public class Auditoria
     {
-        public long IdAuditoria { get; set; } // BIGINT mapea a long
-        public DateTime FechaRegistro { get; set; }
-        public int IdUsuario { get; set; }
-        public string? Accion { get; set; }
-        public string? TablaAfectada { get; set; }
-        public string? DetalleActividad { get; set; }
-        public string? DireccionIp { get; set; }
+        public long ID_AUDITORIA { get; set; } // BIGINT mapea a long
+        public DateTime FECHA_REGISTRO { get; set; }
+        public int ID_USUARIO { get; set; }
+        public string? ACCION { get; set; }
+        public string? TABLA_AFECTADA { get; set; }
+        public string? DETALLE_ACTIVIDAD { get; set; }
+        public string? DIRECCION_IP { get; set; }
 
-        public string? Nombre_Usuario { get; set; }
+        public string? NOMBRE_USUARIO { get; set; }
     }
 }

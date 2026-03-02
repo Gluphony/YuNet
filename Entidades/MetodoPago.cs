@@ -8,8 +8,8 @@ namespace Entidades
 {
     public class MetodoPago
     {
-        public int IdMetodoPago { get; set; }
-        public string? NombreMetodo { get; set; }
-        public bool Estado { get; set; }
+        public int ID_METODO_PAGO { get; set; }
+        public string? NOMBRE_METODO { get; set; }
+        public bool ESTADO { get; set; }
     }
 }

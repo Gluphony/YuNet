@@ -8,9 +8,9 @@ namespace Entidades
 {
     public class RolPermiso
     {
-        public int IdRol { get; set; }
-        public int IdPermiso { get; set; }
-        public string? NombreRol { get; set; }
-        public string? NombrePermiso { get; set; }
+        public int ID_ROL { get; set; }
+        public int ID_PERMISO { get; set; }
+        public string? NOMBRE_ROL { get; set; }
+        public string? NOMBRE_PERMISO { get; set; }
     }
 }
