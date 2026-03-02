@@ -18,7 +18,7 @@ namespace Entidades
         public int CANTIDAD { get; set; }
         public decimal PRECIO_UNITARIO { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal SUBTOTAL { get; private set; }
+        public decimal SUBTOTAL { get;  set; }
         [ForeignKey("ID_CARRITO")]
         public virtual Carrito? ObjCarrito { get; set; }
         [ForeignKey("ID_PRODUCTO")]

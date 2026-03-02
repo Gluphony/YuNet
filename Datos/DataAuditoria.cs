@@ -103,14 +103,19 @@ namespace Datos
         {
             return new Auditoria()
             {
-                IdAuditoria = Convert.ToInt64(reader["Id_Auditoria"]),
-                FechaRegistro = Convert.ToDateTime(reader["Fecha_Registro"]),
-                IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
-                Accion = reader["ACCION"].ToString(),
-                TablaAfectada = reader["TABLA_AFECTADA"].ToString(),
-                DetalleActividad = reader["DETALLE_ACTIVIDAD"].ToString(),
-                DireccionIp = reader["DIRECCION_IP"].ToString(),
-                Nombre_Usuario = reader["Nombre_Usuario"].ToString()
+                ID_AUDITORIA = Convert.ToInt64(reader["ID_AUDITORIA"]),
+                FECHA_REGISTRO = Convert.ToDateTime(reader["FECHA_REGISTRO"]),
+                ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
+                ACCION = reader["ACCION"].ToString(),
+                TABLA_AFECTADA= reader["TABLA_AFECTADA"].ToString(),
+                DETALLE_ACTIVIDAD= reader["DETALLE_ACTIVIDAD"].ToString(),
+                DIRECCION_IP = reader["DIRECCION_IP"].ToString(),
+                
+                ObjUsuario =  new Usuario()
+                { 
+                    NOMBRE = reader["NOMBRE"].ToString() 
+                }
+
             };
         }
     }

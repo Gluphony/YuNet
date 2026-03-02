@@ -34,9 +34,9 @@ namespace Datos
                             {
                                 olista.Add(new MetodoPago()
                                 {
-                                    IdMetodoPago = Convert.ToInt32(reader["Id_Metodo_Pago"]),
-                                    NombreMetodo = reader["Nombre_Metodo"].ToString(),
-                                    Estado = Convert.ToBoolean(reader["Estado"])
+                                    ID_METODO_PAGO = Convert.ToInt32(reader["ID_METODO_PAGO"]),
+                                    NOMBRE_METODO = reader["NOMBRE_METODO"].ToString(),
+                                    ESTADO = Convert.ToBoolean(reader["ESTADO"])
                                 });
                             }
                         }
@@ -66,9 +66,9 @@ namespace Datos
                             {
                                 olista.Add(new MetodoPago()
                                 {
-                                    IdMetodoPago = Convert.ToInt32(reader["Id_Metodo_Pago"]),
-                                    NombreMetodo = reader["Nombre_Metodo"].ToString(),
-                                    Estado = Convert.ToBoolean(reader["Estado"])
+                                    ID_METODO_PAGO = Convert.ToInt32(reader["ID_METODO_PAGO"]),
+                                    NOMBRE_METODO= reader["NOMBRE_METODO"].ToString(),
+                                    ESTADO = Convert.ToBoolean(reader["ESTADO"])
                                 });
                             }
                         }
@@ -88,8 +88,8 @@ namespace Datos
                 using (SqlCommand cmd = new SqlCommand("Sp_InsertarMetodoPago", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Nombre_Metodo", metodoPago.NombreMetodo);
-                    cmd.Parameters.AddWithValue("@Estado", metodoPago.Estado);
+                    cmd.Parameters.AddWithValue("@Nombre_Metodo", metodoPago.NOMBRE_METODO);
+                    cmd.Parameters.AddWithValue("@Estado", metodoPago.ESTADO);
 
                     try
                     {
@@ -111,9 +111,9 @@ namespace Datos
                 using (SqlCommand cmd = new SqlCommand("Sp_EditarMetodoPago", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Id_Metodo_Pago", metodoPago.IdMetodoPago);
-                    cmd.Parameters.AddWithValue("@Nombre_Metodo", metodoPago.NombreMetodo);
-                    cmd.Parameters.AddWithValue("@Estado", metodoPago.Estado);
+                    cmd.Parameters.AddWithValue("@Id_Metodo_Pago", metodoPago.ID_METODO_PAGO);
+                    cmd.Parameters.AddWithValue("@Nombre_Metodo", metodoPago.NOMBRE_METODO);
+                    cmd.Parameters.AddWithValue("@Estado", metodoPago.ESTADO);
 
                     try
                     {

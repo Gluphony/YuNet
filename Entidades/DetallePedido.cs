@@ -19,7 +19,7 @@ namespace Entidades
         public int CANTIDAD { get; set; }
         public decimal PRECIO_UNITARIO { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public decimal SUBTOTAL { get; private set; }
+        public decimal SUBTOTAL { get;  set; }
 
         [ForeignKey("ID_PEDIDO")]
         public virtual Pedido? ObjPedido { get; set; }

@@ -32,9 +32,9 @@ namespace Datos
                             {
                                 olista.Add(new Permisos()
                                 {
-                                    IdPermiso = Convert.ToInt32(reader["IdPermiso"]),
-                                    ClavePermiso = reader["ClavePermiso"].ToString(),
-                                    Descripcion = reader["Descripcion"].ToString(),
+                                    ID_PERMISO = Convert.ToInt32(reader["ID_PERMISO"]),
+                                    CLAVE_PERMISO = reader["CLAVE_PERMISO"].ToString(),
+                                    DESCRIPCION = reader["DESCRIPCION"].ToString(),
                                     Estado = Convert.ToBoolean(reader["Estado"])
                                 });
                             }
@@ -56,8 +56,8 @@ namespace Datos
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     // Nota: Tu SP solo pide Clave y Descripcion (Estado va a 1 por defecto en SQL)
-                    cmd.Parameters.AddWithValue("@Clave_Permiso", oPermiso.ClavePermiso);
-                    cmd.Parameters.AddWithValue("@Descripcion", oPermiso.Descripcion);
+                    cmd.Parameters.AddWithValue("@Clave_Permiso", oPermiso.CLAVE_PERMISO);
+                    cmd.Parameters.AddWithValue("@Descripcion", oPermiso.DESCRIPCION);
 
                     try
                     {
@@ -79,9 +79,9 @@ namespace Datos
                 using (SqlCommand cmd = new SqlCommand("Sp_EditarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Id_Permiso", oPermiso.IdPermiso);
-                    cmd.Parameters.AddWithValue("@Clave_Permiso", oPermiso.ClavePermiso);
-                    cmd.Parameters.AddWithValue("@Descripcion", oPermiso.Descripcion);
+                    cmd.Parameters.AddWithValue("@Id_Permiso", oPermiso.ID_PERMISO);
+                    cmd.Parameters.AddWithValue("@Clave_Permiso", oPermiso.CLAVE_PERMISO);
+                    cmd.Parameters.AddWithValue("@Descripcion", oPermiso.DESCRIPCION);
                     cmd.Parameters.AddWithValue("@Estado", oPermiso.Estado);
 
                     try

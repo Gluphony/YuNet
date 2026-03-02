@@ -24,12 +24,12 @@ namespace Datos
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     // Parámetros del SP
-                    cmd.Parameters.AddWithValue("@Id_Pedido", oDetalle.IdPedido);
-                    cmd.Parameters.AddWithValue("@Id_Producto", oDetalle.IdProducto);
+                    cmd.Parameters.AddWithValue("@Id_Pedido", oDetalle.ID_PEDIDO);
+                    cmd.Parameters.AddWithValue("@Id_Producto", oDetalle.ID_PRODUCTO);
                     // Manejamos el NULL si es un accesorio sin IMEI
-                    cmd.Parameters.AddWithValue("@Imei_Vendido", (object)oDetalle.ImeiVendido ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Cantidad", oDetalle.Cantidad);
-                    cmd.Parameters.AddWithValue("@Precio_Unitario", oDetalle.PrecioUnitario);
+                    cmd.Parameters.AddWithValue("@Imei_Vendido", (object)oDetalle.IMEI_VENDIDO ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Cantidad", oDetalle.CANTIDAD);
+                    cmd.Parameters.AddWithValue("@Precio_Unitario", oDetalle.PRECIO_UNITARIO);
                     cmd.Parameters.AddWithValue("@Id_Usuario", idUsuarioSesion);
 
                     try
@@ -64,12 +64,23 @@ namespace Datos
                             {
                                 olista.Add(new DetallePedido()
                                 {
-                                    IdDetallePedido = Convert.ToInt32(reader["Id_Detalle_Pedido"]),
-                                    Producto = reader["Producto"].ToString(),
-                                    ImeiVendido = reader["Numero_Serie_IMEI"].ToString(),
-                                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
-                                    PrecioUnitario = Convert.ToDecimal(reader["Precio_Unitario"])
-                                    // Subtotal se calcula solo en el Model
+                                    ID_DETALLE_PEDIDO = Convert.ToInt32(reader["Id_Detalle_Pedido"]),
+
+                               
+                                    IMEI_VENDIDO = reader["Numero_Serie_IMEI"].ToString(),
+
+                                    CANTIDAD = Convert.ToInt32(reader["Cantidad"]),
+                                    PRECIO_UNITARIO = Convert.ToDecimal(reader["Precio_Unitario"]),
+
+                                 
+                                    SUBTOTAL = Convert.ToDecimal(reader["Subtotal"]),
+
+                                   
+                                    ObjProducto = new Producto()
+                                    {
+                                       
+                                        MODELO = reader["Producto"].ToString()
+                                    }
                                 });
                             }
                         }

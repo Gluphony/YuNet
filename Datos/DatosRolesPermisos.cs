@@ -91,9 +91,9 @@ namespace Datos
                                 olista.Add(new Permisos()
                                 {
                                     // Usamos los nombres de columna definidos en el SELECT de tu SP
-                                    IdPermiso = Convert.ToInt32(reader["Id_Permiso"]),
-                                    ClavePermiso = reader["Clave_Permiso"].ToString(),
-                                    Descripcion = reader["Descripcion"].ToString()
+                                    ID_PERMISO = Convert.ToInt32(reader["ID_PERMISO"]),
+                                    CLAVE_PERMISO = reader["CLAVE_PERMISO"].ToString(),
+                                    DESCRIPCION = reader["DESCRIPCION"].ToString()
                                 });
                             }
                         }

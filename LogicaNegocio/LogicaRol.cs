@@ -13,12 +13,5 @@ namespace LogicaNegocio
     {
         public DatosRol cim = new DatosRol();
 
-        public List<Rol > ListarROLPorCliente(int idCliente)
-        {
-
-            return cim.Listar1(idCliente);
-        }
-
-
     }
 }
