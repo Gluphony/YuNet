@@ -3,21 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entidades
 {
+    [Table("DETALLE_CARRITO", Schema = "Venta")]
     public class DetalleCarrito
     {
-        public int IdDetalle { get; set; }
-        public int IdCarrito { get; set; }
-        public int IdProducto { get; set; }
-        public int Cantidad { get; set; }
-        public decimal PrecioUnitario { get; set; }
-
-        // Propiedad calculada: No necesita 'set' porque se calcula sola
-        public decimal Subtotal => Cantidad * PrecioUnitario;
-
-        // Propiedad de navegación para mostrar el nombre en la tabla
-        public string? NombreProducto { get; set; }
+        [Key]
+        public int ID_DETALLE { get; set; }
+        public int ID_CARRITO { get; set; }
+        public int ID_PRODUCTO { get; set; }
+        public int CANTIDAD { get; set; }
+        public decimal PRECIO_UNITARIO { get; set; }
+        public decimal SUBTOTAL => CANTIDAD * PRECIO_UNITARIO;
+        [ForeignKey("ID_CARRITO")]
+        public virtual Carrito? ObjCarrito { get; set; }
+        [ForeignKey("ID_PRODUCTO")]
+        public virtual Producto? ObjProducto { get; set; }
     }
 }

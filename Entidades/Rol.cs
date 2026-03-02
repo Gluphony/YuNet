@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entidades
 {
+    [Table("ROL",Schema = "Seguridad")]
     public class Rol
     {
-        public  int IdRol { get; set; }
-        public string? NombreRol { get; set; }
-        public string? Descripcion { get; set; }
-        public Boolean Estado { get; set; }
+        [Key]
+        public  int ID_ROL { get; set; }
+        public string? NOMBRE_ROL { get; set; }
+        public string? DESCRIPCION { get; set; }
+        public bool ESTADO { get; set; }
     }
 }

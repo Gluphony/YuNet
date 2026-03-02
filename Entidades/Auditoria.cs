@@ -3,19 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entidades
 {
+    [Table("AUDITORIA", Schema = "Seguridad")]
     public class Auditoria
     {
-        public long IdAuditoria { get; set; } // BIGINT mapea a long
-        public DateTime FechaRegistro { get; set; }
-        public int IdUsuario { get; set; }
-        public string? Accion { get; set; }
-        public string? TablaAfectada { get; set; }
-        public string? DetalleActividad { get; set; }
-        public string? DireccionIp { get; set; }
+        [Key]
+        public long ID_AUDITORIA { get; set; } // BIGINT mapea a long
+        public DateTime FECHA_REGISTRO { get; set; }
+        public int ID_USUARIO { get; set; }
+        public string? ACCION { get; set; }
+        public string? TABLA_AFECTADA { get; set; }
+        public string? DETALLE_ACTIVIDAD { get; set; }
+        public string? DIRECCION_IP { get; set; }
 
-        public string? Nombre_Usuario { get; set; }
+        [ForeignKey("ID_USUARIO")]
+        public virtual Usuario? ObjUsuario{ get; set; }
     }
 }
