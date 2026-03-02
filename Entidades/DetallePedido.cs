@@ -18,8 +18,8 @@ namespace Entidades
         public string? IMEI_VENDIDO { get; set; }
         public int CANTIDAD { get; set; }
         public decimal PRECIO_UNITARIO { get; set; }
-
-        public decimal SUBTOTAL => CANTIDAD * PRECIO_UNITARIO;
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal SUBTOTAL { get; private set; }
 
         [ForeignKey("ID_PEDIDO")]
         public virtual Pedido? ObjPedido { get; set; }
