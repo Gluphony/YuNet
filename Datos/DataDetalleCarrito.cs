@@ -13,13 +13,13 @@ namespace Datos
     {
         private readonly Conexion _con = new Conexion();
 
-        // 1. LISTAR DETALLE (Aquí aplicamos lo que discutimos)
         public List<DetalleCarrito> Listar(int idCarrito)
         {
             var olista = new List<DetalleCarrito>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarDetalleCarrito", connection))
+                // CORRECCIÓN: Nombre correcto del SP
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_ListarDetalleCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Carrito", idCarrito);
@@ -34,12 +34,13 @@ namespace Datos
                                 olista.Add(new DetalleCarrito()
                                 {
                                     ID_DETALLE = Convert.ToInt32(reader["Id_Detalle"]),
+                                    ID_CARRITO = idCarrito, // MEJORA: Asignamos el ID del padre
                                     ID_PRODUCTO = Convert.ToInt32(reader["Id_Producto"]),
-                                    // "Producto" es el alias que pusiste en el SELECT de tu SP
                                     NOMBRE_PRODUCTO = reader["Producto"].ToString(),
                                     CANTIDAD = Convert.ToInt32(reader["Cantidad"]),
                                     PRECIO_UNITARIO = Convert.ToDecimal(reader["Precio_Unitario"])
 
+                                    // Recuerda que el SUBTOTAL se calcula solo con la flechita (=>) en tu entidad
                                 });
                             }
                         }
@@ -56,7 +57,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_AgregarAlCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_AgregarAlCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Carrito", idCarrito);
@@ -80,7 +81,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_EliminarDetalleCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_EliminarDetalleCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Detalle", idDetalle);

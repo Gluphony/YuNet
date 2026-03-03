@@ -20,7 +20,7 @@ namespace Datos
 
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ObtenerOCrearCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_ObtenerOCrearCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
@@ -55,7 +55,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ActualizarTotalCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_ActualizarTotalCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Carrito", idCarrito);
@@ -78,7 +78,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_CambiarEstadoCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_CambiarEstadoCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Carrito", idCarrito);
@@ -101,7 +101,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_EliminarCarrito", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_EliminarCarrito", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Carrito", idCarrito);

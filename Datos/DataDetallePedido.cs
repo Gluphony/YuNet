@@ -19,7 +19,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_InsertarDetallePedido", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_InsertarDetallePedido", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -50,7 +50,7 @@ namespace Datos
             var olista = new List<DetallePedido>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarTicketPedido", connection))
+                using (SqlCommand cmd = new SqlCommand("Venta.Sp_ListarTicketPedido", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Pedido", idPedido);

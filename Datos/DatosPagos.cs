@@ -22,7 +22,7 @@ namespace Datos
 
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarMetodosPagosActivos", connection))
+                using (SqlCommand cmd = new SqlCommand("Catalogo.Sp_ListarMetodosPagosActivos", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     try
@@ -54,7 +54,7 @@ namespace Datos
 
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarMetodosPago_Admin", connection))
+                using (SqlCommand cmd = new SqlCommand("Catalogo.Sp_ListarMetodosPago_Admin", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     try
@@ -85,7 +85,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_InsertarMetodoPago", connection))
+                using (SqlCommand cmd = new SqlCommand("Catalogo.Sp_InsertarMetodoPago", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Nombre_Metodo", metodoPago.NOMBRE_METODO);
@@ -108,7 +108,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_EditarMetodoPago", connection))
+                using (SqlCommand cmd = new SqlCommand("Catalogo.Sp_EditarMetodoPago", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Metodo_Pago", metodoPago.ID_METODO_PAGO);
@@ -132,7 +132,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_DesactivarMetodoPago", connection))
+                using (SqlCommand cmd = new SqlCommand("Catalogo.Sp_DesactivarMetodoPago", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Metodo_Pago", idMetodoPago);

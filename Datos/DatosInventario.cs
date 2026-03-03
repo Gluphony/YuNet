@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 using Entidades;
 
@@ -18,12 +17,11 @@ namespace Datos
 
             try
             {
-                using (Sqlconnection conexion = new SqlConnection(_con.GetCadena()))
+                // CORRECCIÓN: SqlConnection con 'C' mayúscula
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
                 {
                     SqlCommand cmd = new SqlCommand("Inventario.Sp_ListarHistorialInventario", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    // Enviamos el parámetro que requiere el SP
                     cmd.Parameters.AddWithValue("@Id_Producto", idProducto);
 
                     conexion.Open();
@@ -32,22 +30,8 @@ namespace Datos
                     {
                         while (dr.Read())
                         {
-                            Inventario inventario = new Inventario();
-
-                            // Mapeamos los campos que coinciden entre tu SP y tu Entidad
-                            inventario.ID_INVENTARIO = Convert.ToInt32(dr["Id_Inventario"]);
-                            inventario.FECHA_MOVIMIENTO = Convert.ToDateTime(dr["Fecha_Movimiento"]);
-                            inventario.TIPO_MOVIMIENTO = dr["Tipo_Movimiento"] != DBNull.Value ? dr["Tipo_Movimiento"].ToString() : null;
-                            inventario.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
-                            inventario.MOTIVO = dr["Motivo"] != DBNull.Value ? dr["Motivo"].ToString() : null;
-
-                            /* NOTA: Tu SP también devuelve:
-                             * - Usuario_Responsable
-                             * * Si agregas 'public string? USUARIO_RESPONSABLE { get; set; }' a tu entidad, puedes hacer:
-                             * inventario.USUARIO_RESPONSABLE = dr["Usuario_Responsable"].ToString();
-                             */
-
-                            lista.Add(inventario);
+                            // Usamos el método privado para no repetir código
+                            lista.Add(MapearInventario(dr));
                         }
                     }
                 }
@@ -67,12 +51,11 @@ namespace Datos
 
             try
             {
-                using (Sqlconnection conexion = new SqlConnection(_con.GetCadena()))
+                // CORRECCIÓN: SqlConnection con 'C' mayúscula
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
                 {
                     SqlCommand cmd = new SqlCommand("Inventario.Sp_ListarInventarioPorFecha", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    // C# maneja automáticamente la conversión de DateTime a DATE de SQL Server
                     cmd.Parameters.AddWithValue("@FechaInicio", fechaInicio);
                     cmd.Parameters.AddWithValue("@FechaFin", fechaFin);
 
@@ -82,23 +65,8 @@ namespace Datos
                     {
                         while (dr.Read())
                         {
-                            Inventario inventario = new Inventario();
-
-                            inventario.ID_INVENTARIO = Convert.ToInt32(dr["Id_Inventario"]);
-                            inventario.FECHA_MOVIMIENTO = Convert.ToDateTime(dr["Fecha_Movimiento"]);
-                            inventario.TIPO_MOVIMIENTO = dr["Tipo_Movimiento"] != DBNull.Value ? dr["Tipo_Movimiento"].ToString() : null;
-                            inventario.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
-                            inventario.MOTIVO = dr["Motivo"] != DBNull.Value ? dr["Motivo"].ToString() : null;
-
-                            /* NOTA: Este SP también devuelve:
-                             * - Usuario_Responsable
-                             * - Producto (El nombre del producto)
-                             * * Si agregas esas propiedades a tu entidad 'Inventario', aquí iría:
-                             * inventario.PRODUCTO = dr["Producto"].ToString();
-                             * inventario.USUARIO_RESPONSABLE = dr["Usuario_Responsable"].ToString();
-                             */
-
-                            lista.Add(inventario);
+                            // Usamos el método privado para no repetir código
+                            lista.Add(MapearInventario(dr));
                         }
                     }
                 }
@@ -109,6 +77,29 @@ namespace Datos
             }
 
             return lista;
+        }
+
+        // MÉTODO PRIVADO DE MAPEO
+        private Inventario MapearInventario(SqlDataReader dr)
+        {
+            Inventario inventario = new Inventario();
+
+            inventario.ID_INVENTARIO = Convert.ToInt32(dr["Id_Inventario"]);
+            inventario.FECHA_MOVIMIENTO = Convert.ToDateTime(dr["Fecha_Movimiento"]);
+
+            // Excelente uso de DBNull.Value
+            inventario.TIPO_MOVIMIENTO = dr["Tipo_Movimiento"] != DBNull.Value ? dr["Tipo_Movimiento"].ToString() : null;
+            inventario.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
+            inventario.MOTIVO = dr["Motivo"] != DBNull.Value ? dr["Motivo"].ToString() : null;
+
+            /* NOTA: Tu SP también devuelve 'Usuario_Responsable' y/o 'Producto'.
+             * Si decides agregarlos a tu entidad 'Inventario' en el futuro, 
+             * solo descomenta estas líneas:
+             * * inventario.PRODUCTO = dr["Producto"] != DBNull.Value ? dr["Producto"].ToString() : null;
+             * inventario.USUARIO_RESPONSABLE = dr["Usuario_Responsable"] != DBNull.Value ? dr["Usuario_Responsable"].ToString() : null;
+             */
+
+            return inventario;
         }
     }
 }

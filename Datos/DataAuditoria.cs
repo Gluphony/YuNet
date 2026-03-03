@@ -18,7 +18,7 @@ namespace Datos
             var olista = new List<Auditoria>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoria", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarAuditoria", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     try
@@ -44,7 +44,7 @@ namespace Datos
             var olista = new List<Auditoria>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoriaPorUsuario", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarAuditoriaPorUsuario", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     // Agregamos el parámetro que pide tu SP
@@ -73,7 +73,7 @@ namespace Datos
             var olista = new List<Auditoria>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarAuditoriaPorFecha", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarAuditoriaPorFecha", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     // Pasamos ambas fechas

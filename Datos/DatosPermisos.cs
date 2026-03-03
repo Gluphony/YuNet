@@ -20,7 +20,7 @@ namespace Datos
 
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarPermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     try
@@ -52,7 +52,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_Creacion_ClavePermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_Creacion_ClavePermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     // Nota: Tu SP solo pide Clave y Descripcion (Estado va a 1 por defecto en SQL)
@@ -76,7 +76,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_EditarPermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_EditarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Permiso", oPermiso.ID_PERMISO);
@@ -101,7 +101,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_DesactivarPermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_DesactivarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Permiso", idPermiso);

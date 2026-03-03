@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Entidades;
 
 namespace Datos
@@ -16,7 +16,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_ListarProveedor", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_ListarProveedor", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -37,7 +37,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_InsertarProveedor", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_InsertarProveedor", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     // Si el string es null, enviamos DBNull.Value a la base de datos
@@ -66,7 +66,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_EditarProveedor", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_EditarProveedor", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Id_Proveedor", proveedor.ID_PROVEEDOR);
@@ -96,7 +96,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_DesactivarProveedor", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_DesactivarProveedor", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Proveedor", idProveedor);
 
@@ -119,7 +119,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_ListarProveedoresActivos", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_ListarProveedoresActivos", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -140,7 +140,7 @@ namespace Datos
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand("Sp_BuscarProveedorPorNombre", conexion);
+                    SqlCommand cmd = new SqlCommand("Catalogo.Sp_BuscarProveedorPorNombre", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@TextoBusqueda", textoBusqueda);
 

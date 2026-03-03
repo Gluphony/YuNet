@@ -19,7 +19,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_AsignarPermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_AsignarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Rol", idRol);
@@ -49,7 +49,7 @@ namespace Datos
             bool respuesta = false;
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_RevocarPermiso", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_RevocarPermiso", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Rol", idRol);
@@ -76,7 +76,7 @@ namespace Datos
 
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                using (SqlCommand cmd = new SqlCommand("Sp_ListarPermisosPorRol", connection))
+                using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarPermisosPorRol", connection))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Rol", idRol);
