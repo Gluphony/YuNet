@@ -105,7 +105,7 @@ namespace Datos
             {
                 ID_AUDITORIA = Convert.ToInt64(reader["Id_Auditoria"]),
                 FECHA_REGISTRO = Convert.ToDateTime(reader["Fecha_Registro"]),
-                ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
+                //ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
                 ACCION = reader["ACCION"].ToString(),
                 TABLA_AFECTADA = reader["TABLA_AFECTADA"].ToString(),
                 DETALLE_ACTIVIDAD = reader["DETALLE_ACTIVIDAD"].ToString(),

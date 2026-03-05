@@ -2,6 +2,7 @@
 using Entidades;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,80 +13,72 @@ namespace LogicaNegocio
     {
         private readonly DataUsuario _dataUsuario = new DataUsuario();
 
-        // 1. LISTADO GENERAL
-        //public List<Usuario> Listar()
-        //{
-        //    return _dataUsuario.Listar();
-        //}
+        // Añade estos métodos dentro de tu clase LogicaSeguridad
 
-        //// 2. INSERTAR USUARIO
-        //public bool Insertar(Usuario obj)
-        //{
-        //    if (string.IsNullOrWhiteSpace(obj.NOMBRE))
-        //        throw new ArgumentException("El nombre del usuario es obligatorio.");
+        // LISTAR USUARIOS
+        public DataTable ListarUsuarios()
+        {
+            return _dataUsuario.ListarUsuarios();
+        }
 
-        //    if (string.IsNullOrWhiteSpace(obj.CORREO))
-        //        throw new ArgumentException("El correo electrónico es obligatorio.");
+        // INSERTAR USUARIO
+        public bool InsertarUsuario(string nombre, string correo, string clave, int idRol)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre del usuario es obligatorio.");
 
-        //    // CORRECCIÓN: Validación para byte[] en lugar de string
-        //    if (obj.CONTRASEÑA == null || obj.CONTRASEÑA.Length == 0)
-        //        throw new ArgumentException("La contraseña no puede estar vacía.");
+            if (string.IsNullOrWhiteSpace(correo))
+                throw new ArgumentException("El correo electrónico es obligatorio.");
 
-        //    if (obj.ID_ROL <= 0)
-        //        throw new ArgumentException("Debe asignar un rol válido al nuevo usuario.");
+            if (string.IsNullOrWhiteSpace(clave))
+                throw new ArgumentException("La contraseña es obligatoria para usuarios nuevos.");
 
-        //    obj.NOMBRE = obj.NOMBRE.Trim();
-        //    obj.CORREO = obj.CORREO.Trim();
+            if (idRol <= 0)
+                throw new ArgumentException("Debe seleccionar un rol válido para el usuario.");
 
-        //    return _dataUsuario.Insertar(obj);
-        //}
+            // Sanitización
+            string nombreLimpio = nombre.Trim();
+            string correoLimpio = correo.Trim();
 
-        //// 3. EDITAR USUARIO
-        //public bool Editar(Usuario obj)
-        //{
-        //    if (obj.ID_USUARIO <= 0)
-        //        throw new ArgumentException("ID de usuario no válido.");
+            // Puedes agregar validación de formato de correo aquí si lo deseas
+            if (!correoLimpio.Contains("@"))
+                throw new ArgumentException("El formato del correo electrónico no es válido.");
 
-        //    if (string.IsNullOrWhiteSpace(obj.NOMBRE))
-        //        throw new ArgumentException("El nombre del usuario no puede quedar vacío.");
+            return _dataUsuario.InsertarUsuario(nombreLimpio, correoLimpio, clave, idRol);
+        }
 
-        //    if (string.IsNullOrWhiteSpace(obj.CORREO))
-        //        throw new ArgumentException("El correo electrónico no puede quedar vacío.");
+        // EDITAR USUARIO
+        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado)
+        {
+            if (idUsuario <= 0)
+                throw new ArgumentException("ID de usuario no válido.");
 
-        //    if (obj.ID_ROL <= 0)
-        //        throw new ArgumentException("Debe asignar un rol válido al usuario.");
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre del usuario es obligatorio.");
 
-        //    obj.NOMBRE = obj.NOMBRE.Trim();
-        //    obj.CORREO = obj.CORREO.Trim();
+            if (string.IsNullOrWhiteSpace(correo))
+                throw new ArgumentException("El correo electrónico es obligatorio.");
 
-        //    return _dataUsuario.Editar(obj);
-        //}
+            if (idRol <= 0)
+                throw new ArgumentException("Debe seleccionar un rol válido.");
 
-        //// 4. VALIDAR LOGIN (Inicio de Sesión)
-        //public Usuario Validar(string correo, string clave)
-        //{
-        //    // Evitamos que vayan a la base de datos si ni siquiera escribieron nada
-        //    if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(clave))
-        //    {
-        //        throw new ArgumentException("El correo y la contraseña son obligatorios para iniciar sesión.");
-        //    }
+            // Sanitización
+            string nombreLimpio = nombre.Trim();
+            string correoLimpio = correo.Trim();
 
-        //    return _dataUsuario.Validar(correo.Trim(), clave);
-        //}
+            if (!correoLimpio.Contains("@"))
+                throw new ArgumentException("El formato del correo electrónico no es válido.");
 
-        //// 5. CAMBIAR CLAVE
-        //public bool CambiarClave(int idUsuario, string nuevaClave)
-        //{
-        //    if (idUsuario <= 0)
-        //        throw new ArgumentException("Usuario no válido para el cambio de contraseña.");
+            return _dataUsuario.EditarUsuario(idUsuario, nombreLimpio, correoLimpio, idRol, estado);
+        }
 
-        //    // Podemos forzar una regla de negocio para contraseñas seguras
-        //    if (string.IsNullOrWhiteSpace(nuevaClave) || nuevaClave.Length < 6)
-        //    {
-        //        throw new ArgumentException("La nueva contraseña debe tener al menos 6 caracteres.");
-        //    }
+        // DESACTIVAR USUARIO
+        public bool DesactivarUsuario(int idUsuario)
+        {
+            if (idUsuario <= 0)
+                throw new ArgumentException("ID de usuario no válido.");
 
-        //    return _dataUsuario.CambiarClave(idUsuario, nuevaClave);
-        //}
+            return _dataUsuario.DesactivarUsuario(idUsuario);
+        }
     }
 }

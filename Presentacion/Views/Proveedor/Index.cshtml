@@ -1,0 +1,107 @@
+﻿@model List<Entidades.Proveedor>
+@{
+    ViewData["Title"] = "Gestión de Proveedores";
+}
+
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Proveedores</h3>
+        <p class="text-muted mb-0">Administración del catálogo de proveedores</p>
+    </div>
+    <a href="/Proveedor/Crear" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Nuevo Proveedor
+    </a>
+</div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaProveedores" class="table table-hover table-striped w-100 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Razón Social</th>
+                        <th>Contacto</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-muted fw-bold">@item.ID_PROVEEDOR</td>
+                                <td class="fw-bold text-dark">@item.RAZON_SOCIAL</td>
+                                <td>@item.NOMBRE_CONTACTO</td>
+                                <td><a href="mailto:@item.CORREO" class="text-decoration-none">@item.CORREO</a></td>
+                                <td>
+                                    @if (item.ESTADO)
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a href="/Proveedor/Editar/@item.ID_PROVEEDOR" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    @if (item.ESTADO)
+                                    {
+                                        <form action="/Proveedor/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar este proveedor?');">
+                                            <input type="hidden" name="id" value="@item.ID_PROVEEDOR" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Desactivar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tablaProveedores').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                },
+                "order": [[1, "asc"]], // Ordenar por Razón Social alfabéticamente
+                "pageLength": 10
+            });
+        });
+    </script>
+}

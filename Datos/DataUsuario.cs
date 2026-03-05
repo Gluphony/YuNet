@@ -12,168 +12,122 @@ namespace Datos
 {
     public class DataUsuario
     {
-        public Conexion con = new Conexion();
+        private readonly Conexion _con = new Conexion();
 
-        /* =======================================================
-           1. LISTADO GENERAL (Sp_ListarUsuario)
-        ======================================================= */
-        //    public List<Usuario> Listar()
-        //    {
-        //        var olista = new List<Usuario>();
-        //        using (SqlConnection connection = new SqlConnection(con.GetCadena()))
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarUsuario", connection))
-        //            {
-        //                cmd.CommandType = CommandType.StoredProcedure;
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    using (SqlDataReader reader = cmd.ExecuteReader())
-        //                    {
-        //                        while (reader.Read())
-        //                        {
-        //                            olista.Add(MapearUsuario(reader));
-        //                        }
-        //                    }
-        //                }
-        //                catch (Exception) { /* Log error */ }
-        //            }
-        //        }
-        //        return olista;
-        //    }
+        // Añade estos métodos dentro de tu clase DatosSeguridad
 
-        //    /* =======================================================
-        //       2. INSERTAR (Sp_InsertarUsuario)
-        //    ======================================================= */
-        //    public bool Insertar(Usuario obj)
-        //    {
-        //        bool respuesta = false;
-        //        using (SqlConnection connection = new SqlConnection(con.GetCadena()))
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_InsertarUsuario", connection))
-        //            {
-        //                cmd.CommandType = CommandType.StoredProcedure;
-        //                cmd.Parameters.AddWithValue("@Nombre", obj.NOMBRE);
-        //                cmd.Parameters.AddWithValue("@Correo", obj.CORREO);
-        //                cmd.Parameters.AddWithValue("@CONTRASEÑA", obj.CONTRASEÑA); // SQL aplicará el HASH
-        //                cmd.Parameters.AddWithValue("@Id_Rol", obj.ID_ROL);
+        // 3. LISTAR USUARIOS
+        public DataTable ListarUsuarios()
+        {
+            DataTable tabla = new DataTable();
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Seguridad.Sp_ListarUsuario", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    respuesta = cmd.ExecuteNonQuery() > 0;
-        //                }
-        //                catch (Exception) { respuesta = false; }
-        //            }
-        //        }
-        //        return respuesta;
-        //    }
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(tabla);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al listar los usuarios: " + ex.Message);
+                }
+            }
+            return tabla;
+        }
 
-        //    /* =======================================================
-        //       3. EDITAR (Sp_EditarUsuario)
-        //    ======================================================= */
-        //    public bool Editar(Usuario obj)
-        //    {
-        //        bool respuesta = false;
-        //        using (SqlConnection connection = new SqlConnection(con.GetCadena()))
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_EditarUsuario", connection))
-        //            {
-        //                cmd.CommandType = CommandType.StoredProcedure;
-        //                cmd.Parameters.AddWithValue("@Id_Usuario", obj.ID_USUARIO);
-        //                cmd.Parameters.AddWithValue("@Nombre", obj.NOMBRE);
-        //                cmd.Parameters.AddWithValue("@Correo", obj.CORREO);
-        //                cmd.Parameters.AddWithValue("@Id_Rol", obj.ID_ROL);
-        //                cmd.Parameters.AddWithValue("@Estado", obj.ESTADO);
+        // 4. INSERTAR USUARIO
+        public bool InsertarUsuario(string nombre, string correo, string clave, int idRol)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Seguridad.Sp_InsertarUsuario", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    respuesta = cmd.ExecuteNonQuery() > 0;
-        //                }
-        //                catch (Exception) { respuesta = false; }
-        //            }
-        //        }
-        //        return respuesta;
-        //    }
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Correo", correo ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Clave", clave ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Id_Rol", idRol);
 
-        //    /* =======================================================
-        //       4. VALIDAR LOGIN (Sp_ValidarUsuario)
-        //    ======================================================= */
-        //    public Usuario Validar(string correo, string clave)
-        //    {
-        //        Usuario objeto = null;
-        //        using (SqlConnection connection = new SqlConnection(con.GetCadena()))
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_ValidarUsuario", connection))
-        //            {
-        //                cmd.CommandType = CommandType.StoredProcedure;
-        //                cmd.Parameters.AddWithValue("@Correo", correo);
-        //                cmd.Parameters.AddWithValue("@Clave", clave);
+                    conexion.Open();
+                    cmd.ExecuteNonQuery();
+                    respuesta = true;
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Atrapamos el RAISERROR de SQL Server (ej. "El correo ya está registrado")
+                    throw new Exception(sqlEx.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error de conexión al insertar usuario: " + ex.Message);
+                }
+            }
+            return respuesta;
+        }
 
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    using (SqlDataReader reader = cmd.ExecuteReader())
-        //                    {
-        //                        if (reader.Read())
-        //                        {
-        //                            objeto = MapearUsuario(reader);
-        //                        }
-        //                    }
-        //                }
-        //                catch (Exception) { objeto = null; }
-        //            }
-        //        }
-        //        return objeto;
-        //    }
+        // 5. EDITAR USUARIO
+        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Seguridad.Sp_EditarUsuario", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-        //    /* =======================================================
-        //       5. CAMBIAR CLAVE (Sp_CambiarClaveUsuario)
-        //    ======================================================= */
-        //    public bool CambiarClave(int idUsuario, string nuevaClave)
-        //    {
-        //        bool respuesta = false;
-        //        using (SqlConnection connection = new SqlConnection(con.GetCadena()))
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Seguridad.Sp_CambiarClaveUsuario", connection))
-        //            {
-        //                cmd.CommandType = CommandType.StoredProcedure;
-        //                cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
-        //                cmd.Parameters.AddWithValue("@NuevaClave", nuevaClave);
+                    cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Correo", correo ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Id_Rol", idRol);
+                    cmd.Parameters.AddWithValue("@Estado", estado);
 
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    respuesta = cmd.ExecuteNonQuery() > 0;
-        //                }
-        //                catch (Exception) { respuesta = false; }
-        //            }
-        //        }
-        //        return respuesta;
-        //    }
+                    conexion.Open();
+                    cmd.ExecuteNonQuery();
+                    respuesta = true;
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Atrapamos el RAISERROR de SQL Server
+                    throw new Exception(sqlEx.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al editar usuario: " + ex.Message);
+                }
+            }
+            return respuesta;
+        }
 
-        //    /* =======================================================
-        //       MÉTODO DE MAPEO PRIVADO
-        //    ======================================================= */
-        //    private Usuario MapearUsuario(SqlDataReader reader)
-        //    {
-        //        return new Usuario()
-        //        {
-        //            ID_USUARIO = Convert.ToInt32(reader["ID_USUARIO"]),
-        //            NOMBRE = reader["NOMBRE"].ToString(),
-        //            CORREO = reader["CORREO"].ToString(),
-        //            ESTADO = Convert.ToBoolean(reader["ESTADO"]),
-        //            FECHA_BAJA = reader["FECHA_BAJA"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["FECHA_BAJA"]),
+        // 6. DESACTIVAR USUARIO (Borrado Lógico)
+        public bool DesactivarUsuario(int idUsuario)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Seguridad.Sp_DesactivarUsuario", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-        //            // Mapeo del objeto relacionado para el JOIN
-        //            oRol = new Rol()
-        //            {
-        //                ID_ROL = Convert.ToInt32(reader["ID_ROL"]),
-        //                NOMBRE_ROL = reader["NOMBRE_ROL"].ToString()
-        //            }
-        //        };
-        //    }
-        //}
+                    cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+
+                    conexion.Open();
+                    cmd.ExecuteNonQuery();
+                    respuesta = true;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al desactivar el usuario: " + ex.Message);
+                }
+            }
+            return respuesta;
+        }
     }
 }
