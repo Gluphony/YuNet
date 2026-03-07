@@ -1,0 +1,163 @@
+﻿@model List<Entidades.Categoria>
+@{
+    ViewData["Title"] = "Gestión de Categorías";
+}
+
+<div class="container-fluid">
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <form action="/Categoria/Index" method="get" class="d-flex w-50">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" name="buscarTexto" value="@ViewBag.Buscar" placeholder="Buscar categoría por nombre...">
+                        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                        @if (!string.IsNullOrEmpty(ViewBag.Buscar))
+                        {
+                            <a href="/Categoria/Index" class="btn btn-outline-danger" title="Limpiar filtro"><i class="bi bi-x-lg"></i></a>
+                        }
+                    </div>
+                </form>
+
+                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                    <i class="bi bi-plus-lg me-1"></i> Nueva Categoría
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" width="10%">ID</th>
+                            <th scope="col" width="70%">Nombre de la Categoría</th>
+                            <th scope="col" width="20%" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-secondary">#@item.ID_CATEGORIA</td>
+                                    <td>@item.NOMBRE_CATEGORIA</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary me-1 btn-editar"
+                                                data-id="@item.ID_CATEGORIA"
+                                                data-nombre="@item.NOMBRE_CATEGORIA"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <form action="/Categoria/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de desactivar esta categoría?');">
+                                            <input type="hidden" name="idCategoria" value="@item.ID_CATEGORIA" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    No se encontraron categorías registradas.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Categoría</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/Categoria/Crear" method="post">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre de la Categoría</label>
+                        <input type="text" class="form-control" name="NOMBRE_CATEGORIA" required autocomplete="off" placeholder="Ej. Smartphones, Laptops...">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2"></i>Editar Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/Categoria/Editar" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editId" name="ID_CATEGORIA" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre de la Categoría</label>
+                        <input type="text" class="form-control" id="editNombre" name="NOMBRE_CATEGORIA" required autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning px-4 fw-bold text-dark">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Este script toma los datos de la fila de la tabla y los pone dentro del Modal de Editar
+        document.addEventListener('DOMContentLoaded', function () {
+            const botonesEditar = document.querySelectorAll('.btn-editar');
+
+            botonesEditar.forEach(boton => {
+                boton.addEventListener('click', function () {
+                    // Extraer datos de los atributos data-*
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+
+                    // Asignarlos al formulario del modal
+                    document.getElementById('editId').value = id;
+                    document.getElementById('editNombre').value = nombre;
+                });
+            });
+        });
+    </script>
+}

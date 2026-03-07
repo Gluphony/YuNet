@@ -69,5 +69,9 @@ namespace LogicaNegocio
 
             return false;
         }
+        public List<Permisos> ListarTodos()
+        {
+            return _datosRolesPermisos.ListarTodosLosPermisos();
+        }
     }
 }

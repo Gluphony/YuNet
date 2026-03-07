@@ -3,97 +3,85 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using LogicaNegocio; // Referencia a tu capa lógica
+using LogicaNegocio;
 
 namespace Presentacion.Controllers
 {
     public class LoginController : Controller
     {
-        // Instanciamos la capa lógica de seguridad
         private readonly LogicaLogin _logicaSeguridad = new LogicaLogin();
 
-        // 1. GET: Muestra la pantalla de Login
         [HttpGet]
         public IActionResult Index()
         {
-            // Si el usuario ya está logueado, lo mandamos directo al Inicio
+            // Si ya está logueado, directo al Dashboard
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }
-
             return View();
         }
 
-        // 2. POST: Procesa las credenciales
         [HttpPost]
-        public IActionResult Index(string correo, string clave)
+        public async Task<IActionResult> Index(string correo, string clave)
         {
             try
             {
-                // Llamamos a nuestra capa lógica
                 DataTable dtUsuario = _logicaSeguridad.ValidarLogin(correo, clave);
 
                 if (dtUsuario != null && dtUsuario.Rows.Count > 0)
                 {
-                    // ¡Login Exitoso! Extraemos los datos del DataTable
                     DataRow fila = dtUsuario.Rows[0];
-                    string idUsuario = fila["Id_Usuario"].ToString();
-                    string nombre = fila["Nombre"].ToString();
-                    string rol = fila["Nombre_Rol"].ToString(); // Viene de tu INNER JOIN
-                    string correoDb = fila["Correo"].ToString();
 
-                    // Creamos los "Claims" (credenciales del usuario para la sesión)
+                    // Mapeo de datos desde el DataTable (Asegúrate que estos nombres coincidan con tu SQL)
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, idUsuario),
-                        new Claim(ClaimTypes.Name, nombre),
-                        new Claim(ClaimTypes.Email, correoDb),
-                        new Claim(ClaimTypes.Role, rol) // Fundamental para proteger vistas por rol
+                        new Claim(ClaimTypes.NameIdentifier, fila["Id_Usuario"].ToString()),
+                        new Claim(ClaimTypes.Name, fila["Nombre"].ToString()),
+                        new Claim(ClaimTypes.Email, fila["Correo"].ToString()),
+                        new Claim(ClaimTypes.Role, fila["Nombre_Rol"].ToString()) // IMPORTANTE: Este es el que lee el Layout
                     };
 
-                    // Creamos la identidad y firmamos la cookie
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties
                     {
                         AllowRefresh = true,
-                        IsPersistent = true // Para mantener la sesión si cierra el navegador (opcional)
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) // La sesión dura 8 horas
                     };
 
-                    // Iniciar sesión en el sistema
-                    HttpContext.SignInAsync(
+                    await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties
-                    ).Wait();
+                    );
 
-                    // Redirigimos al panel principal (Home/Index)
+                    // ====================================================
+                    // REDIRECCIÓN UNIFICADA (YuNet Dashboard)
+                    // ====================================================
+                    // Todos van al Home, y el Home mostrará las tarjetas 
+                    // correspondientes a su rol automáticamente.
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    // Login fallido: Cero filas devueltas
                     ViewBag.Error = "Correo o contraseña incorrectos.";
                     return View();
                 }
             }
             catch (Exception ex)
             {
-                // Mostramos el error de la capa lógica (ej. "El correo es obligatorio")
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = "Ocurrió un error en el servidor: " + ex.Message;
                 return View();
             }
         }
 
-        // 3. GET: Cerrar Sesión
-        public IActionResult Salir()
+        public async Task<IActionResult> Salir()
         {
-            // Destruimos la cookie de sesión
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
-
-            // Redirigimos al Login
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Login");
         }
     }

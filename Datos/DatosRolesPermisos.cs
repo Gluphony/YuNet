@@ -106,5 +106,37 @@ namespace Datos
             }
             return olista;
         }
+    
+    // 4. LISTAR TODOS LOS PERMISOS DISPONIBLES EN EL SISTEMA
+public List<Permisos> ListarTodosLosPermisos()
+        {
+            var olista = new List<Permisos>();
+            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
+            {
+                // Asegúrate de que este SP exista o usa un SELECT simple
+                using (SqlCommand cmd = new SqlCommand("SELECT Id_Permiso, Clave_Permiso, Descripcion FROM Seguridad.Permisos", connection))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    try
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                olista.Add(new Permisos()
+                                {
+                                    ID_PERMISO = Convert.ToInt32(reader["Id_Permiso"]),
+                                    CLAVE_PERMISO = reader["Clave_Permiso"].ToString(),
+                                    DESCRIPCION = reader["Descripcion"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    catch (Exception) { /* Log error */ }
+                }
+            }
+            return olista;
+        }
     }
 }

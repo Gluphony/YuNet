@@ -40,7 +40,6 @@
     .border-left-info {
         border-left: 0.25rem solid #0dcaf0 !important;
     }
-    /* Nuevo color para Auditoría */
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -48,61 +47,63 @@
         <h3 class="fw-bold mb-0 text-dark">Dashboard General</h3>
         <p class="text-muted mb-0">Resumen de la actividad del sistema YuNet</p>
     </div>
-    <a href="/Productos/Crear" class="btn btn-primary shadow-sm">
-        <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
-    </a>
+    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
+    {
+        <a href="/Productos/Crear" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+        </a>
+    }
 </div>
 
 <div class="row mb-4">
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-primary h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-primary text-uppercase mb-1" style="font-size: 0.8rem;">
-                            Usuarios Activos
+    @if (User.IsInRole("Administrador"))
+    {
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1" style="font-size: 0.8rem;">Personal Activo</div>
+                            <div class="h3 mb-0 fw-bold text-dark">12</div>
                         </div>
-                        <div class="h3 mb-0 fw-bold text-dark">12</div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-success h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-success text-uppercase mb-1" style="font-size: 0.8rem;">
-                            Productos Totales
-                        </div>
-                        <div class="h3 mb-0 fw-bold text-dark">345</div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-circle bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-box-seam-fill"></i>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
+
+    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
+    {
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-left-success h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1" style="font-size: 0.8rem;">Productos en Catálogo</div>
+                            <div class="h3 mb-0 fw-bold text-dark">345</div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-box-seam-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card stat-card border-left-warning h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs fw-bold text-warning text-uppercase mb-1" style="font-size: 0.8rem;">
-                            Stock Bajo
-                        </div>
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1" style="font-size: 0.8rem;">Stock Crítico</div>
                         <div class="h3 mb-0 fw-bold text-dark">8</div>
                     </div>
                     <div class="col-auto">
@@ -115,39 +116,59 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-info h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-info text-uppercase mb-1" style="font-size: 0.8rem;">
-                            Eventos Hoy
+    @if (User.IsInRole("Administrador") || User.IsInRole("Soporte Tecnico"))
+    {
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card border-left-info h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1" style="font-size: 0.8rem;">Incidencias Hoy</div>
+                            <div class="h3 mb-0 fw-bold text-dark">42</div>
                         </div>
-                        <div class="h3 mb-0 fw-bold text-dark">42</div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-circle bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-shield-check"></i>
+                        <div class="col-auto">
+                            <div class="icon-circle bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 </div>
 
 <div class="row">
     <div class="col-lg-12">
         <div class="card stat-card">
-            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 fw-bold text-primary">Accesos y Tareas Frecuentes</h6>
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary">Tareas Rápidas según tu Perfil</h6>
             </div>
             <div class="card-body">
-                <p class="text-muted">Bienvenido <strong>@User.Identity.Name</strong>. Utiliza el menú de la izquierda para navegar o selecciona una tarea rápida:</p>
+                <p class="text-muted">Hola <strong>@User.Identity.Name</strong>, selecciona una acción para comenzar:</p>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="/Usuarios/Index" class="btn btn-outline-secondary"><i class="bi bi-person-gear"></i> Gestionar Permisos</a>
-                    <a href="/Productos/Index" class="btn btn-outline-secondary"><i class="bi bi-search"></i> Buscar Producto</a>
-                    <a href="/Auditoria/Index" class="btn btn-outline-info text-dark"><i class="bi bi-list-check"></i> Ver Registros de Auditoría</a>
+
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <a href="/RolPermisos/Index" class="btn btn-outline-dark"><i class="bi bi-shield-lock"></i> Seguridad</a>
+                        <a href="/Usuarios/Index" class="btn btn-outline-secondary"><i class="bi bi-person-gear"></i> Usuarios</a>
+                    }
+
+                    @if (User.IsInRole("Cajero") || User.IsInRole("Administrador"))
+                    {
+                        <a href="/Ventas/Index" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nueva Venta</a>
+                    }
+
+                    @if (User.IsInRole("Jefe de Almacen") || User.IsInRole("Administrador"))
+                    {
+                        <a href="/Inventario/Index" class="btn btn-success"><i class="bi bi-journal-text"></i> Ver Kárdex</a>
+                        <a href="/Productos/Index" class="btn btn-outline-success"><i class="bi bi-search"></i> Buscar Producto</a>
+                    }
+
+                    @if (User.IsInRole("Soporte Tecnico"))
+                    {
+                        <a href="/Soporte/Index" class="btn btn-info text-white"><i class="bi bi-headset"></i> Gestionar Ticket</a>
+                    }
                 </div>
             </div>
         </div>
