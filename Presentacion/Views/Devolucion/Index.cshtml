@@ -1,0 +1,111 @@
+﻿@model List<Entidades.Devolucion>
+
+@{
+    ViewData["Title"] = "Gestión de Devoluciones";
+}
+
+<style>
+    /* Estilos de tu Dashboard */
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .border-left-danger {
+        border-left: 0.25rem solid #dc3545 !important;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Listado de Devoluciones</h3>
+        <p class="text-muted mb-0">Historial de dispositivos devueltos en el sistema</p>
+    </div>
+
+    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
+    {
+        <a href="/Devolucion/Crear" class="btn btn-danger shadow-sm">
+            <i class="bi bi-arrow-return-left me-1"></i> Nueva Devolución
+        </a>
+    }
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card stat-card border-left-danger mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-danger"><i class="bi bi-arrow-repeat me-2"></i>Registros de Devolución</h6>
+            </div>
+            <div class="card-body">
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mt-2">
+                        <thead class="table-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                            <tr>
+                                <th class="border-0 rounded-start">ID Devolución</th>
+                                <th class="border-0">Fecha</th>
+                                <th class="border-0">Motivo Cliente</th>
+                                <th class="border-0">Estado Dispositivo</th>
+                                <th class="border-0 text-center">¿Regresó a Inventario?</th>
+                                <th class="border-0 rounded-end text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Count > 0)
+                            {
+                                foreach (var dev in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-dark">#@dev.ID_DEVOLUCION</td>
+                                        <td>@dev.FECHA_DEVOLUCION.ToString("dd/MM/yyyy")</td>
+                                        <td>@(string.IsNullOrEmpty(dev.MOTIVO_CLIENTE) ? "Sin especificar" : dev.MOTIVO_CLIENTE)</td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                @(string.IsNullOrEmpty(dev.ESTADO_DISPOSITIVO_RECIBIDO) ? "N/A" : dev.ESTADO_DISPOSITIVO_RECIBIDO)
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (dev.REGRESAR_INVENTARIO)
+                                            {
+                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Sí</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> No</span>
+                                            }
+                                        </td>
+
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary shadow-sm" title="Ver Detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else if (ViewBag.Error == null)
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-black-50"></i>
+                                        No hay devoluciones registradas en el sistema.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

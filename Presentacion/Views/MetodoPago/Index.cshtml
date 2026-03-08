@@ -1,0 +1,243 @@
+﻿@model List<Entidades.MetodoPago>
+
+@{
+    ViewData["Title"] = "Gestión de Métodos de Pago";
+}
+
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .form-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #0d6efd !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #0dcaf0 !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Métodos de Pago</h3>
+        <p class="text-muted mb-0">Administra las formas de pago de tu sistema</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <div class="card stat-card form-card border-left-primary h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary" id="tituloFormulario">
+                    <i class="bi bi-wallet2 me-2"></i>Registrar Método
+                </h6>
+                <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="btnCancelarEdicion" onclick="cancelarEdicion()">
+                    Cancelar
+                </button>
+            </div>
+            <div class="card-body">
+                <input type="hidden" id="txtIdMetodo" value="0" />
+
+                <div class="mb-4">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">Nombre del Método</label>
+                    <input type="text" id="txtNombreMetodo" class="form-control" placeholder="Ej. Tarjeta de Crédito, Efectivo..." />
+                </div>
+
+                <button id="btnGuardar" class="btn btn-primary w-100 shadow-sm" onclick="guardarMetodo(this)">
+                    <i class="bi bi-save me-1"></i> Guardar Método
+                </button>
+
+                <div id="mensajeNotificacion" class="alert mt-3 mb-0" style="display: none; font-size: 0.9rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card stat-card border-left-info h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-info"><i class="bi bi-list-check me-2"></i>Métodos Registrados</h6>
+            </div>
+            <div class="card-body p-0">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger m-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                            <tr>
+                                <th class="ps-4 border-0">ID</th>
+                                <th class="border-0">Nombre del Método</th>
+                                <th class="border-0 text-center">Estado</th>
+                                <th class="pe-4 border-0 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Count > 0)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark">#@item.ID_METODO_PAGO</td>
+                                        <td class="fw-bold">@item.NOMBRE_METODO</td>
+                                        <td class="text-center">
+                                            @if (item.ESTADO)
+                                            {
+                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Activo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Inactivo</span>
+                                            }
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <button class="btn btn-sm btn-outline-primary shadow-sm me-1" title="Editar"
+                                                    onclick="prepararEdicion(@item.ID_METODO_PAGO, '@item.NOMBRE_METODO')">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            @if (item.ESTADO)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger shadow-sm" title="Desactivar"
+                                                        onclick="desactivarMetodo(@item.ID_METODO_PAGO, this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-wallet2 fs-1 d-block mb-2 text-black-50"></i>
+                                        No hay métodos de pago registrados.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- 1. GUARDAR / EDITAR ---
+        function guardarMetodo(btn) {
+            const idMetodo = document.getElementById("txtIdMetodo").value;
+            const nombreMetodo = document.getElementById("txtNombreMetodo").value;
+
+            if (!nombreMetodo.trim()) {
+                mostrarMensaje("El nombre del método es obligatorio.", "alert-warning");
+                return;
+            }
+
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Guardando...';
+            btn.disabled = true;
+
+            const metodoObj = {
+                ID_METODO_PAGO: parseInt(idMetodo),
+                NOMBRE_METODO: nombreMetodo
+            };
+
+            fetch('/MetodoPago/Guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(metodoObj)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.exito) {
+                    mostrarMensaje('<i class="bi bi-check-circle-fill me-2"></i>' + data.mensaje, "alert-success");
+                    setTimeout(() => window.location.reload(), 1200);
+                } else {
+                    mostrarMensaje('<i class="bi bi-x-circle-fill me-2"></i>' + data.mensaje, "alert-danger");
+                    restaurarBoton(btn, textoOriginal);
+                }
+            })
+            .catch(error => {
+                mostrarMensaje('<i class="bi bi-wifi-off me-2"></i> Error de red.', "alert-danger");
+                restaurarBoton(btn, textoOriginal);
+            });
+        }
+
+        // --- 2. DESACTIVAR ---
+        function desactivarMetodo(id, btn) {
+            if (!confirm('¿Estás seguro de desactivar este método de pago?')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            // Enviamos el ID directamente en el cuerpo (JSON)
+            fetch('/MetodoPago/Desactivar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(id)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.exito) {
+                    window.location.reload();
+                } else {
+                    alert(data.mensaje);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-trash"></i>';
+                }
+            })
+            .catch(error => alert('Error de red al intentar desactivar.'));
+        }
+
+        // --- 3. FUNCIONES DE INTERFAZ ---
+        function prepararEdicion(id, nombre) {
+            document.getElementById("txtIdMetodo").value = id;
+            document.getElementById("txtNombreMetodo").value = nombre;
+
+            document.getElementById("tituloFormulario").innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar Método';
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save me-1"></i> Actualizar Método';
+            document.getElementById("btnCancelarEdicion").classList.remove("d-none");
+
+            document.getElementById("txtNombreMetodo").focus();
+        }
+
+        function cancelarEdicion() {
+            document.getElementById("txtIdMetodo").value = "0";
+            document.getElementById("txtNombreMetodo").value = "";
+
+            document.getElementById("tituloFormulario").innerHTML = '<i class="bi bi-wallet2 me-2"></i>Registrar Método';
+            document.getElementById("btnGuardar").innerHTML = '<i class="bi bi-save me-1"></i> Guardar Método';
+            document.getElementById("btnCancelarEdicion").classList.add("d-none");
+        }
+
+        function mostrarMensaje(html, claseBootstrap) {
+            const div = document.getElementById("mensajeNotificacion");
+            div.innerHTML = html;
+            div.className = `alert mt-3 mb-0 shadow-sm ${claseBootstrap}`;
+            div.style.display = "block";
+        }
+
+        function restaurarBoton(btn, textoOriginal) {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    </script>
+}

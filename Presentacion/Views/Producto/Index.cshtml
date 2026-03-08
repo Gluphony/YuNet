@@ -1,0 +1,138 @@
+﻿@model IEnumerable<Entidades.Producto>
+
+@{
+    ViewData["Title"] = "Catálogo de Productos";
+}
+
+<style>
+    /* ADN visual YuNet */
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #198754 !important;
+    }
+
+    /* Estilo para las miniaturas de productos */
+    .img-thumbnail-catalog {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #eaecf4;
+    }
+
+    .stock-badge {
+        font-size: 0.85rem;
+        padding: 0.5em 0.8em;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Inventario de Productos</h3>
+        <p class="text-muted mb-0">Gestión de stock, precios y modelos de YuNet</p>
+    </div>
+    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
+    {
+        <a href="@Url.Action("Create", "Producto")" class="btn btn-success shadow-sm">
+            <i class="bi bi-box-seam me-1"></i> Registrar Producto
+        </a>
+    }
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card stat-card border-left-success">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-success">Lista de Artículos</h6>
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <input type="text" class="form-control" placeholder="Buscar modelo...">
+                    <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Imagen</th>
+                                <th>Modelo / Marca</th>
+                                <th>Descripción</th>
+                                <th>Precio</th>
+                                <th>Existencias</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"
+                                             alt="Producto" class="img-thumbnail-catalog shadow-sm" />
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">@item.MODELO</div>
+                                        <small class="text-muted text-uppercase">Marca ID: @item.ID_MARCA</small>
+                                    </td>
+                                    <td><small class="text-truncate d-inline-block" style="max-width: 200px;">@item.DESCRIPCION</small></td>
+                                    <td class="fw-bold text-primary">$@item.PRECIO.ToString("N2")</td>
+                                    <td>
+                                        @{
+                                            var stockClass = item.EXISTENCIAS <= 5 ? "bg-danger" :
+                                            item.EXISTENCIAS <= 15 ? "bg-warning text-dark" : "bg-light text-dark border";
+                                        }
+                                        <span class="badge stock-badge @stockClass">
+                                            @item.EXISTENCIAS unidades
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.ESTADO)
+                                        {
+                                            <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger"><i class="bi bi-dash-circle-fill"></i></span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a href="@Url.Action("Edit", "Producto", new { id = item.ID_PRODUCTO })" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button onclick="eliminarProducto(@item.ID_PRODUCTO)" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function eliminarProducto(id) {
+            if (confirm("¿Seguro que desea desactivar este producto?")) {
+                $.post('@Url.Action("Desactivar", "Producto")', { id: id }, function (data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

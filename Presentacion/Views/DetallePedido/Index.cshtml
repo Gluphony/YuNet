@@ -1,0 +1,78 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Entidades;
+using LogicaNegocio;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+
+namespace Presentacion.Controllers
+{
+    [Authorize] // 1. Protegemos el controlador
+    public class DetallePedidoController : Controller
+    {
+        private readonly LogicaDetallePedido _logicaDetalle = new LogicaDetallePedido();
+
+        // 2. Recuperamos el usuario real
+        private int ObtenerIdUsuarioLogueado()
+        {
+            var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(claimId, out int idUsuario)) return idUsuario;
+            return 0;
+        }
+
+        // --- ACCIÓN PARA INSERTAR DETALLE (AJAX) ---
+        [HttpPost]
+        public IActionResult Insertar([FromBody] DetallePedido oDetalle)
+        {
+            try
+            {
+                int idUsuarioSesion = ObtenerIdUsuarioLogueado(); // 3. Usamos el usuario real
+
+                if (idUsuarioSesion <= 0)
+                    return Json(new { exito = false, mensaje = "Sesión expirada. Vuelva a iniciar sesión." });
+
+                bool resultado = _logicaDetalle.InsertarDetalle(oDetalle, idUsuarioSesion);
+
+                if (resultado)
+                {
+                    return Json(new { exito = true, mensaje = "Producto agregado al pedido." });
+                }
+
+                return Json(new { exito = false, mensaje = "No se pudo registrar el detalle en la base de datos." });
+            }
+            catch (ArgumentException ex)
+            {
+                return Json(new { exito = false, mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { exito = false, mensaje = "Error del sistema: " + ex.Message });
+            }
+        }
+
+        // --- ACCIÓN PARA MOSTRAR EL TICKET ---
+        [HttpGet]
+        public IActionResult Ticket(int idPedido)
+        {
+            try
+            {
+                List<DetallePedido>
+    detalles = _logicaDetalle.ListarTicket(idPedido);
+    return View(detalles);
+    }
+    catch (ArgumentException ex)
+    {
+    ViewBag.Error = ex.Message;
+    return View(new List<DetallePedido>
+        ());
+        }
+        catch (Exception)
+        {
+        ViewBag.Error = "Ocurrió un error al intentar generar el ticket.";
+        return View(new List<DetallePedido>
+            ());
+            }
+            }
+            }
+            }

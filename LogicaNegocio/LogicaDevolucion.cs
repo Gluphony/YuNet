@@ -23,16 +23,9 @@ namespace LogicaNegocio
             }
             catch (Exception ex)
             {
-                // Aquí podrías agregar un log de errores (guardar en un archivo de texto, etc.)
-                // Por ahora, relanzamos la excepción para que llegue a la vista.
                 throw new Exception("Ocurrió un error en la capa lógica al intentar obtener las devoluciones.", ex);
             }
         }
 
-        /* * ESPACIO RESERVADO PARA EL FUTURO:
-         * Si en algún momento decides procesar las devoluciones desde C# en lugar de hacerlo 
-         * solo en SQL, aquí irían métodos como:
-         * * public bool RegistrarDevolucion(Devolucion devolucion) { ... validaciones estrictas ... }
-         */
     }
 }

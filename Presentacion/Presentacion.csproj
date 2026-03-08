@@ -15,4 +15,8 @@
     <ProjectReference Include="..\LogicaNegocio\LogicaNegocio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\DetalleCarrito\" />
+  </ItemGroup>
+
 </Project>

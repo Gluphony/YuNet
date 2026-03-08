@@ -1,0 +1,140 @@
+﻿@model IEnumerable<Entidades.Permisos>
+
+@{
+    ViewData["Title"] = "Configuración de Permisos";
+}
+
+<style>
+    /* Reutilizamos tu ADN de diseño */
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #0dcaf0 !important;
+    }
+
+    .clave-badge {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #f8f9fc;
+        border: 1px solid #e3e6f0;
+        color: #4e73df;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Gestión de Permisos</h3>
+        <p class="text-muted mb-0">Configuración de accesos y llaves del sistema</p>
+    </div>
+    <a href="@Url.Action("Create", "Permisos")" class="btn btn-dark shadow-sm">
+        <i class="bi bi-shield-plus me-1"></i> Nuevo Permiso
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card stat-card border-left-info">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-info">Diccionario de Permisos Activos</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%">ID</th>
+                                <th style="width: 25%">Clave (Sistema)</th>
+                                <th style="width: 40%">Descripción</th>
+                                <th style="width: 10%">Estado</th>
+                                <th style="width: 15%" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="text-muted">#@item.ID_PERMISO</td>
+                                    <td><span class="clave-badge">@item.CLAVE_PERMISO</span></td>
+                                    <td class="text-dark">@item.DESCRIPCION</td>
+                                    <td>
+                                        @if (item.ESTADO)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                                <i class="bi bi-check-lg"></i> Activo
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
+                                                <i class="bi bi-x-lg"></i> Inactivo
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group shadow-sm">
+                                            <a href="@Url.Action("Edit", "Permisos", new { id = item.ID_PERMISO })"
+                                               class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="confirmarDesactivar(@item.ID_PERMISO)"
+                                                    title="Desactivar">
+                                                <i class="bi bi-shield-slash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmarDesactivar(id) {
+            Swal.fire({
+                title: '¿Desactivar permiso?',
+                text: "Esto podría afectar el acceso de los usuarios vinculados.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, desactivar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Llamada AJAX al método Desactivar del controlador
+                    $.post('@Url.Action("Desactivar", "Permisos")', { id: id }, function (data) {
+                        if (data.success) {
+                            Swal.fire('¡Hecho!', data.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+}

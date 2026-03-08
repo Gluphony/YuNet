@@ -1,0 +1,208 @@
+﻿@model System.Data.DataTable
+
+@{
+    ViewData["Title"] = "Gestión de Unidades (IMEI)";
+    // Recuperamos el ID que se haya buscado
+    int idProductoActual = ViewBag.IdProducto != null ? (int)ViewBag.IdProducto : 0;
+}
+
+<style>
+    /* Estilos del Dashboard */
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .form-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .border-left-primary {
+        border-left: 0.25rem solid #0d6efd !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #0dcaf0 !important;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Inventario Físico (IMEI)</h3>
+        <p class="text-muted mb-0">Registra y consulta las unidades físicas por producto</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <div class="card stat-card form-card border-left-primary h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary"><i class="bi bi-upc-scan me-2"></i>Registrar Nueva Unidad</h6>
+            </div>
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">ID del Producto</label>
+                    <input type="number" id="txtIdProducto" class="form-control" value="@(idProductoActual > 0 ? idProductoActual : "")" placeholder="Ej. 101" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">IMEI / Número de Serie</label>
+                    <input type="text" id="txtImei" class="form-control" placeholder="Ingrese el IMEI" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">Estado Físico</label>
+                    <select id="cbEstado" class="form-select">
+                        <option value="NUEVO">Nuevo sellado</option>
+                        <option value="EXHIBICION">De exhibición</option>
+                        <option value="REACONDICIONADO">Reacondicionado</option>
+                    </select>
+                </div>
+
+                <button id="btnGuardar" class="btn btn-primary w-100 shadow-sm">
+                    <i class="bi bi-save me-1"></i> Guardar Unidad
+                </button>
+
+                <div id="mensajeNotificacion" class="alert mt-3 mb-0" style="display: none; font-size: 0.9rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card stat-card border-left-info h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-info"><i class="bi bi-box-seam me-2"></i>Unidades Disponibles</h6>
+
+                <form method="get" action="/UnidadExistencia/Index" class="d-flex">
+                    <input type="number" name="idProducto" class="form-control form-control-sm me-2" placeholder="Buscar ID Producto..." value="@(idProductoActual > 0 ? idProductoActual : "")" required>
+                    <button type="submit" class="btn btn-sm btn-info text-white shadow-sm">Buscar</button>
+                </form>
+            </div>
+            <div class="card-body">
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                            <tr>
+                                <th class="border-0 rounded-start">ID Unidad</th>
+                                <th class="border-0">IMEI</th>
+                                <th class="border-0">Estado Físico</th>
+                                <th class="border-0 text-center">Disponible</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow row in Model.Rows)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-dark">#@row["ID_UNIDAD_EXISTENCIA"]</td>
+                                        <td><span class="badge bg-dark">@row["IMEI"]</span></td>
+                                        <td>@row["ESTADO_FISICO"]</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Sí</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else if (idProductoActual > 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-phone-vibrate fs-1 d-block mb-2 text-black-50"></i>
+                                        No hay unidades disponibles para este producto.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-search fs-1 d-block mb-2 text-black-50"></i>
+                                        Usa el buscador de arriba para listar las unidades de un producto.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("btnGuardar").addEventListener("click", function () {
+
+            const idProducto = document.getElementById("txtIdProducto").value;
+            const imei = document.getElementById("txtImei").value;
+            const estado = document.getElementById("cbEstado").value;
+
+            if(!idProducto || !imei) {
+                mostrarMensaje("El ID del producto y el IMEI son obligatorios.", "alert-warning");
+                return;
+            }
+
+            const btn = this;
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Guardando...';
+            btn.disabled = true;
+
+            // CREAMOS EL OBJETO EXACTAMENTE COMO TU CLASE UnidadExistencia
+            const unidad = {
+                ID_PRODUCTO: parseInt(idProducto),
+                IMEI: imei,
+                ESTADO_FISICO: estado
+            };
+
+            fetch('/UnidadExistencia/Insertar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(unidad)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.exito) {
+                    mostrarMensaje('<i class="bi bi-check-circle-fill me-2"></i>' + data.mensaje, "alert-success");
+
+                    setTimeout(() => {
+                        // Recargamos la página pasando el ID del producto para que se vea en la lista de la derecha
+                        window.location.href = '/UnidadExistencia/Index?idProducto=' + idProducto;
+                    }, 1200);
+
+                } else {
+                    mostrarMensaje('<i class="bi bi-x-circle-fill me-2"></i>' + data.mensaje, "alert-danger");
+                    restaurarBoton(btn, textoOriginal);
+                }
+            })
+            .catch(error => {
+                mostrarMensaje('<i class="bi bi-wifi-off me-2"></i> Error de red.', "alert-danger");
+                restaurarBoton(btn, textoOriginal);
+            });
+        });
+
+        function mostrarMensaje(html, claseBootstrap) {
+            const div = document.getElementById("mensajeNotificacion");
+            div.innerHTML = html;
+            div.className = `alert mt-3 mb-0 shadow-sm ${claseBootstrap}`;
+            div.style.display = "block";
+        }
+
+        function restaurarBoton(btn, textoOriginal) {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    </script>
+}
