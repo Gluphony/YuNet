@@ -7,16 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\DetalleCarrito\**" />
+    <Content Remove="Views\DetalleCarrito\**" />
+    <EmbeddedResource Remove="Views\DetalleCarrito\**" />
+    <None Remove="Views\DetalleCarrito\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Entidades\Entidades.csproj" />
     <ProjectReference Include="..\LogicaNegocio\LogicaNegocio.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\DetalleCarrito\" />
   </ItemGroup>
 
 </Project>

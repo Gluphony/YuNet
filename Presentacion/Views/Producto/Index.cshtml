@@ -36,11 +36,12 @@
         <h3 class="fw-bold mb-0 text-dark">Inventario de Productos</h3>
         <p class="text-muted mb-0">Gestión de stock, precios y modelos de YuNet</p>
     </div>
-    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
+
+    @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
     {
-        <a href="@Url.Action("Create", "Producto")" class="btn btn-success shadow-sm">
+        <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearProducto">
             <i class="bi bi-box-seam me-1"></i> Registrar Producto
-        </a>
+        </button>
     }
 </div>
 
@@ -65,7 +66,10 @@
                                 <th>Precio</th>
                                 <th>Existencias</th>
                                 <th>Estado</th>
-                                <th class="text-center">Acciones</th>
+                                @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
+                                {
+                                    <th class="text-center">Acciones</th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -101,16 +105,23 @@
                                             <span class="text-danger"><i class="bi bi-dash-circle-fill"></i></span>
                                         }
                                     </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <a href="@Url.Action("Edit", "Producto", new { id = item.ID_PRODUCTO })" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button onclick="eliminarProducto(@item.ID_PRODUCTO)" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+
+                                    @if (User.IsInRole("Administrador") || User.IsInRole("Vendedor"))
+                                    {
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <a href="@Url.Action("Edit", "Producto", new { id = item.ID_PRODUCTO })" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                @if (User.IsInRole("Administrador"))
+                                                {
+                                                    <button onclick="eliminarProducto(@item.ID_PRODUCTO)" class="btn btn-sm btn-outline-danger" title="Desactivar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    }
                                 </tr>
                             }
                         </tbody>
@@ -121,7 +132,68 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalCrearProducto" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="@Url.Action("Create", "Producto")" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="modalCrearLabel">
+                        <i class="bi bi-box-seam me-2"></i>Registrar Nuevo Producto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Modelo</label>
+                            <input type="text" name="Modelo" class="form-control shadow-sm" required maxlength="150" placeholder="Ej. Router TP-Link Archer">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ID Marca</label>
+                            <input type="number" name="Id_Marca" class="form-control shadow-sm" required placeholder="Ej. 1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ID Categoría</label>
+                            <input type="number" name="Id_Categoria" class="form-control shadow-sm" required placeholder="Ej. 2">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Descripción</label>
+                            <textarea name="Descripcion" class="form-control shadow-sm" rows="3" required placeholder="Breve descripción..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Características</label>
+                            <textarea name="Caracteristicas" class="form-control shadow-sm" rows="3" required placeholder="Especificaciones técnicas..."></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Precio ($)</label>
+                            <input type="number" step="0.01" name="Precio" class="form-control shadow-sm" required placeholder="0.00">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Existencias (Stock Inicial)</label>
+                            <input type="number" name="Existencias" class="form-control shadow-sm" required placeholder="0">
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold">Imagen del Producto (Opcional)</label>
+                            <input type="file" name="Imagen" class="form-control shadow-sm" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success shadow-sm"><i class="bi bi-save me-1"></i> Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         function eliminarProducto(id) {
             if (confirm("¿Seguro que desea desactivar este producto?")) {
@@ -129,8 +201,10 @@
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert("Error: " + data.message);
+                        alert("Error al intentar desactivar: " + data.message);
                     }
+                }).fail(function() {
+                    alert("Ocurrió un error al intentar comunicarse con el servidor.");
                 });
             }
         }

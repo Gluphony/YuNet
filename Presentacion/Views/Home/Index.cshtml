@@ -3,173 +3,314 @@
 }
 
 <style>
-    /* Estilos específicos para las tarjetas del Dashboard */
     .stat-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-        transition: transform 0.2s;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
     .icon-circle {
-        height: 3rem;
-        width: 3rem;
-        border-radius: 100%;
+        height: 3.5rem;
+        width: 3.5rem;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
     }
 
-    .border-left-primary {
-        border-left: 0.25rem solid #0d6efd !important;
+    .color-obsidian {
+        color: var(--text-main) !important;
     }
 
-    .border-left-success {
-        border-left: 0.25rem solid #198754 !important;
+    .bg-lavender-light {
+        background-color: rgba(198, 195, 242, 0.2) !important;
     }
 
-    .border-left-warning {
-        border-left: 0.25rem solid #ffc107 !important;
+    .bg-obsidian-light {
+        background-color: rgba(108, 117, 125, 0.1) !important;
     }
 
-    .border-left-info {
-        border-left: 0.25rem solid #0dcaf0 !important;
+    .btn-lavender {
+        background-color: #C6C3F2;
+        color: #262628;
+        border: none;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .btn-lavender:hover {
+            background-color: #b0aeea;
+            color: #262628;
+        }
+
+    .btn-obsidian {
+        background-color: #262628;
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .btn-obsidian:hover {
+            background-color: #1a1a1c;
+            color: #ffffff;
+        }
+
+    .border-left-lavender {
+        border-left: 4px solid #C6C3F2 !important;
+    }
+
+    .border-left-obsidian {
+        border-left: 4px solid var(--text-main) !important;
+    }
+
+    .brand-card, .product-card {
+        transition: all 0.3s;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+        .brand-card:hover, .product-card:hover {
+            transform: scale(1.03);
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+    .carousel-item-custom {
+        height: 250px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 15px;
+    }
+
+    .carousel-overlay {
+        background: rgba(38, 38, 40, 0.7);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 2rem;
+        color: white;
+        border-radius: 15px;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0 text-dark">Dashboard General</h3>
-        <p class="text-muted mb-0">Resumen de la actividad del sistema YuNet</p>
+<div class="row mb-4 mt-2">
+    <div class="col-12">
+        <div id="promoCarousel" class="carousel slide shadow-sm" data-bs-ride="carousel" style="border-radius: 15px;">
+            <div class="carousel-inner" style="border-radius: 15px;">
+                <div class="carousel-item active carousel-item-custom" style="background-image: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1000');">
+                    <div class="carousel-overlay">
+                        <h2 class="fw-bold mb-2">Bienvenido a YuNet POS</h2>
+                        <p class="fs-5 mb-0" style="color: #C6C3F2;">El sistema definitivo para gestionar tu inventario y maximizar tus ventas.</p>
+                    </div>
+                </div>
+                <div class="carousel-item carousel-item-custom" style="background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000');">
+                    <div class="carousel-overlay">
+                        <h2 class="fw-bold mb-2">Restock de Temporada</h2>
+                        <p class="fs-5 mb-0" style="color: #C6C3F2;">Revisa el módulo de inventario, nuevos ingresos en electrónica y accesorios.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
     </div>
-    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
-    {
-        <a href="/Productos/Crear" class="btn btn-primary shadow-sm">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
-        </a>
-    }
 </div>
 
 <div class="row mb-4">
-    @if (User.IsInRole("Administrador"))
-    {
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-left-primary h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-primary text-uppercase mb-1" style="font-size: 0.8rem;">Personal Activo</div>
-                            <div class="h3 mb-0 fw-bold text-dark">12</div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
-    {
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-left-success h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-success text-uppercase mb-1" style="font-size: 0.8rem;">Productos en Catálogo</div>
-                            <div class="h3 mb-0 fw-bold text-dark">345</div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-box-seam-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-warning h-100 py-2">
+    <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="card stat-card border-left-obsidian h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs fw-bold text-warning text-uppercase mb-1" style="font-size: 0.8rem;">Stock Crítico</div>
-                        <div class="h3 mb-0 fw-bold text-dark">8</div>
+                        <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--text-muted); font-size: 0.75rem;">Personal Activo</div>
+                        <div class="h3 mb-0 fw-bold color-obsidian">@(ViewBag.TotalUsuarios ?? "12")</div>
                     </div>
-                    <div class="col-auto">
-                        <div class="icon-circle bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        </div>
-                    </div>
+                    <div class="col-auto"><div class="icon-circle bg-obsidian-light color-obsidian"><i class="bi bi-people-fill"></i></div></div>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (User.IsInRole("Administrador") || User.IsInRole("Soporte Tecnico"))
-    {
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-left-info h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-info text-uppercase mb-1" style="font-size: 0.8rem;">Incidencias Hoy</div>
-                            <div class="h3 mb-0 fw-bold text-dark">42</div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                        </div>
+    <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="card stat-card border-left-lavender h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--text-muted); font-size: 0.75rem;">Productos en Catálogo</div>
+                        <div class="h3 mb-0 fw-bold color-obsidian">@(ViewBag.TotalProductos ?? "845")</div>
                     </div>
+                    <div class="col-auto"><div class="icon-circle bg-lavender-light color-obsidian"><i class="bi bi-box-seam-fill"></i></div></div>
                 </div>
             </div>
         </div>
-    }
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="card stat-card border-left-obsidian h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--text-muted); font-size: 0.75rem;">Ventas del Día</div>
+                        <div class="h3 mb-0 fw-bold color-obsidian">24</div>
+                    </div>
+                    <div class="col-auto"><div class="icon-circle bg-obsidian-light color-obsidian"><i class="bi bi-cart-check"></i></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card border-left-lavender h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--text-muted); font-size: 0.75rem;">Proveedores</div>
+                        <div class="h3 mb-0 fw-bold color-obsidian">@(ViewBag.TotalProveedores ?? "8")</div>
+                    </div>
+                    <div class="col-auto"><div class="icon-circle bg-lavender-light color-obsidian"><i class="bi bi-truck"></i></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card stat-card">
-            <div class="card-header bg-white py-3">
-                <h6 class="m-0 fw-bold text-primary">Tareas Rápidas según tu Perfil</h6>
+<div class="row mb-4">
+    <div class="col-lg-7 mb-4 mb-lg-0">
+        <div class="card stat-card border-0 h-100">
+            <div class="card-header py-3 border-0 mt-2 px-4" style="background-color: transparent;">
+                <h6 class="m-0 fw-bold color-obsidian"><i class="bi bi-lightning-charge-fill me-2" style="color: #C6C3F2;"></i>Accesos Rápidos</h6>
+            </div>
+            <div class="card-body px-4 pb-4 pt-1">
+                <p class="mb-4 text-muted">Selecciona una acción frecuente para comenzar a trabajar en tu turno:</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/Carrito/Index" class="btn btn-lavender px-4 py-2" style="border-radius: 10px;"><i class="bi bi-cart-plus me-2"></i> Nueva Venta (POS)</a>
+                    <a href="/Inventario/Index" class="btn btn-obsidian px-4 py-2" style="border-radius: 10px;"><i class="bi bi-journal-text me-2"></i> Ver Kárdex</a>
+                    <a href="/Producto/Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;"><i class="bi bi-box me-2"></i> Catálogo</a>
+                    <a href="/Usuarios/Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;"><i class="bi bi-person-gear me-2"></i> Personal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card stat-card border-0 h-100" style="background-color: #262628;">
+            <div class="card-body p-4 text-white">
+                <h5 class="fw-bold mb-3 d-flex align-items-center"><i class="bi bi-rocket-takeoff me-2" style="color: #C6C3F2;"></i> Filosofía YuNet</h5>
+                <p class="small mb-3" style="color: #e4e4e7; line-height: 1.6;">
+                    Nacimos con la visión de centralizar el control operativo. Creemos en la tecnología como herramienta para facilitar el trabajo diario, reducir errores de inventario y brindar una experiencia de venta fluida.
+                </p>
+                <div class="p-3 rounded mt-auto" style="background-color: rgba(198, 195, 242, 0.1); border-left: 3px solid #C6C3F2;">
+                    <span class="small fw-bold">Compromiso:</span><br>
+                    <span class="small" style="color: #a1a1aa;">Innovación, seguridad de datos y eficiencia en cada transacción.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2 mb-4">
+    <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold color-obsidian m-0"><i class="bi bi-star-fill me-2 text-warning"></i> Productos de Alta Rotación</h5>
+        <a href="/Producto/Index" class="text-decoration-none small fw-bold" style="color: #C6C3F2;">Ver todo <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card product-card h-100">
+            <div class="bg-light p-3 text-center d-flex justify-content-center align-items-center" style="height: 150px;">
+                <i class="bi bi-phone text-muted" style="font-size: 4rem;"></i>
             </div>
             <div class="card-body">
-                <p class="text-muted">Hola <strong>@User.Identity.Name</strong>, selecciona una acción para comenzar:</p>
-                <div class="d-flex gap-2 flex-wrap">
+                <span class="badge bg-lavender-light color-obsidian mb-2">Telefonía</span>
+                <h6 class="fw-bold mb-1">iPhone 15 Pro 256GB</h6>
+                <p class="text-muted small mb-2">Stock: 14 unidades</p>
+                <div class="fw-bold" style="color: #262628;">$1,199.00</div>
+            </div>
+        </div>
+    </div>
 
-                    @if (User.IsInRole("Administrador"))
-                    {
-                        <a href="/RolPermisos/Index" class="btn btn-outline-dark"><i class="bi bi-shield-lock"></i> Seguridad</a>
-                        <a href="/Usuarios/Index" class="btn btn-outline-secondary"><i class="bi bi-person-gear"></i> Usuarios</a>
-                    }
+    <div class="col-md-3 mb-3">
+        <div class="card product-card h-100">
+            <div class="bg-light p-3 text-center d-flex justify-content-center align-items-center" style="height: 150px;">
+                <i class="bi bi-smartwatch text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <div class="card-body">
+                <span class="badge bg-lavender-light color-obsidian mb-2">Wearables</span>
+                <h6 class="fw-bold mb-1">Galaxy Watch 6 Classic</h6>
+                <p class="text-muted small mb-2">Stock: 8 unidades</p>
+                <div class="fw-bold" style="color: #262628;">$349.99</div>
+            </div>
+        </div>
+    </div>
 
-                    @if (User.IsInRole("Cajero") || User.IsInRole("Administrador"))
-                    {
-                        <a href="/Ventas/Index" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nueva Venta</a>
-                    }
+    <div class="col-md-3 mb-3">
+        <div class="card product-card h-100">
+            <div class="bg-light p-3 text-center d-flex justify-content-center align-items-center" style="height: 150px;">
+                <i class="bi bi-earbuds text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <div class="card-body">
+                <span class="badge bg-lavender-light color-obsidian mb-2">Audio</span>
+                <h6 class="fw-bold mb-1">AirPods Pro 2da Gen</h6>
+                <p class="text-muted small mb-2 text-danger"><i class="bi bi-exclamation-circle"></i> Stock bajo: 3 ud.</p>
+                <div class="fw-bold" style="color: #262628;">$249.00</div>
+            </div>
+        </div>
+    </div>
 
-                    @if (User.IsInRole("Jefe de Almacen") || User.IsInRole("Administrador"))
-                    {
-                        <a href="/Inventario/Index" class="btn btn-success"><i class="bi bi-journal-text"></i> Ver Kárdex</a>
-                        <a href="/Productos/Index" class="btn btn-outline-success"><i class="bi bi-search"></i> Buscar Producto</a>
-                    }
+    <div class="col-md-3 mb-3">
+        <div class="card product-card h-100">
+            <div class="bg-light p-3 text-center d-flex justify-content-center align-items-center" style="height: 150px;">
+                <i class="bi bi-laptop text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <div class="card-body">
+                <span class="badge bg-lavender-light color-obsidian mb-2">Cómputo</span>
+                <h6 class="fw-bold mb-1">MacBook Air M2</h6>
+                <p class="text-muted small mb-2">Stock: 5 unidades</p>
+                <div class="fw-bold" style="color: #262628;">$1,099.00</div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    @if (User.IsInRole("Soporte Tecnico"))
-                    {
-                        <a href="/Soporte/Index" class="btn btn-info text-white"><i class="bi bi-headset"></i> Gestionar Ticket</a>
-                    }
-                </div>
+<div class="row mt-2 mb-4">
+    <div class="col-12 mb-3">
+        <h5 class="fw-bold color-obsidian m-0"><i class="bi bi-stars me-2" style="color: #C6C3F2;"></i> Partners Oficiales</h5>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card brand-card h-100">
+            <div class="p-4 text-center d-flex justify-content-center align-items-center" style="background: linear-gradient(135deg, #2b2b2b, #434343); height: 100px;">
+                <i class="bi bi-apple text-white" style="font-size: 2.5rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card brand-card h-100">
+            <div class="p-4 text-center d-flex justify-content-center align-items-center" style="background: linear-gradient(135deg, #1428A0, #00B4FF); height: 100px;">
+                <h3 class="text-white fw-bold mb-0" style="letter-spacing: 1px;">SAMSUNG</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card brand-card h-100">
+            <div class="p-4 text-center d-flex justify-content-center align-items-center" style="background: linear-gradient(135deg, #FF6900, #ff8c00); height: 100px;">
+                <h3 class="text-white fw-bold mb-0">xiaomi</h3>
             </div>
         </div>
     </div>
