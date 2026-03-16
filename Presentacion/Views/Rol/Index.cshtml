@@ -47,10 +47,6 @@
                         {
                             foreach (DataRow fila in Model.Rows)
                             {
-                                // Conversión del token a Base64 de forma segura
-                                string versionBase64 = fila["VersionRow"] != DBNull.Value
-                                ? Convert.ToBase64String((byte[])fila["VersionRow"])
-                                : "";
                                 <tr>
                                     <td class="fw-bold text-secondary">#@fila["Id_Rol"]</td>
                                     <td><span class="badge bg-dark">@fila["Nombre_Rol"]</span></td>
@@ -71,7 +67,6 @@
                                                 data-nombre="@fila["Nombre_Rol"]"
                                                 data-desc="@fila["Descripcion"]"
                                                 data-estado="@(Convert.ToBoolean(fila["Estado"]) ? "1" : "0")"
-                                                data-version="@versionBase64"
                                                 data-bs-toggle="modal" data-bs-target="#modalEditar">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -139,8 +134,6 @@
             <form action="/Rol/Editar" method="post">
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId" name="ID_ROL" />
-                    <input type="hidden" id="editVersion" name="VersionOriginalBase64" />
-
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre del Rol</label>
                         <input type="text" class="form-control text-uppercase" id="editNombre" name="NOMBRE_ROL" required>
@@ -178,7 +171,7 @@
                     document.getElementById('editNombre').value = this.getAttribute('data-nombre');
                     document.getElementById('editDesc').value = this.getAttribute('data-desc');
                     document.getElementById('editEstado').value = this.getAttribute('data-estado');
-                    document.getElementById('editVersion').value = this.getAttribute('data-version');
+                    // Se eliminó la lectura de data-version
                 });
             });
         });

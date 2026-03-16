@@ -1,78 +1,81 @@
-﻿using Datos;
+﻿using Microsoft.AspNetCore.Mvc;
 using Entidades;
+using LogicaNegocio;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace LogicaNegocio
+namespace TuProyecto.Controllers 
 {
-    public class LogicaCategoria
+    public class CategoriaController : Controller
     {
-        private readonly DataCategoria _dataCategoria = new DataCategoria();
+        // Instanciamos la clase de Lógica de Negocio que me compartiste
+        private readonly LogicaCategoria _logicaCategoria = new LogicaCategoria();
 
-        // 1. LISTAR CATEGORÍAS
-        public List<Categoria> Listar()
+        // 1. LISTAR (GET: /Categoria o /Categoria/Index)
+        public IActionResult Index()
         {
-            return _dataCategoria.Listar();
+            var lista = _logicaCategoria.Listar();
+            return View(lista);
         }
 
-        // 2. CREAR CATEGORÍA
-        public bool Crear(Categoria categoria)
+        // 2. FILTRAR (GET: /Categoria/Filtrar?nombre=algo)
+        public IActionResult Filtrar(string nombre)
         {
-            // Regla de Negocio: El nombre no puede estar vacío o lleno de espacios
-            if (string.IsNullOrWhiteSpace(categoria.NOMBRE_CATEGORIA))
-            {
-                throw new ArgumentException("El nombre de la categoría es obligatorio.");
-            }
+            var lista = _logicaCategoria.FiltrarPorNombre(nombre);
 
-            // Opcional: Limpiar espacios extra antes de enviar a BD
-            categoria.NOMBRE_CATEGORIA = categoria.NOMBRE_CATEGORIA.Trim();
-
-            return _dataCategoria.Crear(categoria);
+            // Retornamos a la vista Index pero con la lista filtrada
+            return View("Index", lista);
         }
 
-        // 3. EDITAR CATEGORÍA
-        public bool Editar(Categoria categoria)
+        // 3. CREAR (POST: /Categoria/Crear)
+        [HttpPost]
+        public IActionResult Crear(Categoria categoria)
         {
-            if (categoria.ID_CATEGORIA <= 0)
+            try
             {
-                throw new ArgumentException("El ID de la categoría no es válido.");
+                _logicaCategoria.Crear(categoria);
+                TempData["MensajeExito"] = "Categoría creada correctamente.";
+            }
+            catch (Exception ex)
+            {
+                // Atrapa las validaciones que pusiste en tu LN (ej. nombre vacío)
+                TempData["MensajeError"] = ex.Message;
             }
 
-            if (string.IsNullOrWhiteSpace(categoria.NOMBRE_CATEGORIA))
-            {
-                throw new ArgumentException("El nombre de la categoría no puede quedar vacío.");
-            }
-
-            categoria.NOMBRE_CATEGORIA = categoria.NOMBRE_CATEGORIA.Trim();
-
-            return _dataCategoria.Editar(categoria);
+            return RedirectToAction("Index");
         }
 
-        // 4. DESACTIVAR CATEGORÍA
-        public bool Desactivar(int idCategoria)
+        // 4. EDITAR (POST: /Categoria/Editar)
+        [HttpPost]
+        public IActionResult Editar(Categoria categoria)
         {
-            if (idCategoria <= 0)
+            try
             {
-                throw new ArgumentException("El ID de la categoría a desactivar no es válido.");
+                _logicaCategoria.Editar(categoria);
+                TempData["MensajeExito"] = "Categoría actualizada correctamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = ex.Message;
             }
 
-            return _dataCategoria.Desactivar(idCategoria);
+            return RedirectToAction("Index");
         }
 
-        // 5. FILTRAR POR NOMBRE
-        public List<Categoria> FiltrarPorNombre(string nombre)
+        // 5. DESACTIVAR (POST: /Categoria/Desactivar/5)
+        [HttpPost]
+        public IActionResult Desactivar(int idCategoria)
         {
-            // Regla: Si mandan el filtro vacío, mejor devolvemos la lista completa 
-            // en lugar de hacer fallar la consulta
-            if (string.IsNullOrWhiteSpace(nombre))
+            try
             {
-                return _dataCategoria.Listar();
+                _logicaCategoria.Desactivar(idCategoria);
+                TempData["MensajeExito"] = "Categoría desactivada.";
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = ex.Message;
             }
 
-            return _dataCategoria.FiltrarPorNombre(nombre.Trim());
+            return RedirectToAction("Index");
         }
     }
 }

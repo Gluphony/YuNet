@@ -6,111 +6,98 @@
     int idProductoActual = ViewBag.IdProducto != null ? (int)ViewBag.IdProducto : 0;
 }
 
-<style>
-    /* Estilos del Dashboard */
-    .stat-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-        transition: transform 0.2s;
-    }
-
-    .form-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .border-left-primary {
-        border-left: 0.25rem solid #0d6efd !important;
-    }
-
-    .border-left-info {
-        border-left: 0.25rem solid #0dcaf0 !important;
-    }
-</style>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h3 class="fw-bold mb-0 text-dark">Inventario Físico (IMEI)</h3>
-        <p class="text-muted mb-0">Registra y consulta las unidades físicas por producto</p>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Inventario Físico (IMEI)</h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Registra y consulta las unidades físicas por producto</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-xl-4 col-lg-5 mb-4">
-        <div class="card stat-card form-card border-left-primary h-100">
-            <div class="card-header bg-white py-3">
-                <h6 class="m-0 fw-bold text-primary"><i class="bi bi-upc-scan me-2"></i>Registrar Nueva Unidad</h6>
+        <div class="card border-0 shadow-sm form-card h-100" style="background-color: var(--bg-card); border-radius: 12px; border-left: 0.25rem solid #C6C3F2 !important; transition: 0.3s;">
+            <div class="card-header py-3" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+                <h6 class="m-0 fw-bold" style="color: #C6C3F2;"><i class="bi bi-upc-scan me-2"></i>Registrar Nueva Unidad</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
 
                 <div class="mb-3">
-                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">ID del Producto</label>
-                    <input type="number" id="txtIdProducto" class="form-control" value="@(idProductoActual > 0 ? idProductoActual : "")" placeholder="Ej. 101" />
+                    <label class="form-label fw-bold text-uppercase mb-1" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID del Producto</label>
+                    <input type="number" id="txtIdProducto" class="form-control border-0" value="@(idProductoActual > 0 ? idProductoActual : "")" placeholder="Ej. 101" style="background-color: var(--bg-main); color: var(--text-main);" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">IMEI / Número de Serie</label>
-                    <input type="text" id="txtImei" class="form-control" placeholder="Ingrese el IMEI" />
+                    <label class="form-label fw-bold text-uppercase mb-1" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">IMEI / Número de Serie</label>
+                    <input type="text" id="txtImei" class="form-control border-0" placeholder="Ingrese el IMEI" style="background-color: var(--bg-main); color: var(--text-main);" />
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label text-xs fw-bold text-uppercase text-muted mb-1" style="font-size: 0.8rem;">Estado Físico</label>
-                    <select id="cbEstado" class="form-select">
+                    <label class="form-label fw-bold text-uppercase mb-1" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado Físico</label>
+                    <select id="cbEstado" class="form-select border-0" style="background-color: var(--bg-main); color: var(--text-main);">
                         <option value="NUEVO">Nuevo sellado</option>
                         <option value="EXHIBICION">De exhibición</option>
                         <option value="REACONDICIONADO">Reacondicionado</option>
                     </select>
                 </div>
 
-                <button id="btnGuardar" class="btn btn-primary w-100 shadow-sm">
+                <button id="btnGuardar" class="btn border-0 shadow-sm w-100 py-2 mt-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                     <i class="bi bi-save me-1"></i> Guardar Unidad
                 </button>
 
-                <div id="mensajeNotificacion" class="alert mt-3 mb-0" style="display: none; font-size: 0.9rem;"></div>
+                <div id="mensajeNotificacion" class="alert mt-3 mb-0 border-0" style="display: none; font-size: 0.9rem; border-radius: 8px;"></div>
             </div>
         </div>
     </div>
 
     <div class="col-xl-8 col-lg-7 mb-4">
-        <div class="card stat-card border-left-info h-100">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 fw-bold text-info"><i class="bi bi-box-seam me-2"></i>Unidades Disponibles</h6>
+        <div class="card border-0 shadow-sm h-100" style="background-color: var(--bg-card); border-radius: 12px; transition: 0.3s;">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+                <h6 class="m-0 fw-bold" style="color: var(--text-main);"><i class="bi bi-box-seam me-2"></i>Unidades Disponibles</h6>
 
                 <form method="get" action="/UnidadExistencia/Index" class="d-flex">
-                    <input type="number" name="idProducto" class="form-control form-control-sm me-2" placeholder="Buscar ID Producto..." value="@(idProductoActual > 0 ? idProductoActual : "")" required>
-                    <button type="submit" class="btn btn-sm btn-info text-white shadow-sm">Buscar</button>
+                    <input type="number" name="idProducto" class="form-control form-control-sm border-0 me-2" placeholder="ID Producto..." value="@(idProductoActual > 0 ? idProductoActual : "")" required style="background-color: var(--bg-main); color: var(--text-main);">
+                    <button type="submit" class="btn btn-sm border-0 shadow-sm px-3" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color) !important; font-weight: 600; border-radius: 6px;">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
                 </form>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
 
                 @if (ViewBag.Error != null)
                 {
-                    <div class="alert alert-danger shadow-sm">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
+                        <div>@ViewBag.Error</div>
                     </div>
                 }
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                    <table class="table table-hover align-middle mb-0" style="color: var(--text-main);">
+                        <thead style="border-bottom: 2px solid var(--border-color);">
                             <tr>
-                                <th class="border-0 rounded-start">ID Unidad</th>
-                                <th class="border-0">IMEI</th>
-                                <th class="border-0">Estado Físico</th>
-                                <th class="border-0 text-center">Disponible</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID Unidad</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">IMEI</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado Físico</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 text-center rounded-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Disponible</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="border-top: none;">
                             @if (Model != null && Model.Rows.Count > 0)
                             {
                                 foreach (System.Data.DataRow row in Model.Rows)
                                 {
-                                    <tr>
-                                        <td class="fw-bold text-dark">#@row["ID_UNIDAD_EXISTENCIA"]</td>
-                                        <td><span class="badge bg-dark">@row["IMEI"]</span></td>
-                                        <td>@row["ESTADO_FISICO"]</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Sí</span>
+                                    <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
+                                        <td class="py-3 fw-bold" style="color: var(--text-main);">#@row["ID_UNIDAD_EXISTENCIA"]</td>
+                                        <td class="py-3">
+                                            <span class="badge" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); font-weight: 500; font-family: monospace; font-size: 0.9rem;">
+                                                <i class="bi bi-upc me-1"></i> @row["IMEI"]
+                                            </span>
+                                        </td>
+                                        <td class="py-3" style="color: var(--text-main);">@row["ESTADO_FISICO"]</td>
+                                        <td class="py-3 text-center">
+                                            <span class="badge rounded-pill" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; border: 1px solid rgba(32, 201, 151, 0.5); padding: 0.4em 0.8em;">
+                                                <i class="bi bi-check-circle me-1"></i> Sí
+                                            </span>
                                         </td>
                                     </tr>
                                 }
@@ -118,18 +105,24 @@
                             else if (idProductoActual > 0)
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">
-                                        <i class="bi bi-phone-vibrate fs-1 d-block mb-2 text-black-50"></i>
-                                        No hay unidades disponibles para este producto.
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-phone-vibrate fs-1 mb-3" style="color: var(--text-muted);"></i>
+                                            <h5 style="color: var(--text-main);">No hay unidades disponibles</h5>
+                                            <p style="color: var(--text-muted);">No se encontraron unidades físicas para el producto <strong>#@idProductoActual</strong>.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">
-                                        <i class="bi bi-search fs-1 d-block mb-2 text-black-50"></i>
-                                        Usa el buscador de arriba para listar las unidades de un producto.
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-search fs-1 mb-3" style="color: var(--text-muted);"></i>
+                                            <h5 style="color: var(--text-main);">Busca un producto</h5>
+                                            <p style="color: var(--text-muted);">Usa el buscador de arriba para listar las unidades de un producto específico.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -142,6 +135,30 @@
     </div>
 </div>
 
+<style>
+    /* Efecto hover suave para la tarjeta de formulario */
+    .form-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Correcciones para la tabla en modo oscuro */
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-main) !important;
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom-color: var(--border-color);
+    }
+
+    /* Estilo para que el dropdown y los inputs no se vean blancos en modo oscuro */
+    select option {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+    }
+</style>
+
 @section Scripts {
     <script>
         document.getElementById("btnGuardar").addEventListener("click", function () {
@@ -151,7 +168,7 @@
             const estado = document.getElementById("cbEstado").value;
 
             if(!idProducto || !imei) {
-                mostrarMensaje("El ID del producto y el IMEI son obligatorios.", "alert-warning");
+                mostrarMensaje('<i class="bi bi-exclamation-triangle-fill me-2"></i> El ID del producto y el IMEI son obligatorios.', "rgba(255, 193, 7, 0.15)", "#ffc107");
                 return;
             }
 
@@ -160,7 +177,6 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Guardando...';
             btn.disabled = true;
 
-            // CREAMOS EL OBJETO EXACTAMENTE COMO TU CLASE UnidadExistencia
             const unidad = {
                 ID_PRODUCTO: parseInt(idProducto),
                 IMEI: imei,
@@ -175,28 +191,31 @@
             .then(response => response.json())
             .then(data => {
                 if (data.exito) {
-                    mostrarMensaje('<i class="bi bi-check-circle-fill me-2"></i>' + data.mensaje, "alert-success");
+                    mostrarMensaje('<i class="bi bi-check-circle-fill me-2"></i>' + data.mensaje, "rgba(25, 135, 84, 0.15)", "#20c997");
 
                     setTimeout(() => {
-                        // Recargamos la página pasando el ID del producto para que se vea en la lista de la derecha
                         window.location.href = '/UnidadExistencia/Index?idProducto=' + idProducto;
                     }, 1200);
 
                 } else {
-                    mostrarMensaje('<i class="bi bi-x-circle-fill me-2"></i>' + data.mensaje, "alert-danger");
+                    mostrarMensaje('<i class="bi bi-x-circle-fill me-2"></i>' + data.mensaje, "rgba(220, 53, 69, 0.15)", "#ff6b6b");
                     restaurarBoton(btn, textoOriginal);
                 }
             })
             .catch(error => {
-                mostrarMensaje('<i class="bi bi-wifi-off me-2"></i> Error de red.', "alert-danger");
+                mostrarMensaje('<i class="bi bi-wifi-off me-2"></i> Error de conexión con el servidor.', "rgba(220, 53, 69, 0.15)", "#ff6b6b");
                 restaurarBoton(btn, textoOriginal);
             });
         });
 
-        function mostrarMensaje(html, claseBootstrap) {
+        // Modificamos ligeramente la función de mensajes para aceptar colores personalizados
+        // y que se vea bien en ambos temas
+        function mostrarMensaje(html, bgColor, textColor) {
             const div = document.getElementById("mensajeNotificacion");
             div.innerHTML = html;
-            div.className = `alert mt-3 mb-0 shadow-sm ${claseBootstrap}`;
+            div.style.backgroundColor = bgColor;
+            div.style.color = textColor;
+            div.style.border = `1px solid ${textColor}50`; // Borde semi-transparente
             div.style.display = "block";
         }
 

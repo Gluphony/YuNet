@@ -4,88 +4,78 @@
     ViewData["Title"] = "Gestión de Devoluciones";
 }
 
-<style>
-    /* Estilos de tu Dashboard */
-    .stat-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-        transition: transform 0.2s;
-    }
-
-    .border-left-danger {
-        border-left: 0.25rem solid #dc3545 !important;
-    }
-</style>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h3 class="fw-bold mb-0 text-dark">Listado de Devoluciones</h3>
-        <p class="text-muted mb-0">Historial de dispositivos devueltos en el sistema</p>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Listado de Devoluciones</h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Historial de dispositivos devueltos en el sistema</p>
     </div>
 
     @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
     {
-        <a href="/Devolucion/Crear" class="btn btn-danger shadow-sm">
-            <i class="bi bi-arrow-return-left me-1"></i> Nueva Devolución
+        <a href="@Url.Action("Crear", "Devolucion")" class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <i class="bi bi-arrow-return-left me-2"></i> Nueva Devolución
         </a>
     }
 </div>
 
+@if (ViewBag.Error != null)
+{
+    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px;">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
+        <div>@ViewBag.Error</div>
+    </div>
+}
+
 <div class="row">
     <div class="col-12">
-        <div class="card stat-card border-left-danger mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 fw-bold text-danger"><i class="bi bi-arrow-repeat me-2"></i>Registros de Devolución</h6>
+        <div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; transition: 0.3s; border-left: 0.25rem solid #C6C3F2 !important;">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+                <h6 class="m-0 fw-bold" style="color: #C6C3F2;"><i class="bi bi-arrow-repeat me-2"></i>Registros de Devolución</h6>
             </div>
-            <div class="card-body">
-
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger shadow-sm">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
-                    </div>
-                }
+            <div class="card-body p-4">
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mt-2">
-                        <thead class="table-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                    <table class="table table-hover align-middle mt-2 mb-0" style="color: var(--text-main);">
+                        <thead style="border-bottom: 2px solid var(--border-color);">
                             <tr>
-                                <th class="border-0 rounded-start">ID Devolución</th>
-                                <th class="border-0">Fecha</th>
-                                <th class="border-0">Motivo Cliente</th>
-                                <th class="border-0">Estado Dispositivo</th>
-                                <th class="border-0 text-center">¿Regresó a Inventario?</th>
-                                <th class="border-0 rounded-end text-end">Acciones</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID Devolución</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Motivo Cliente</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado Dispositivo</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">¿Regresó a Inventario?</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 rounded-end text-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="border-top: none;">
                             @if (Model != null && Model.Count > 0)
                             {
                                 foreach (var dev in Model)
                                 {
-                                    <tr>
-                                        <td class="fw-bold text-dark">#@dev.ID_DEVOLUCION</td>
-                                        <td>@dev.FECHA_DEVOLUCION.ToString("dd/MM/yyyy")</td>
-                                        <td>@(string.IsNullOrEmpty(dev.MOTIVO_CLIENTE) ? "Sin especificar" : dev.MOTIVO_CLIENTE)</td>
-                                        <td>
-                                            <span class="badge bg-secondary">
+                                    <tr style="border-bottom: 1px solid var(--border-color);">
+                                        <td class="py-3 fw-bold" style="color: var(--text-main);">#@dev.ID_DEVOLUCION</td>
+                                        <td class="py-3" style="color: var(--text-main);">@dev.FECHA_DEVOLUCION.ToString("dd/MM/yyyy")</td>
+                                        <td class="py-3" style="color: var(--text-main);">@(string.IsNullOrEmpty(dev.MOTIVO_CLIENTE) ? "Sin especificar" : dev.MOTIVO_CLIENTE)</td>
+                                        <td class="py-3">
+                                            <span class="badge rounded-pill" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.4em 0.8em; font-weight: 500;">
                                                 @(string.IsNullOrEmpty(dev.ESTADO_DISPOSITIVO_RECIBIDO) ? "N/A" : dev.ESTADO_DISPOSITIVO_RECIBIDO)
                                             </span>
                                         </td>
-                                        <td class="text-center">
+                                        <td class="py-3 text-center">
                                             @if (dev.REGRESAR_INVENTARIO)
                                             {
-                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Sí</span>
+                                                <span class="badge rounded-pill" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; border: 1px solid rgba(32, 201, 151, 0.5); padding: 0.4em 0.8em;">
+                                                    <i class="bi bi-check-circle me-1"></i> Sí
+                                                </span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> No</span>
+                                                <span class="badge rounded-pill" style="background-color: rgba(220, 53, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 107, 107, 0.5); padding: 0.4em 0.8em;">
+                                                    <i class="bi bi-x-circle me-1"></i> No
+                                                </span>
                                             }
                                         </td>
-
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-secondary shadow-sm" title="Ver Detalles">
+                                        <td class="py-3 text-end">
+                                            <button class="btn btn-sm btn-light rounded-circle shadow-sm" title="Ver Detalles" style="width: 32px; height: 32px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                         </td>
@@ -95,9 +85,12 @@
                             else if (ViewBag.Error == null)
                             {
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-black-50"></i>
-                                        No hay devoluciones registradas en el sistema.
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-inbox fs-1 mb-3" style="color: var(--text-muted);"></i>
+                                            <h5 style="color: var(--text-main);">No hay devoluciones registradas</h5>
+                                            <p style="color: var(--text-muted);">El historial de devoluciones se encuentra vacío actualmente.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -109,3 +102,16 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Ajustes específicos para que la tabla respete el modo oscuro/claro */
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom-color: var(--border-color);
+    }
+</style>

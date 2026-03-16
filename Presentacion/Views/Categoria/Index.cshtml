@@ -1,163 +1,97 @@
-﻿@model List<Entidades.Categoria>
+﻿@model IEnumerable<Entidades.Categoria>
 @{
-    ViewData["Title"] = "Gestión de Categorías";
+    ViewData["Title"] = "Categorías";
 }
 
-<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Categorías</h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona la clasificación de tus productos</p>
+    </div>
+    <button class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        <i class="bi bi-plus-lg me-2"></i>Nueva Categoría
+    </button>
+</div>
 
-    @if (TempData["Exito"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Exito"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+<div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; transition: 0.3s;">
+    <div class="card-body p-4">
 
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-body p-4">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <form action="/Categoria/Index" method="get" class="d-flex w-50">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0 ps-0" name="buscarTexto" value="@ViewBag.Buscar" placeholder="Buscar categoría por nombre...">
-                        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-                        @if (!string.IsNullOrEmpty(ViewBag.Buscar))
-                        {
-                            <a href="/Categoria/Index" class="btn btn-outline-danger" title="Limpiar filtro"><i class="bi bi-x-lg"></i></a>
-                        }
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-4">
+                <form asp-action="Filtrar" method="get" class="d-flex">
+                    <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                        <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="nombre" class="form-control border-0" placeholder="Buscar categoría..." style="background-color: var(--bg-main); color: var(--text-main);">
+                        <button type="submit" class="btn border-0" style="background-color: #C6C3F2; color: #262628; font-weight: 600;">Buscar</button>
                     </div>
                 </form>
-
-                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrear">
-                    <i class="bi bi-plus-lg me-1"></i> Nueva Categoría
-                </button>
             </div>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col" width="10%">ID</th>
-                            <th scope="col" width="70%">Nombre de la Categoría</th>
-                            <th scope="col" width="20%" class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Count > 0)
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="color: var(--text-main);">
+                <thead style="border-bottom: 2px solid var(--border-color);">
+                    <tr>
+                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID</th>
+                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Nombre de Categoría</th>
+                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado</th>
+                        <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody style="border-top: none;">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
                         {
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="fw-bold text-secondary">#@item.ID_CATEGORIA</td>
-                                    <td>@item.NOMBRE_CATEGORIA</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary me-1 btn-editar"
-                                                data-id="@item.ID_CATEGORIA"
-                                                data-nombre="@item.NOMBRE_CATEGORIA"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditar">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-
-                                        <form action="/Categoria/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de desactivar esta categoría?');">
-                                            <input type="hidden" name="idCategoria" value="@item.ID_CATEGORIA" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="3" class="text-center py-4 text-muted">
-                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                    No se encontraron categorías registradas.
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td class="py-3 fw-bold" style="color: var(--text-main);">@item.ID_CATEGORIA</td>
+                                <td class="py-3" style="color: var(--text-main);">@item.NOMBRE_CATEGORIA</td>
+                                <td class="py-3">
+                                    <span class="badge rounded-pill" style="background-color: rgba(198, 195, 242, 0.2); color: #C6C3F2; border: 1px solid #C6C3F2; padding: 0.4em 0.8em;">
+                                        Activo
+                                    </span>
+                                </td>
+                                <td class="py-3 text-end">
+                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2" title="Editar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm" title="Desactivar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: #dc3545; border-color: var(--border-color);">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="bi bi-inbox fs-1 mb-3" style="color: var(--text-muted);"></i>
+                                    <h5 style="color: var(--text-main);">No hay categorías registradas</h5>
+                                    <p style="color: var(--text-muted);">Agrega una nueva categoría para comenzar a organizar tus productos.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
+
     </div>
 </div>
 
-<div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Categoría</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/Categoria/Crear" method="post">
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nombre de la Categoría</label>
-                        <input type="text" class="form-control" name="NOMBRE_CATEGORIA" required autocomplete="off" placeholder="Ej. Smartphones, Laptops...">
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<style>
+    /* Ajustes específicos para que la tabla respete el modo oscuro/claro */
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+    }
 
-<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2"></i>Editar Categoría</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/Categoria/Editar" method="post">
-                <div class="modal-body p-4">
-                    <input type="hidden" id="editId" name="ID_CATEGORIA" />
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nombre de la Categoría</label>
-                        <input type="text" class="form-control" id="editNombre" name="NOMBRE_CATEGORIA" required autocomplete="off">
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning px-4 fw-bold text-dark">Actualizar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Este script toma los datos de la fila de la tabla y los pone dentro del Modal de Editar
-        document.addEventListener('DOMContentLoaded', function () {
-            const botonesEditar = document.querySelectorAll('.btn-editar');
-
-            botonesEditar.forEach(boton => {
-                boton.addEventListener('click', function () {
-                    // Extraer datos de los atributos data-*
-                    const id = this.getAttribute('data-id');
-                    const nombre = this.getAttribute('data-nombre');
-
-                    // Asignarlos al formulario del modal
-                    document.getElementById('editId').value = id;
-                    document.getElementById('editNombre').value = nombre;
-                });
-            });
-        });
-    </script>
-}
+    .table > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom-color: var(--border-color);
+    }
+</style>
