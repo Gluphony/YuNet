@@ -27,6 +27,7 @@ namespace CapaDatos
                     // Manejamos el int? en caso de que venga nulo
                     cmd.Parameters.AddWithValue("@Id_Metodo_Pago", pedido.ID_METODO_PAGO ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Total", pedido.TOTAL);
+                    cmd.Parameters.AddWithValue("@Estado", pedido.ESTADO ?? "Pendiente");
 
                     conexion.Open();
 
@@ -246,6 +247,52 @@ namespace CapaDatos
             }
 
             return lista;
+        }
+    
+    // 7. OBTENER PEDIDO POR ID (Para los Detalles)
+        public Pedido ObtenerPorId(int idPedido)
+        {
+            Pedido pedido = null; // Inicializamos en null por si no existe
+
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+                {
+                    // Opción A: Usando un Procedimiento Almacenado (Recomendado por tu estructura)
+                    SqlCommand cmd = new SqlCommand("Venta.Sp_ObtenerPedidoPorId", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Opción B: Si no quieres crear el SP en SQL, comenta las dos líneas de arriba y descomenta estas:
+                    // SqlCommand cmd = new SqlCommand("SELECT Id_Pedido, Fecha_Pedido, Total, Estado FROM Venta.Pedidos WHERE Id_Pedido = @Id_Pedido", conexion);
+                    // cmd.CommandType = CommandType.Text;
+
+                    cmd.Parameters.AddWithValue("@Id_Pedido", idPedido);
+
+                    conexion.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        // Usamos "if" en lugar de "while" porque solo esperamos un resultado
+                        if (dr.Read())
+                        {
+                            pedido = new Pedido();
+                            pedido.ID_PEDIDO = Convert.ToInt32(dr["Id_Pedido"]);
+                            pedido.FECHA_PEDIDO = Convert.ToDateTime(dr["Fecha_Pedido"]);
+                            pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
+                            pedido.ESTADO = dr["Estado"].ToString();
+
+                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
+                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "No especificado";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener los detalles del pedido: " + ex.Message);
+            }
+
+            return pedido; // Retornará el pedido lleno, o null si no lo encontró
         }
     }
 }

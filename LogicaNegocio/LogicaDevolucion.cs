@@ -26,6 +26,17 @@ namespace LogicaNegocio
                 throw new Exception("Ocurrió un error en la capa lógica al intentar obtener las devoluciones.", ex);
             }
         }
+        public bool Crear(Devolucion devolucion)
+        {
+            // Pequeñas validaciones
+            if (devolucion.ID_DETALLE_DEVOLUCION <= 0)
+                throw new ArgumentException("Debe especificar un detalle válido.");
+
+            if (string.IsNullOrWhiteSpace(devolucion.MOTIVO_CLIENTE))
+                throw new ArgumentException("El motivo del cliente es obligatorio.");
+
+            return _datosDevoluciones.Crear(devolucion);
+        }
 
     }
 }

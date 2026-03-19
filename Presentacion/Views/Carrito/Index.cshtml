@@ -31,9 +31,9 @@
         <h3 class="fw-bold mb-0 text-dark">Carrito de Compras</h3>
         <p class="text-muted mb-0">Orden #@Model.ID_CARRITO creada el @Model.FECHA_CREACION.ToString("dd/MM/yyyy")</p>
     </div>
-    <a href="/Productos/Index" class="btn btn-outline-secondary shadow-sm">
-        <i class="bi bi-arrow-left me-1"></i> Seguir Comprando
-    </a>
+    <a href="@Url.Action("Index", "Producto")" class="btn btn-outline-secondary shadow-sm">
+    <i class="bi bi-arrow-left me-1"></i> Seguir Comprando
+</a>
 </div>
 
 @if (TempData["MensajeExito"] != null)

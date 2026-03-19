@@ -191,9 +191,15 @@
                 </a>
                 <div id="collapseVentas" class="collapse" data-bs-parent="#accordionSidebar">
                     <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Carrito")"><i class="bi bi-cart-plus me-2 text-muted"></i>Punto de Venta</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Pedido")"><i class="bi bi-receipt me-2 text-muted"></i>Pedidos</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Devolucion")"><i class="bi bi-arrow-return-left me-2 text-muted"></i>Devoluciones</a>
+                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Carrito" asp-action="Index">
+                            <i class="bi bi-cart-plus me-2 text-muted"></i>Punto de Venta
+                        </a>
+                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Pedido" asp-action="Index">
+                            <i class="bi bi-receipt me-2 text-muted"></i>Pedidos
+                        </a>
+                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Devolucion" asp-action="Index">
+                            <i class="bi bi-arrow-return-left me-2 text-muted"></i>Devoluciones
+                        </a>
                     </div>
                 </div>
             </li>

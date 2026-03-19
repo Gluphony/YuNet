@@ -84,6 +84,16 @@ namespace LogicaNegocio
 
             return _datosPedidos.ListarPorEstado(estado.Trim());
         }
+        // 7. OBTENER PEDIDO POR ID (Detalles)
+        public Pedido ObtenerPorId(int idPedido)
+        {
+            // Validamos que el ID tenga lógica
+            if (idPedido <= 0)
+                throw new ArgumentException("El ID del pedido no es válido.");
+
+            // Llamamos a la capa de datos
+            return _datosPedidos.ObtenerPorId(idPedido);
+        }
     }
 }
  

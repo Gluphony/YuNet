@@ -12,7 +12,7 @@
 
     @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
     {
-        <a href="@Url.Action("Crear", "Devolucion")" class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        <a href="@Url.Action("Create", "Devolucion")" class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
             <i class="bi bi-arrow-return-left me-2"></i> Nueva Devolución
         </a>
     }
@@ -38,11 +38,11 @@
                     <table class="table table-hover align-middle mt-2 mb-0" style="color: var(--text-main);">
                         <thead style="border-bottom: 2px solid var(--border-color);">
                             <tr>
-                                <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID Devolución</th>
-                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha</th>
-                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Motivo Cliente</th>
-                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado Dispositivo</th>
-                                <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">¿Regresó a Inventario?</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Info. Devolución</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Producto / IMEI</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Detalles</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado Dispositivo</th>
+                                <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Reingreso Stock</th>
                                 <th scope="col" class="pb-3 text-uppercase border-0 rounded-end text-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
                             </tr>
                         </thead>
@@ -52,10 +52,22 @@
                                 foreach (var dev in Model)
                                 {
                                     <tr style="border-bottom: 1px solid var(--border-color);">
-                                        <td class="py-3 fw-bold" style="color: var(--text-main);">#@dev.ID_DEVOLUCION</td>
-                                        <td class="py-3" style="color: var(--text-main);">@dev.FECHA_DEVOLUCION.ToString("dd/MM/yyyy")</td>
-                                        <td class="py-3" style="color: var(--text-main);">@(string.IsNullOrEmpty(dev.MOTIVO_CLIENTE) ? "Sin especificar" : dev.MOTIVO_CLIENTE)</td>
                                         <td class="py-3">
+                                            <div class="fw-bold" style="color: var(--text-main);">#@dev.ID_DEVOLUCION</div>
+                                            <small class="text-muted">Factura: @dev.FACTURA_ORIGINAL</small><br />
+                                            <small class="text-muted" style="font-size: 0.7rem;">@dev.FECHA_DEVOLUCION.ToString("dd/MM/yyyy")</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <div style="color: var(--text-main); font-weight: 500;">@dev.PRODUCTO_NOMBRE</div>
+                                            <small style="color: #C6C3F2; font-size: 0.75rem;">IMEI: @dev.IMEI</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <div style="font-size: 0.85rem; max-width: 180px;" class="text-truncate" title="@dev.MOTIVO_CLIENTE">
+                                                @dev.MOTIVO_CLIENTE
+                                            </div>
+                                            <small class="text-info" style="font-size: 0.75rem; font-weight: 500;">Acción: @dev.ACCION_TOMADA</small>
+                                        </td>
+                                        <td class="py-3 text-center">
                                             <span class="badge rounded-pill" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.4em 0.8em; font-weight: 500;">
                                                 @(string.IsNullOrEmpty(dev.ESTADO_DISPOSITIVO_RECIBIDO) ? "N/A" : dev.ESTADO_DISPOSITIVO_RECIBIDO)
                                             </span>
@@ -75,21 +87,21 @@
                                             }
                                         </td>
                                         <td class="py-3 text-end">
-                                            <button class="btn btn-sm btn-light rounded-circle shadow-sm" title="Ver Detalles" style="width: 32px; height: 32px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                                            <a href="@Url.Action("Details", "Devolucion", new { id = dev.ID_DEVOLUCION })" class="btn btn-sm btn-light rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center" title="Ver Detalles" style="width: 32px; height: 32px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
                                                 <i class="bi bi-eye"></i>
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
                             }
-                            else if (ViewBag.Error == null)
+                            else
                             {
                                 <tr>
                                     <td colspan="6" class="text-center py-5">
                                         <div class="d-flex flex-column align-items-center">
                                             <i class="bi bi-inbox fs-1 mb-3" style="color: var(--text-muted);"></i>
                                             <h5 style="color: var(--text-main);">No hay devoluciones registradas</h5>
-                                            <p style="color: var(--text-muted);">El historial de devoluciones se encuentra vacío actualmente.</p>
+                                            <p style="color: var(--text-muted);">El historial se encuentra vacío actualmente.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -104,14 +116,18 @@
 </div>
 
 <style>
-    /* Ajustes específicos para que la tabla respete el modo oscuro/claro */
     .table-hover tbody tr:hover {
-        background-color: var(--bg-main) !important;
-        color: var(--text-main) !important;
+        background-color: rgba(198, 195, 242, 0.05) !important;
     }
 
     .table > :not(caption) > * > * {
         background-color: transparent !important;
         border-bottom-color: var(--border-color);
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
