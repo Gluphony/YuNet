@@ -48,7 +48,19 @@ namespace Datos
                     cmd.Parameters.AddWithValue("@Caracteristicas", producto.CARACTERISTICAS ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Precio", producto.PRECIO);
                     cmd.Parameters.AddWithValue("@Existencias", producto.EXISTENCIAS);
-                    cmd.Parameters.AddWithValue("@Imagen", producto.IMAGEN != null ? (object)producto.IMAGEN : DBNull.Value);
+
+                    // --- SOLUCIÓN PARA LA IMAGEN ---
+                    SqlParameter paramImagen = new SqlParameter("@Imagen", SqlDbType.VarBinary);
+                    if (producto.IMAGEN != null && producto.IMAGEN.Length > 0)
+                    {
+                        paramImagen.Value = producto.IMAGEN;
+                    }
+                    else
+                    {
+                        paramImagen.Value = DBNull.Value;
+                    }
+                    cmd.Parameters.Add(paramImagen);
+                    // -------------------------------
 
                     conexion.Open();
                     cmd.ExecuteNonQuery();
@@ -79,8 +91,20 @@ namespace Datos
                     cmd.Parameters.AddWithValue("@Descripcion", producto.DESCRIPCION ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Caracteristicas", producto.CARACTERISTICAS ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Precio", producto.PRECIO);
-                    cmd.Parameters.AddWithValue("@Imagen", producto.IMAGEN != null ? (object)producto.IMAGEN : DBNull.Value);
                     cmd.Parameters.AddWithValue("@Estado", producto.ESTADO);
+
+                    // --- SOLUCIÓN PARA LA IMAGEN ---
+                    SqlParameter paramImagen = new SqlParameter("@Imagen", SqlDbType.VarBinary);
+                    if (producto.IMAGEN != null && producto.IMAGEN.Length > 0)
+                    {
+                        paramImagen.Value = producto.IMAGEN;
+                    }
+                    else
+                    {
+                        paramImagen.Value = DBNull.Value;
+                    }
+                    cmd.Parameters.Add(paramImagen);
+                    // -------------------------------
 
                     conexion.Open();
                     cmd.ExecuteNonQuery();

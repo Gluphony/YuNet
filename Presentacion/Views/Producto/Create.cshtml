@@ -1,0 +1,87 @@
+﻿@model Entidades.Producto
+
+@{
+    ViewData["Title"] = "Crear Producto";
+}
+
+<div class="container-fluid mt-4 text-light">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+            <div class="d-flex align-items-center mb-4">
+                <h2 class="fw-bold mb-0">Nuevo Producto</h2>
+                <a asp-action="Index" class="btn btn-link text-muted ms-auto text-decoration-none">
+                    <i class="bi bi-arrow-left"></i> Volver o Cancelar
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-lg" style="background-color: #1e1e2d; border-radius: 12px;">
+                <div class="card-body p-5">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger bg-danger text-white border-0">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-semibold">Marca</label>
+                                <select asp-for="ID_MARCA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Marcas" required>
+                                    <option value="">-- Seleccione --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-semibold">Categoría</label>
+                                <select name="ID_CATEGORIA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Categorias">
+                                    <option value="">-- Seleccione --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-muted fw-semibold">Modelo / Nombre</label>
+                                <input asp-for="MODELO" class="form-control bg-dark text-light border-secondary" required maxlength="100" placeholder="Ej. Galaxy S23" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-muted fw-semibold">Descripción del Producto</label>
+                                <textarea asp-for="DESCRIPCION" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Características principales..."></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label text-muted fw-semibold">Características</label>
+                                <textarea asp-for="CARACTERISTICAS" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Ej. Procesador Snapdragon, 8GB RAM..."></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-semibold">Precio Unitario ($)</label>
+                                <input asp-for="PRECIO" type="number" step="0.01" min="0" class="form-control bg-dark text-light border-secondary" required placeholder="0.00" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-muted fw-semibold">Stock Inicial</label>
+                                <input asp-for="EXISTENCIAS" type="number" min="0" class="form-control bg-dark text-light border-secondary" required placeholder="0" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-muted fw-semibold">Imagen Referencial</label>
+                                <input type="file" name="archivoImagen" class="form-control bg-dark text-light border-secondary" accept="image/*" />
+                            </div>
+                        </div>
+
+                        <div class="mt-5 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-5 py-2" style="border-radius: 8px;">
+                                Guardar Registro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

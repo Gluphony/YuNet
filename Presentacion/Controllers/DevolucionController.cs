@@ -3,6 +3,7 @@ using Entidades;
 using LogicaNegocio;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims; // Necesario para obtener el ID de usuario de la sesión
 
 namespace Presentacion.Controllers
 {
@@ -28,12 +29,25 @@ namespace Presentacion.Controllers
 
         // ========================================================
         // NUEVO: GET: Devolucion/Create (Muestra el formulario)
+        // Recibe el ID del detalle del pedido a devolver
         // ========================================================
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(int? idDetalle)
         {
-            // Mandamos una entidad en blanco a la vista
-            return View(new Devolucion());
+            var modelo = new Devolucion();
+
+            if (idDetalle.HasValue)
+            {
+                // Asignamos el ID que viene desde el botón "Devolver" de la vista del pedido
+                modelo.ID_DETALLE_DEVOLUCION = idDetalle.Value;
+            }
+            else
+            {
+                // Si el usuario entra directamente a /Devolucion/Create sin pasar por un pedido
+                ViewBag.Error = "Atención: No se ha seleccionado un producto específico para devolver.";
+            }
+
+            return View(modelo);
         }
 
         // ========================================================
@@ -45,13 +59,26 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // Limpiamos la validación del ID por si la BD lo genera automáticamente
+                // 1. Asignar el usuario que autoriza automáticamente desde la sesión activa
+                var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(claimId))
+                {
+                    nuevaDevolucion.ID_USUARIO_AUTORIZA = int.Parse(claimId);
+                }
+                else
+                {
+                    // Fallback de seguridad: Si por alguna razón no hay sesión o claims, 
+                    // asignamos el ID 1 (Asegúrate de que el usuario con ID 1 exista en tu base de datos)
+                    nuevaDevolucion.ID_USUARIO_AUTORIZA = 1;
+                }
+
+                // 2. Limpiamos validaciones de campos que el usuario no llena a mano
                 ModelState.Remove("ID_DEVOLUCION");
+                ModelState.Remove("ID_USUARIO_AUTORIZA");
 
                 if (ModelState.IsValid)
                 {
                     // Llamamos a tu capa lógica para guardar
-                    // Asumo que tienes un método Crear() en tu LogicaDevolucion
                     _logicaDevolucion.Crear(nuevaDevolucion);
 
                     TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
