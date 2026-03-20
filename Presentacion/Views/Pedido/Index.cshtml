@@ -1,0 +1,178 @@
+﻿@model IEnumerable<Entidades.Pedido>
+
+@{
+    ViewData["Title"] = "Gestión de Pedidos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Gestión de Pedidos</h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Listado detallado de pedidos registrados en YuNet</p>
+    </div>
+    @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
+    {
+        <a href="/Pedido/Create" class="btn border-0 shadow-sm px-4" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <i class="bi bi-cart-plus me-2"></i> Nuevo Pedido
+        </a>
+    }
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm form-card mb-4" style="background-color: var(--bg-card); border-radius: 12px; border-left: 0.25rem solid #C6C3F2 !important; transition: 0.3s;">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+                <h6 class="m-0 fw-bold" style="color: #C6C3F2;"><i class="bi bi-receipt me-2"></i>Listado General</h6>
+
+                <div class="dropdown no-arrow">
+                    <button class="btn btn-sm border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color) !important; font-weight: 500; border-radius: 6px;">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background-color: var(--bg-card); border: 1px solid var(--border-color) !important;">
+                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Todos</a></li>
+                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Pendientes</a></li>
+                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Completados</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div id="notificacionPedido" style="display: none;"></div>
+
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="dataTable" style="color: var(--text-main);">
+                            <thead style="border-bottom: 2px solid var(--border-color);">
+                                <tr>
+                                    <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID</th>
+                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Usuario</th>
+                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha</th>
+                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Total</th>
+                                    <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado</th>
+                                    <th scope="col" class="pb-3 text-uppercase border-0 text-center rounded-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody style="border-top: none;">
+                                @foreach (var item in Model)
+                                {
+                                    <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
+                                        <td class="py-3 fw-bold" style="color: var(--text-main);">#@item.ID_PEDIDO</td>
+                                        <td class="py-3" style="color: var(--text-muted);">
+                                            <i class="bi bi-person-badge me-1"></i> @item.ID_USUARIO
+                                        </td>
+                                        <td class="py-3" style="color: var(--text-muted);">@item.FECHA_PEDIDO.ToString("dd/MM/yyyy")</td>
+                                        <td class="py-3 fw-bold" style="color: #C6C3F2; white-space: nowrap;">
+                                            $@item.TOTAL.ToString("N2")
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            @{
+                                                string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
+                                                string bgBadge = estadoStr == "COMPLETADO" ? "rgba(25, 135, 84, 0.15)" :
+                                                estadoStr == "PENDIENTE" ? "rgba(255, 193, 7, 0.15)" :
+                                                estadoStr == "CANCELADO" ? "rgba(220, 53, 69, 0.15)" : "rgba(13, 202, 240, 0.15)";
+                                                string colorBadge = estadoStr == "COMPLETADO" ? "#20c997" :
+                                                estadoStr == "PENDIENTE" ? "#ffc107" :
+                                                estadoStr == "CANCELADO" ? "#ff6b6b" : "#0dcaf0";
+                                            }
+                                            <span class="badge rounded-pill" style="background-color: @bgBadge; color: @colorBadge; border: 1px solid @(colorBadge)50; padding: 0.4em 0.8em; font-weight: 500;">
+                                                @item.ESTADO
+                                            </span>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            <div class="btn-group shadow-sm" role="group" style="border-radius: 6px;">
+                                                <a href="/Pedido/Details/@item.ID_PEDIDO" class="btn btn-sm" style="background-color: var(--bg-main); color: #0dcaf0; border: 1px solid var(--border-color) !important;" title="Ver Detalles">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                @if (User.IsInRole("Administrador"))
+                                                {
+                                                    @if (estadoStr != "COMPLETADO")
+                                                    {
+                                                        <button class="btn btn-sm" style="background-color: var(--bg-main); color: #20c997; border: 1px solid var(--border-color) !important; border-left: none !important;" onclick="cambiarEstado(@item.ID_PEDIDO, 'Completado')" title="Marcar como Completado">
+                                                            <i class="bi bi-check2-all"></i>
+                                                        </button>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-inbox" style="font-size: 4rem; color: var(--border-color);"></i>
+                        </div>
+                        <h5 style="color: var(--text-main); font-weight: 600;">No hay pedidos registrados</h5>
+                        <p style="color: var(--text-muted);">Aún no se ha generado ningún pedido en el sistema.</p>
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
+                        {
+                            <a href="/Pedido/Create" class="btn mt-2 px-4" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px;">
+                                Crear mi primer pedido
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem 0 rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-main) !important;
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom-color: var(--border-color);
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--bg-main);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function cambiarEstado(idPedido, nuevoEstado) {
+            if(confirm(`¿Desea marcar el pedido #${idPedido} como ${nuevoEstado}?`)) {
+
+                const params = new URLSearchParams();
+                params.append('id', idPedido);
+                params.append('nuevoEstado', nuevoEstado);
+
+                fetch('/Pedido/ActualizarEstado', {
+                    method: 'POST',
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const divNotif = document.getElementById('notificacionPedido');
+
+                    if (data.success) {
+                        divNotif.innerHTML = `<div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; border-radius: 8px;"><i class="bi bi-check-circle-fill me-2"></i>Estado actualizado correctamente.</div>`;
+                        divNotif.style.display = 'block';
+                        setTimeout(() => { location.reload(); }, 1000);
+                    } else {
+                        divNotif.innerHTML = `<div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(220, 53, 69, 0.15); color: #ff6b6b; border-radius: 8px;"><i class="bi bi-x-circle-fill me-2"></i>${data.message || 'Error al actualizar.'}</div>`;
+                        divNotif.style.display = 'block';
+                    }
+
+                    setTimeout(() => { divNotif.style.display = 'none'; }, 4000);
+                })
+                .catch(error => {
+                    alert("Error de conexión al intentar actualizar el estado.");
+                });
+            }
+        }
+    </script>
+}

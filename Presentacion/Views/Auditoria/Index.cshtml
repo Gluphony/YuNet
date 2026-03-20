@@ -1,0 +1,117 @@
+﻿@model List<Entidades.Auditoria>
+@{
+    ViewData["Title"] = "Registro de Auditoría";
+}
+
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0 text-dark">Auditoría del Sistema</h3>
+        <p class="text-muted mb-0">Registro histórico de acciones y eventos</p>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form action="/Auditoria/FiltrarPorFecha" method="post" class="row align-items-end">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label small fw-bold text-secondary">Fecha Inicio</label>
+                <input type="date" class="form-control" name="fechaInicio" value="@ViewBag.FechaInicio" required>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label small fw-bold text-secondary">Fecha Fin</label>
+                <input type="date" class="form-control" name="fechaFin" value="@ViewBag.FechaFin" required>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Filtrar Registros
+                </button>
+            </div>
+        </form>
+        @if (ViewBag.Error != null)
+        {
+            <div class="text-danger mt-2 small"><i class="bi bi-exclamation-triangle"></i> @ViewBag.Error</div>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="tablaAuditoria" class="table table-hover table-striped w-100 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th># ID</th>
+                        <th>Fecha y Hora</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Tabla</th>
+                        <th>Detalle</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="text-muted small">@item.ID_AUDITORIA</td>
+                                <td>@item.FECHA_REGISTRO.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td class="fw-bold text-primary">@item.NOMBRE_USUARIO</td>
+                                <td>
+                                    @if (item.ACCION.ToUpper() == "INSERT")
+                                    {
+                                        <span class="badge bg-success">Creación</span>
+                                    }
+                                    else if (item.ACCION.ToUpper() == "UPDATE")
+                                    {
+
+                                        <span class="badge bg-warning text-dark">Edición</span>
+                                    }
+                                    else if (item.ACCION.ToUpper() == "DELETE")
+                                    {
+
+                                        <span class="badge bg-danger">Eliminación</span>
+                                    }
+                                    else if (item.ACCION.ToUpper() == "LOGIN")
+                                    {
+
+                                        <span class="badge bg-info text-dark">Acceso</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-secondary">@item.ACCION</span>
+                                    }
+                                </td>
+                                <td><code>@item.TABLA_AFECTADA</code></td>
+                                <td class="small">@item.DETALLE_ACTIVIDAD</td>
+                                <td class="small text-muted">@item.DIRECCION_IP</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tablaAuditoria').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Traduce la tabla al español
+                },
+                "order": [[0, "desc"]], // Ordena por la primera columna (ID) de forma descendente (los más recientes primero)
+                "pageLength": 10 // Mostrar 10 registros por página
+            });
+        });
+    </script>
+}

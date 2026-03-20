@@ -1,0 +1,138 @@
+﻿@model List<Entidades.Inventario>
+@{
+    ViewData["Title"] = "Movimientos de Inventario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Kárdex de Inventario</h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Consulta de entradas y salidas de productos</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; transition: 0.3s;">
+
+    <div class="card-header p-4" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+        <form method="get" action="@Url.Action("Index", "Inventario")" class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label mb-1" style="color: var(--text-muted); font-size: 0.85rem;">Búsqueda rápida</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="busquedaKardex" class="form-control border-0" placeholder="Buscar motivo..." style="background-color: var(--bg-main); color: var(--text-main);">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label mb-1" style="color: var(--text-muted); font-size: 0.85rem;">Desde</label>
+                <input type="date" name="fechaInicio" class="form-control border-0" value="@ViewBag.FechaInicio" style="background-color: var(--bg-main); color: var(--text-main);" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label mb-1" style="color: var(--text-muted); font-size: 0.85rem;">Hasta</label>
+                <input type="date" name="fechaFin" class="form-control border-0" value="@ViewBag.FechaFin" style="background-color: var(--bg-main); color: var(--text-main);" />
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn border-0 shadow-sm me-2 w-50" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px;">
+                    Filtrar
+                </button>
+                <a href="@Url.Action("Index", "Inventario")" class="btn border-0 shadow-sm w-50" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color) !important; font-weight: 600; border-radius: 8px;">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tablaKardex" style="color: var(--text-main);">
+                <thead style="border-bottom: 2px solid var(--border-color);">
+                    <tr>
+                        <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID Mov.</th>
+                        <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha y Hora</th>
+                        <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Tipo</th>
+                        <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Cantidad</th>
+                        <th scope="col" class="pb-3 text-uppercase border-0 rounded-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Motivo / Observación</th>
+                    </tr>
+                </thead>
+                <tbody style="border-top: none;">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="fila-kardex" style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
+                                <td class="py-3 fw-bold" style="color: var(--text-main);">#@item.ID_INVENTARIO</td>
+                                <td class="py-3" style="color: var(--text-main);">@item.FECHA_MOVIMIENTO.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="py-3">
+                                    @if (item.TIPO_MOVIMIENTO == "ENTRADA")
+                                    {
+                                        <span class="badge rounded-pill" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; border: 1px solid rgba(32, 201, 151, 0.5); padding: 0.4em 0.8em; font-weight: 500;">
+                                            <i class="bi bi-arrow-down-left me-1"></i>ENTRADA
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill" style="background-color: rgba(220, 53, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 107, 107, 0.5); padding: 0.4em 0.8em; font-weight: 500;">
+                                            <i class="bi bi-arrow-up-right me-1"></i>SALIDA
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-3 text-center fw-bold fs-5" style="color: var(--text-main);">
+                                    @(item.TIPO_MOVIMIENTO == "ENTRADA" ? "+" : "-")@item.CANTIDAD
+                                </td>
+                                <td class="py-3 col-motivo" style="color: var(--text-muted);">@(string.IsNullOrEmpty(item.MOTIVO) ? "Sin observaciones" : item.MOTIVO)</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="filaVacia">
+                            <td colspan="5" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="bi bi-journal-x fs-1 mb-3" style="color: var(--text-muted);"></i>
+                                    <h5 style="color: var(--text-main);">No hay movimientos registrados</h5>
+                                    <p style="color: var(--text-muted);">Prueba ajustando las fechas de búsqueda.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-main) !important;
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom-color: var(--border-color);
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputBusqueda = document.getElementById("busquedaKardex");
+        const filas = document.querySelectorAll(".fila-kardex");
+
+        inputBusqueda.addEventListener("keyup", function () {
+            const textoBuscado = inputBusqueda.value.toLowerCase();
+
+            filas.forEach(fila => {
+                // Buscamos específicamente en la columna del motivo (puedes cambiarlo a texto general si quieres)
+                const motivo = fila.querySelector(".col-motivo").textContent.toLowerCase();
+
+                if (motivo.includes(textoBuscado)) {
+                    fila.style.display = ""; // Muestra la fila
+                } else {
+                    fila.style.display = "none"; // Oculta la fila
+                }
+            });
+        });
+    });
+</script>

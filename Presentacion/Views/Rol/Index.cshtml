@@ -1,0 +1,210 @@
+﻿@using System.Data
+@model DataTable
+@{
+    ViewData["Title"] = "Gestión de Roles y Permisos";
+}
+
+<div class="container-fluid">
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 text-secondary"><i class="bi bi-shield-lock me-2"></i>Roles del Sistema</h5>
+                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                    <i class="bi bi-plus-lg me-1"></i> Nuevo Rol
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="10%">ID</th>
+                            <th width="25%">Nombre del Rol</th>
+                            <th width="35%">Descripción</th>
+                            <th width="15%">Estado</th>
+                            <th width="15%" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Rows.Count > 0)
+                        {
+                            foreach (DataRow fila in Model.Rows)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-secondary">#@fila["Id_Rol"]</td>
+                                    <td><span class="badge bg-dark">@fila["Nombre_Rol"]</span></td>
+                                    <td class="text-muted small">@fila["Descripcion"]</td>
+                                    <td>
+                                        @if (Convert.ToBoolean(fila["Estado"]))
+                                        {
+                                            <span class="badge bg-success">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary me-1 btn-editar"
+                                                data-id="@fila["Id_Rol"]"
+                                                data-nombre="@fila["Nombre_Rol"]"
+                                                data-desc="@fila["Descripcion"]"
+                                                data-estado="@(Convert.ToBoolean(fila["Estado"]) ? "1" : "0")"
+                                                data-version="@Convert.ToBase64String((byte[])fila["VERSION_FILA"])"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        @if (Convert.ToBoolean(fila["Estado"]))
+                                        {
+                                            <form action="/Rol/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas desactivar este rol? Esto podría afectar a los usuarios que lo tengan asignado.');">
+                                                <input type="hidden" name="idRol" value="@fila["Id_Rol"]" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Desactivar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No se encontraron roles registrados.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Rol</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="/Rol/Crear" method="post">
+                <div class="modal-body p-4">
+                    
+                    <div class="mb-3">
+                        <label for="selectRol" class="form-label fw-bold">Nombre del Rol</label>
+                        <select class="form-select" id="selectRol" name="NOMBRE_ROL" onchange="llenarDescripcion()" required>
+                            <option value="" data-desc="">Seleccione un rol...</option>
+                            <option value="Administrador" data-desc="Acceso total al sistema">Administrador</option>
+                            <option value="Usuario" data-desc="Acceso limitado a funciones específicas">Usuario</option>
+                            <option value="Auditor" data-desc="Acceso solo a funciones de auditoría y reportes">Auditor</option>
+                            <option value="Vendedor" data-desc="Acceso a funciones de ventas y caja">Vendedor</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="txtDescripcion" class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control bg-light" id="txtDescripcion" name="DESCRIPCION" rows="3" readonly placeholder="La descripción se autocompletará aquí..."></textarea>
+                    </div>
+
+                </div>
+                
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Rol</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2"></i>Editar Rol</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/Rol/Editar" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editId" name="ID_ROL" />
+                    <input type="hidden" id="editVersion" name="VersionOriginalBase64" />
+        
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="editNombre" name="NOMBRE_ROL" rows="3" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control bg-light" id="editDesc" name="DESCRIPCION" rows="3" readonly></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estado</label>
+                        <select class="form-select" id="editEstado" name="EstadoHtml" required>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning px-4 fw-bold text-dark">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const botonesEditar = document.querySelectorAll('.btn-editar');
+
+            botonesEditar.forEach(boton => {
+                boton.addEventListener('click', function () {
+                    // Cargar valores al modal desde los atributos 'data-'
+                    document.getElementById('editId').value = this.getAttribute('data-id');
+                    document.getElementById('editNombre').value = this.getAttribute('data-nombre');
+                    document.getElementById('editDesc').value = this.getAttribute('data-desc');
+                    document.getElementById('editEstado').value = this.getAttribute('data-estado');
+           
+                     // Cargar valores al modal desde los atributos 'data-'
+                    document.getElementById('editVersion').value = this.getAttribute('data-version');
+                });
+            });
+        });
+
+            function llenarDescripcion() {
+            // Obtenemos el select y el textarea por su ID
+            var combo = document.getElementById("selectRol");
+            var cajaDescripcion = document.getElementById("txtDescripcion");
+        
+            // Obtenemos la opción seleccionada actualmente
+            var opcionSeleccionada = combo.options[combo.selectedIndex];
+        
+            // Extraemos el texto del atributo 'data-desc' y lo pasamos al textarea
+            var descripcion = opcionSeleccionada.getAttribute("data-desc");
+            cajaDescripcion.value = descripcion;
+        }
+    </script>
+}
