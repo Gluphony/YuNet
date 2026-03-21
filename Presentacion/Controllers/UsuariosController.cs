@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using LogicaNegocio;
 using System;
 using System.Data;
+using System.Security.Claims;
 
 namespace Presentacion.Controllers
 {
@@ -31,16 +32,29 @@ namespace Presentacion.Controllers
 
         // 2. CREAR USUARIO
         [HttpPost]
-        public IActionResult Crear(string Nombre, string Correo, string Clave, int Id_Rol)
+        public IActionResult Crear(string Nombre, string Correo, string Clave, int idRol)
         {
             try
             {
-                bool respuesta = _logicaUsuario.InsertarUsuario(Nombre, Correo, Clave, Id_Rol);
+                // SOLUCIÓN: Necesitamos el ID del Rol de la persona que está ejecutando esta acción.
+                // Como este controlador tiene [Authorize(Roles = "Administrador")], sabemos que es un Admin.
+                // Asumiendo que el ID del rol Administrador en tu BD es 1:
+                int idRolDelUsuarioCreador = 1;
+
+                // *Nota Pro*: Si guardas el IdRol en los Claims durante el Login, lo correcto sería leerlo así:
+                // string claimRol = User.FindFirst("IdRol")?.Value;
+                // int idRolDelUsuarioCreador = claimRol != null ? int.Parse(claimRol) : 1;
+
+                // Ahora sí pasamos los 5 parámetros que exige la capa lógica
+                bool respuesta = _logicaUsuario.InsertarUsuario(idRolDelUsuarioCreador, Nombre, Correo, Clave, idRol);
+
                 if (respuesta)
                     TempData["Exito"] = "Usuario registrado correctamente.";
             }
             catch (Exception ex)
             {
+                // Si la validación de la contraseña falla (ej. no tiene mayúsculas), 
+                // el Exception caerá aquí y le mostrará el error al usuario en la vista.
                 TempData["Error"] = ex.Message;
             }
             return RedirectToAction("Index");
@@ -52,8 +66,6 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // El checkbox o select del formulario HTML suele devolver "true"/"false" o "1"/"0"
-                // Aquí lo convertimos a booleano de forma segura
                 bool boolEstado = (Estado == "1" || Estado == "true" || Estado == "True");
 
                 bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, boolEstado);

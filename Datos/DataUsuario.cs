@@ -14,8 +14,6 @@ namespace Datos
     {
         private readonly Conexion _con = new Conexion();
 
-        // Añade estos métodos dentro de tu clase DatosSeguridad
-
         // 3. LISTAR USUARIOS
         public DataTable ListarUsuarios()
         {
@@ -39,7 +37,8 @@ namespace Datos
         }
 
         // 4. INSERTAR USUARIO
-        public bool InsertarUsuario(string nombre, string correo, string clave, int idRol)
+        // 👇 AQUÍ ESTÁ EL CAMBIO: Cambiamos 'string clave' por 'byte[] clave'
+        public bool InsertarUsuario(string nombre, string correo, byte[] clave, int idRol)
         {
             bool respuesta = false;
             using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
@@ -51,7 +50,10 @@ namespace Datos
 
                     cmd.Parameters.AddWithValue("@Nombre", nombre ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Correo", correo ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Clave", clave ?? (object)DBNull.Value);
+
+                    // 👇 Pasamos el arreglo de bytes. ADO.NET lo convierte a VARBINARY para SQL Server automáticamente.
+                    cmd.Parameters.AddWithValue("@Clave", (object)clave ?? DBNull.Value);
+
                     cmd.Parameters.AddWithValue("@Id_Rol", idRol);
 
                     conexion.Open();

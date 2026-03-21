@@ -85,5 +85,30 @@ namespace Presentacion.Controllers
 
             return RedirectToAction("Index", new { idRolSeleccionado = idRol });
         }
+        [HttpPost]
+        public IActionResult CrearPermiso(string CLAVE_PERMISO, string DESCRIPCION)
+        {
+            try
+            {
+                // Creamos el objeto con los datos del formulario
+                Permisos nuevoPermiso = new Permisos
+                {
+                    CLAVE_PERMISO = CLAVE_PERMISO,
+                    DESCRIPCION = DESCRIPCION
+                };
+
+                // Llamamos a la lógica (Asegúrate de haber creado este método en tu capa Lógica y Datos)
+                _logicaRolPermisos.InsertarPermiso(nuevoPermiso);
+
+                TempData["Exito"] = "Permiso creado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al crear el permiso: " + ex.Message;
+            }
+
+            // Recargamos la misma página
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -37,16 +37,20 @@
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label asp-for="ID_DETALLE_DEVOLUCION" class="form-label small fw-bold" style="color: var(--text-muted);">ID Detalle de Venta</label>
-                                <input asp-for="ID_DETALLE_DEVOLUCION" type="number" class="form-control border-0 shadow-sm py-2"
-                                       style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Ej: 1024" required />
-                                <div class="form-text small">Indique el ID único del producto en la factura.</div>
+                                <label asp-for="ID_DETALLE_DEVOLUCION" class="form-label small fw-bold" style="color: var(--text-muted);">Producto a Devolver</label>
+                                <select asp-for="ID_DETALLE_DEVOLUCION" asp-items="ViewBag.ListaDetalles" class="form-select border-0 shadow-sm py-2"
+                                        style="background-color: var(--bg-main); color: var(--text-main);" required>
+                                    <option value="">-- Seleccione el producto --</option>
+                                </select>
+                                <div class="form-text small">Elija el producto de la factura original.</div>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="ID_USUARIO_AUTORIZA" class="form-label small fw-bold" style="color: var(--text-muted);">ID Usuario que Autoriza</label>
-                                <input asp-for="ID_USUARIO_AUTORIZA" type="number" class="form-control border-0 shadow-sm py-2"
-                                       style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Su ID de usuario" required />
+                                <label asp-for="ID_USUARIO_AUTORIZA" class="form-label small fw-bold" style="color: var(--text-muted);">Usuario que Autoriza</label>
+                                <select asp-for="ID_USUARIO_AUTORIZA" asp-items="ViewBag.ListaUsuarios" class="form-select border-0 shadow-sm py-2"
+                                        style="background-color: var(--bg-main); color: var(--text-main);" required>
+                                    <option value="">-- Seleccione quién autoriza --</option>
+                                </select>
                             </div>
                         </div>
 

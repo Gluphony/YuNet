@@ -28,14 +28,10 @@ namespace Datos
                     try
                     {
                         connection.Open();
-                        // ExecuteNonQuery devuelve las filas afectadas. 
-                        // Si el SP hizo el INSERT, devolverá 1 (true).
-                        // Si entró en el IF EXISTS y no insertó nada, devolverá 0 (false).
                         respuesta = cmd.ExecuteNonQuery() > 0;
                     }
                     catch (Exception ex)
                     {
-                        // Aquí podrías loguear el error ex.Message
                         respuesta = false;
                     }
                 }
@@ -90,7 +86,6 @@ namespace Datos
                             {
                                 olista.Add(new Permisos()
                                 {
-                                    // Usamos los nombres de columna definidos en el SELECT de tu SP
                                     ID_PERMISO = Convert.ToInt32(reader["Id_Permiso"]),
                                     CLAVE_PERMISO = reader["Clave_Permiso"].ToString(),
                                     DESCRIPCION = reader["Descripcion"].ToString()
@@ -100,20 +95,18 @@ namespace Datos
                     }
                     catch (Exception)
                     {
-                        // En caso de error devolvemos la lista vacía
                     }
                 }
             }
             return olista;
         }
-    
-    // 4. LISTAR TODOS LOS PERMISOS DISPONIBLES EN EL SISTEMA
-public List<Permisos> ListarTodosLosPermisos()
+
+        // 4. LISTAR TODOS LOS PERMISOS DISPONIBLES EN EL SISTEMA
+        public List<Permisos> ListarTodosLosPermisos()
         {
             var olista = new List<Permisos>();
             using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
             {
-                // Asegúrate de que este SP exista o usa un SELECT simple
                 using (SqlCommand cmd = new SqlCommand("SELECT Id_Permiso, Clave_Permiso, Descripcion FROM Seguridad.Permisos", connection))
                 {
                     cmd.CommandType = CommandType.Text;
@@ -137,6 +130,35 @@ public List<Permisos> ListarTodosLosPermisos()
                 }
             }
             return olista;
+        }
+
+        // 5. INSERTAR UN NUEVO PERMISO (MÉTODO NUEVO AGREGADO)
+        public bool InsertarPermiso(Permisos permiso)
+        {
+            bool respuesta = false;
+            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
+            {
+                // Usamos un query directo para guardar el permiso en la tabla
+                string query = "INSERT INTO Seguridad.Permisos (Clave_Permiso, Descripcion) VALUES (@Clave, @Desc)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@Clave", permiso.CLAVE_PERMISO);
+                    cmd.Parameters.AddWithValue("@Desc", permiso.DESCRIPCION);
+
+                    try
+                    {
+                        connection.Open();
+                        respuesta = cmd.ExecuteNonQuery() > 0;
+                    }
+                    catch (Exception)
+                    {
+                        respuesta = false;
+                    }
+                }
+            }
+            return respuesta;
         }
     }
 }

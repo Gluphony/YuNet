@@ -11,7 +11,7 @@ namespace Entidades
         public int ID_USUARIO { get; set; }
         public string? NOMBRE { get; set; }
         public string? CORREO { get; set; }
-        public byte[]? CONTRASEÑA { get; set; } // VARBINARY mapea a byte[]
+        public byte[]? CONTRASEÑA { get; set; }
         public bool ESTADO { get; set; }
         public int ID_ROL { get; set; }
         public string? NOMBRE_ROL { get; set; }

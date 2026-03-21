@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Entidades;
 using LogicaNegocio;
 using System;
@@ -8,15 +9,16 @@ namespace Presentacion.Controllers
 {
     public class DevolucionController : Controller
     {
-        private readonly LogicaDevolucion _logicaDevolucion = new LogicaDevolucion();
+        private readonly LogicaDevolucion _LogicaDevolucion = new LogicaDevolucion();
+        private readonly LogicaUsuario _LogicaUsuario = new LogicaUsuario();
+        private readonly LogicaDetallePedido _LogicaDetallePedido = new LogicaDetallePedido();
 
-        // --- 1. ACCIÓN PARA MOSTRAR LA LISTA DE DEVOLUCIONES ---
         [HttpGet]
         public IActionResult Index()
         {
             try
             {
-                List<Devolucion> devoluciones = _logicaDevolucion.Listar();
+                List<Devolucion> devoluciones = _LogicaDevolucion.Listar();
                 return View(devoluciones);
             }
             catch (Exception ex)
@@ -26,47 +28,75 @@ namespace Presentacion.Controllers
             }
         }
 
-        // ========================================================
-        // NUEVO: GET: Devolucion/Create (Muestra el formulario)
-        // ========================================================
         [HttpGet]
         public IActionResult Create()
         {
-            // Mandamos una entidad en blanco a la vista
+            CargarListasDesplegables();
             return View(new Devolucion());
         }
 
-        // ========================================================
-        // NUEVO: POST: Devolucion/Create (Guarda los datos)
-        // ========================================================
         [HttpPost]
-        [ValidateAntiForgeryToken] // Seguridad contra ataques CSRF
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Devolucion nuevaDevolucion)
         {
             try
             {
-                // Limpiamos la validación del ID por si la BD lo genera automáticamente
                 ModelState.Remove("ID_DEVOLUCION");
+                ModelState.Remove("FECHA_DEVOLUCION");
+                ModelState.Remove("FACTURA_ORIGINAL");
+                ModelState.Remove("PRODUCTO_NOMBRE");
+                ModelState.Remove("IMEI");
+                ModelState.Remove("AUTORIZADO_POR_NOMBRE");
 
                 if (ModelState.IsValid)
                 {
-                    // Llamamos a tu capa lógica para guardar
-                    // Asumo que tienes un método Crear() en tu LogicaDevolucion
-                    _logicaDevolucion.Crear(nuevaDevolucion);
-
-                    TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
-                    return RedirectToAction("Index");
+                    bool creado = _LogicaDevolucion.Crear(nuevaDevolucion);
+                    if (creado)
+                    {
+                        TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
+                        return RedirectToAction("Index");
+                    }
                 }
 
-                // Si hay errores de validación, recargamos la vista con los datos que escribió el usuario
-                ViewBag.Error = "Por favor, revisa los campos del formulario.";
+                CargarListasDesplegables();
+                ViewBag.Error = "Por favor, revisa los campos marcados en el formulario.";
                 return View(nuevaDevolucion);
             }
             catch (Exception ex)
             {
+                CargarListasDesplegables();
                 ViewBag.Error = "Error al registrar la devolución: " + ex.Message;
                 return View(nuevaDevolucion);
             }
+        }
+
+        // ====== AQUÍ ESTÁ LA MAGIA PARA EVITAR LOS ERRORES ======
+        private void CargarListasDesplegables()
+        {
+            // --- 1. CARGAR USUARIOS DESDE EL DATATABLE ---
+            var dtUsuarios = _LogicaUsuario.ListarUsuarios();
+            var listaUsuarios = new List<SelectListItem>();
+
+            // Recorremos las filas del DataTable para armar la lista
+            if (dtUsuarios != null && dtUsuarios.Rows.Count > 0)
+            {
+                foreach (System.Data.DataRow row in dtUsuarios.Rows)
+                {
+                    listaUsuarios.Add(new SelectListItem
+                    {
+                        // OJO: Si la columna se llama diferente en BD, cámbialo aquí
+                        Value = row["ID_USUARIO"].ToString(),
+                        Text = row["NOMBRE"].ToString()
+                    });
+                }
+            }
+
+            ViewBag.ListaUsuarios = new SelectList(listaUsuarios, "Value", "Text");
+
+            // --- 2. CARGAR DETALLES ---
+            // Como LogicaDetallePedido no tiene un método general para listar, 
+            // mandamos una lista vacía para que no explote la vista.
+            ViewBag.ListaDetalles = new SelectList(new List<SelectListItem>());
         }
     }
 }

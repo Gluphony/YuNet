@@ -13,31 +13,47 @@
 }
 
 <div class="container py-4">
-    <h2 class="mb-4">Configuración de Accesos</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Configuración de Accesos</h2>
+        <button type="button" class="btn btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoPermiso">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Permiso
+        </button>
+    </div>
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
     @if (TempData["Exito"] != null)
     {
-        <div class="alert alert-success">@TempData["Exito"]</div>
+        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+            @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
 
     <div class="row">
         <div class="col-md-4">
-            <div class="card shadow-sm p-3">
+            <div class="card shadow-sm p-3 border-0">
                 <form method="get" action="@Url.Action("Index")">
-                    <label class="form-label fw-bold">Seleccionar Rol:</label>
-                    <select name="idRolSeleccionado" class="form-select" onchange="this.form.submit()">
-                        <option value="">-- Seleccione --</option>
+                    <label class="form-label fw-bold text-secondary">Seleccionar Rol:</label>
+                    <select name="idRolSeleccionado" class="form-select border-primary" onchange="this.form.submit()">
+                        <option value="">-- Seleccione un Rol --</option>
                         @if (roles != null)
                         {
                             foreach (DataRow row in roles.Rows)
                             {
-                                <option value="@row["Id_Rol"]" selected="@(idRolActual == Convert.ToInt32(row["Id_Rol"]))">
-                                    @row["Nombre_Rol"]
-                                </option>
+                                if (idRolActual != null && idRolActual == Convert.ToInt32(row["Id_Rol"]))
+                                {
+                                    <option value="@row["Id_Rol"]" selected>@row["Nombre_Rol"]</option>
+                                }
+                                else
+                                {
+                                    <option value="@row["Id_Rol"]">@row["Nombre_Rol"]</option>
+                                }
                             }
                         }
                     </select>
@@ -46,37 +62,91 @@
         </div>
 
         <div class="col-md-8">
-            <div class="card shadow-sm p-4">
+            <div class="card shadow-sm p-4 border-0">
                 @if (idRolActual > 0)
                 {
                     <form method="post" action="@Url.Action("Guardar")">
                         <input type="hidden" name="idRol" value="@idRolActual" />
 
                         <div class="row">
-                            @foreach (var p in catalogo)
+                            @if (catalogo != null && catalogo.Count > 0)
                             {
-                                <div class="col-md-6 mb-3">
-                                    <div class="d-flex justify-content-between align-items-center border p-2 rounded bg-light">
-                                        <div>
-                                            <span class="fw-bold d-block">@p.DESCRIPCION</span>
-                                            <small class="text-muted">@p.CLAVE_PERMISO</small>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="permisosSeleccionados"
-                                                   value="@p.ID_PERMISO" @(idsAsignados.Contains(p.ID_PERMISO) ? "checked" : "")>
+                                foreach (var p in catalogo)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center border p-3 rounded bg-light shadow-sm">
+                                            <div>
+                                                <span class="fw-bold d-block text-dark">@p.DESCRIPCION</span>
+                                                <span class="badge bg-secondary">@p.CLAVE_PERMISO</span>
+                                            </div>
+                                            <div class="form-check form-switch fs-4">
+                                                <input class="form-check-input cursor-pointer" type="checkbox" name="permisosSeleccionados"
+                                                       value="@p.ID_PERMISO" @(idsAsignados.Contains(p.ID_PERMISO) ? "checked" : "")>
+                                            </div>
                                         </div>
                                     </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12 text-center text-muted py-3">
+                                    No hay permisos registrados en el sistema. Crea uno nuevo arriba.
                                 </div>
                             }
                         </div>
-                        <button type="submit" class="btn btn-primary mt-3 w-100">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-primary mt-3 w-100 fw-bold shadow-sm">
+                            <i class="bi bi-save me-1"></i> Guardar Configuración de Accesos
+                        </button>
                     </form>
                 }
                 else
                 {
-                    <p class="text-center text-muted">Seleccione un rol para ver sus permisos.</p>
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-shield-lock display-4 text-light mb-3"></i>
+                        <h5>Seleccione un rol en el menú lateral</h5>
+                        <p>Para ver y configurar a qué secciones del sistema tiene acceso.</p>
+                    </div>
                 }
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoPermiso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Nuevo Permiso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="/RolPermisos/CrearPermiso" method="post">
+                <div class="modal-body p-4">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Clave del Permiso</label>
+                        <input type="text" class="form-control" name="CLAVE_PERMISO" required
+                               placeholder="Ej: VER_REPORTE, EDITAR_CAJA"
+                               style="text-transform: uppercase;"
+                               oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '_');">
+                        <div class="form-text">Sin espacios. Usa guiones bajos (Se pondrá en mayúsculas automáticamente).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción / Cargo que permite</label>
+                        <textarea class="form-control" name="DESCRIPCION" rows="3" required
+                                  placeholder="Ej: Permite al usuario acceder al módulo de reportes financieros..."></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold">Guardar Permiso</button>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

@@ -101,39 +101,33 @@
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            
+
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Rol</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
+
             <form action="/Rol/Crear" method="post">
                 <div class="modal-body p-4">
-                    
+
                     <div class="mb-3">
-                        <label for="selectRol" class="form-label fw-bold">Nombre del Rol</label>
-                        <select class="form-select" id="selectRol" name="NOMBRE_ROL" onchange="llenarDescripcion()" required>
-                            <option value="" data-desc="">Seleccione un rol...</option>
-                            <option value="Administrador" data-desc="Acceso total al sistema">Administrador</option>
-                            <option value="Usuario" data-desc="Acceso limitado a funciones específicas">Usuario</option>
-                            <option value="Auditor" data-desc="Acceso solo a funciones de auditoría y reportes">Auditor</option>
-                            <option value="Vendedor" data-desc="Acceso a funciones de ventas y caja">Vendedor</option>
-                        </select>
+                        <label for="txtNombreRol" class="form-label fw-bold">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="txtNombreRol" name="NOMBRE_ROL" required placeholder="Escribe el nombre del rol (ej: Cajero, Supervisor...)">
                     </div>
 
                     <div class="mb-3">
                         <label for="txtDescripcion" class="form-label fw-bold">Descripción</label>
-                        <textarea class="form-control bg-light" id="txtDescripcion" name="DESCRIPCION" rows="3" readonly placeholder="La descripción se autocompletará aquí..."></textarea>
+                        <textarea class="form-control" id="txtDescripcion" name="DESCRIPCION" rows="3" required placeholder="Escribe para qué sirve este rol..."></textarea>
                     </div>
 
                 </div>
-                
+
                 <div class="modal-footer bg-light border-top-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Rol</button>
                 </div>
             </form>
-            
+
         </div>
     </div>
 </div>
@@ -149,7 +143,7 @@
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId" name="ID_ROL" />
                     <input type="hidden" id="editVersion" name="VersionOriginalBase64" />
-        
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre del Rol</label>
                         <input type="text" class="form-control" id="editNombre" name="NOMBRE_ROL" rows="3" readonly>
@@ -187,24 +181,11 @@
                     document.getElementById('editNombre').value = this.getAttribute('data-nombre');
                     document.getElementById('editDesc').value = this.getAttribute('data-desc');
                     document.getElementById('editEstado').value = this.getAttribute('data-estado');
-           
+
                      // Cargar valores al modal desde los atributos 'data-'
                     document.getElementById('editVersion').value = this.getAttribute('data-version');
                 });
             });
         });
-
-            function llenarDescripcion() {
-            // Obtenemos el select y el textarea por su ID
-            var combo = document.getElementById("selectRol");
-            var cajaDescripcion = document.getElementById("txtDescripcion");
-        
-            // Obtenemos la opción seleccionada actualmente
-            var opcionSeleccionada = combo.options[combo.selectedIndex];
-        
-            // Extraemos el texto del atributo 'data-desc' y lo pasamos al textarea
-            var descripcion = opcionSeleccionada.getAttribute("data-desc");
-            cajaDescripcion.value = descripcion;
-        }
     </script>
 }

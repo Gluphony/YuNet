@@ -72,6 +72,23 @@ namespace LogicaNegocio
         public List<Permisos> ListarTodos()
         {
             return _datosRolesPermisos.ListarTodosLosPermisos();
+
+        }
+        // 6. CREAR NUEVO PERMISO
+        public bool InsertarPermiso(Permisos permiso)
+        {
+            if (permiso == null)
+                throw new ArgumentNullException("La información del permiso no puede estar vacía.");
+
+            if (string.IsNullOrWhiteSpace(permiso.CLAVE_PERMISO))
+                throw new ArgumentException("La clave del permiso es obligatoria.");
+
+            if (string.IsNullOrWhiteSpace(permiso.DESCRIPCION))
+                throw new ArgumentException("La descripción del permiso es obligatoria.");
+
+            // OJO: Para que esto no marque error, también debes crear este mismo 
+            // método "InsertarPermiso" en tu archivo DatosRolesPermisos.cs
+            return _datosRolesPermisos.InsertarPermiso(permiso);
         }
     }
 }

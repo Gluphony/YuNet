@@ -4,7 +4,7 @@
     ViewData["Title"] = "Gestión de Usuarios";
 }
 
-<div class="container-fluid">
+<div class="container-fluid py-3">
 
     @if (TempData["Exito"] != null)
     {
@@ -26,7 +26,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="mb-0 text-secondary"><i class="bi bi-people me-2"></i>Lista de Usuarios</h5>
-                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrear">
                     <i class="bi bi-person-plus me-1"></i> Nuevo Usuario
                 </button>
             </div>
@@ -70,13 +70,14 @@
                                                 data-correo="@fila["Correo"]"
                                                 data-idrol="@fila["Id_Rol"]"
                                                 data-estado="@(Convert.ToBoolean(fila["Estado"]) ? "1" : "0")"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditar">
+                                                data-bs-toggle="modal" data-bs-target="#modalEditar"
+                                                title="Editar">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
                                         @if (Convert.ToBoolean(fila["Estado"]))
                                         {
-                                            <form action="/Usuarios/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas desactivar este usuario?');">
+                                            <form action="@Url.Action("Desactivar", "Usuarios")" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas desactivar este usuario?');">
                                                 <input type="hidden" name="idUsuario" value="@fila["Id_Usuario"]" />
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Desactivar">
                                                     <i class="bi bi-person-x"></i>
@@ -107,7 +108,7 @@
                 <h5 class="modal-title fw-bold"><i class="bi bi-person-plus me-2"></i>Crear Usuario</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/Usuarios/Crear" method="post">
+            <form action="@Url.Action("Crear", "Usuarios")" method="post">
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre Completo</label>
@@ -123,7 +124,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Rol en el Sistema</label>
-                        <select class="form-select" name="Id_Rol" required>
+                        <select class="form-select" name="idRol" required>
                             <option value="">Seleccione un rol...</option>
                             <option value="1">Administrador</option>
                             <option value="2">Usuario</option>
@@ -148,7 +149,7 @@
                 <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2"></i>Editar Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/Usuarios/Editar" method="post">
+            <form action="@Url.Action("Editar", "Usuarios")" method="post">
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId" name="Id_Usuario" />
 
