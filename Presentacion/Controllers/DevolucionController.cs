@@ -31,6 +31,9 @@ namespace Presentacion.Controllers
         // NUEVO: GET: Devolucion/Create (Muestra el formulario)
         // Recibe el ID del detalle del pedido a devolver
         // ========================================================
+        // ========================================================
+        // GET: Devolucion/Create
+        // ========================================================
         [HttpGet]
         public IActionResult Create(int? idDetalle)
         {
@@ -38,12 +41,13 @@ namespace Presentacion.Controllers
 
             if (idDetalle.HasValue)
             {
-                // Asignamos el ID que viene desde el botón "Devolver" de la vista del pedido
+                // Ahora sí usamos la propiedad exacta de tu Entidad
                 modelo.ID_DETALLE_DEVOLUCION = idDetalle.Value;
+                modelo.FECHA_DEVOLUCION = DateTime.Now;
+                modelo.REGRESAR_INVENTARIO = false; // Valor por defecto
             }
             else
             {
-                // Si el usuario entra directamente a /Devolucion/Create sin pasar por un pedido
                 ViewBag.Error = "Atención: No se ha seleccionado un producto específico para devolver.";
             }
 
@@ -51,41 +55,36 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // NUEVO: POST: Devolucion/Create (Guarda los datos)
+        // POST: Devolucion/Create
         // ========================================================
         [HttpPost]
-        [ValidateAntiForgeryToken] // Seguridad contra ataques CSRF
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Devolucion nuevaDevolucion)
         {
             try
             {
-                // 1. Asignar el usuario que autoriza automáticamente desde la sesión activa
-                var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!string.IsNullOrEmpty(claimId))
-                {
-                    nuevaDevolucion.ID_USUARIO_AUTORIZA = int.Parse(claimId);
-                }
-                else
-                {
-                    // Fallback de seguridad: Si por alguna razón no hay sesión o claims, 
-                    // asignamos el ID 1 (Asegúrate de que el usuario con ID 1 exista en tu base de datos)
-                    nuevaDevolucion.ID_USUARIO_AUTORIZA = 1;
-                }
+                // 1. Asignar el usuario que autoriza (desde Claim o estático)
+                var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                nuevaDevolucion.ID_USUARIO_AUTORIZA = !string.IsNullOrEmpty(claimId) ? int.Parse(claimId) : 1;
+                nuevaDevolucion.FECHA_DEVOLUCION = DateTime.Now;
 
-                // 2. Limpiamos validaciones de campos que el usuario no llena a mano
+                // 2. Limpiamos validaciones de PK, FKs y propiedades de solo lectura/reporte
                 ModelState.Remove("ID_DEVOLUCION");
                 ModelState.Remove("ID_USUARIO_AUTORIZA");
+                ModelState.Remove("PRODUCTO_NOMBRE");
+                ModelState.Remove("IMEI");
+                ModelState.Remove("AUTORIZADO_POR_NOMBRE");
+                // FACTURA_ORIGINAL al ser int, si no viene en el form, asume 0. Lo removemos por si acaso.
+                ModelState.Remove("FACTURA_ORIGINAL");
 
                 if (ModelState.IsValid)
                 {
-                    // Llamamos a tu capa lógica para guardar
                     _logicaDevolucion.Crear(nuevaDevolucion);
 
                     TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", "Pedido"); // Te regreso a pedidos tras el éxito
                 }
 
-                // Si hay errores de validación, recargamos la vista con los datos que escribió el usuario
                 ViewBag.Error = "Por favor, revisa los campos del formulario.";
                 return View(nuevaDevolucion);
             }

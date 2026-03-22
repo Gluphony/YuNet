@@ -51,6 +51,9 @@
                 <thead style="border-bottom: 2px solid var(--border-color);">
                     <tr>
                         <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID Mov.</th>
+
+                        <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Producto</th>
+
                         <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha y Hora</th>
                         <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Tipo</th>
                         <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Cantidad</th>
@@ -64,6 +67,9 @@
                         {
                             <tr class="fila-kardex" style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
                                 <td class="py-3 fw-bold" style="color: var(--text-main);">#@item.ID_INVENTARIO</td>
+
+                                <td class="py-3 fw-semibold" style="color: var(--text-main);">@item.MODELO</td>
+
                                 <td class="py-3" style="color: var(--text-main);">@item.FECHA_MOVIMIENTO.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="py-3">
                                     @if (item.TIPO_MOVIMIENTO == "ENTRADA")
@@ -89,7 +95,7 @@
                     else
                     {
                         <tr id="filaVacia">
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-journal-x fs-1 mb-3" style="color: var(--text-muted);"></i>
                                     <h5 style="color: var(--text-main);">No hay movimientos registrados</h5>
@@ -124,13 +130,12 @@
             const textoBuscado = inputBusqueda.value.toLowerCase();
 
             filas.forEach(fila => {
-                // Buscamos específicamente en la columna del motivo (puedes cambiarlo a texto general si quieres)
                 const motivo = fila.querySelector(".col-motivo").textContent.toLowerCase();
 
                 if (motivo.includes(textoBuscado)) {
-                    fila.style.display = ""; // Muestra la fila
+                    fila.style.display = "";
                 } else {
-                    fila.style.display = "none"; // Oculta la fila
+                    fila.style.display = "none";
                 }
             });
         });

@@ -3,12 +3,28 @@
     ViewData["Title"] = "Categorías";
 }
 
+@* --- ALERTAS DE ÉXITO Y ERROR --- *@
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Categorías</h2>
         <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona la clasificación de tus productos</p>
     </div>
-    <button class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+    <button type="button" class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" data-bs-toggle="modal" data-bs-target="#modalCrear" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
         <i class="bi bi-plus-lg me-2"></i>Nueva Categoría
     </button>
 </div>
@@ -27,6 +43,9 @@
                         <button type="submit" class="btn border-0" style="background-color: #C6C3F2; color: #262628; font-weight: 600;">Buscar</button>
                     </div>
                 </form>
+            </div>
+            <div class="col-auto">
+                <a asp-action="Index" class="btn btn-light border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);"><i class="bi bi-arrow-clockwise"></i></a>
             </div>
         </div>
 
@@ -49,17 +68,31 @@
                                 <td class="py-3 fw-bold" style="color: var(--text-main);">@item.ID_CATEGORIA</td>
                                 <td class="py-3" style="color: var(--text-main);">@item.NOMBRE_CATEGORIA</td>
                                 <td class="py-3">
-                                    <span class="badge rounded-pill" style="background-color: rgba(198, 195, 242, 0.2); color: #C6C3F2; border: 1px solid #C6C3F2; padding: 0.4em 0.8em;">
-                                        Activo
-                                    </span>
+                                    @if (item.ESTADO)
+                                    {
+                                        <span class="badge rounded-pill" style="background-color: rgba(25, 135, 84, 0.1); color: #198754; border: 1px solid #198754; padding: 0.4em 0.8em;">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid #dc3545; padding: 0.4em 0.8em;">Inactivo</span>
+                                    }
                                 </td>
                                 <td class="py-3 text-end">
-                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm me-2" title="Editar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
-                                        <i class="bi bi-pencil"></i>
+                                    @* --- BOTÓN EDITAR SIEMPRE VISIBLE --- *@
+                                    @* Pasamos el estado como "true" o "false" a la función de JS *@
+                                    <button type="button" onclick="cargarModalEditar('@item.ID_CATEGORIA', '@item.NOMBRE_CATEGORIA', '@(item.ESTADO ? "true" : "false")')" class="btn btn-sm btn-light rounded shadow-sm me-2" data-bs-toggle="modal" data-bs-target="#modalEditar" title="Editar" style="width: 32px; height: 32px; background-color: #0d6efd; color: white; border-color: #0d6efd;">
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm" title="Desactivar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: #dc3545; border-color: var(--border-color);">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+
+                                    @* --- BOTÓN DESACTIVAR (Solo si está activo) --- *@
+                                    @if (item.ESTADO)
+                                    {
+                                        <form asp-action="Desactivar" asp-route-id="@item.ID_CATEGORIA" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar esta categoría?');">
+                                            <button type="submit" class="btn btn-sm btn-light rounded shadow-sm" title="Desactivar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: #dc3545; border-color: #dc3545;">
+                                                <i class="bi bi-person-x"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -71,7 +104,6 @@
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-inbox fs-1 mb-3" style="color: var(--text-muted);"></i>
                                     <h5 style="color: var(--text-main);">No hay categorías registradas</h5>
-                                    <p style="color: var(--text-muted);">Agrega una nueva categoría para comenzar a organizar tus productos.</p>
                                 </div>
                             </td>
                         </tr>
@@ -83,8 +115,80 @@
     </div>
 </div>
 
+@* --- MODAL CREAR --- *@
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border-color: var(--border-color);">
+            <form asp-action="Crear" method="post">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="modalCrearLabel" style="color: var(--text-main);">Nueva Categoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(var(--bs-body-color-rgb));"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Nombre de la Categoría</label>
+                        <input type="text" name="NOMBRE_CATEGORIA" class="form-control" required style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);" placeholder="Ej. Lácteos, Abarrotes...">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* --- MODAL EDITAR --- *@
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border-color: var(--border-color);">
+            <form asp-action="Editar" method="post">
+                <div class="modal-header" style="background-color: #ffc107; color: #000; border-bottom: none;">
+                    <h5 class="modal-title fw-bold" id="modalEditarLabel"><i class="bi bi-pencil-square me-2"></i>Editar Categoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body mt-2">
+                    <input type="hidden" id="editIdCategoria" name="ID_CATEGORIA" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="color: var(--text-main);">Nombre de la Categoría</label>
+                        <input type="text" id="editNombreCategoria" name="NOMBRE_CATEGORIA" class="form-control" required style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                    </div>
+
+                    @* AQUI AGREGAMOS EL COMBOBOX PARA EL ESTADO *@
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="color: var(--text-main);">Estado</label>
+                        <select id="editEstadoCategoria" name="ESTADO" class="form-select" style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #6c757d;">Cancelar</button>
+                    <button type="submit" class="btn btn-warning fw-bold" style="background-color: #ffc107; color: #000;">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Ahora la función recibe 3 parámetros, incluyendo el estado
+        function cargarModalEditar(id, nombre, estado) {
+            document.getElementById('editIdCategoria').value = id;
+            document.getElementById('editNombreCategoria').value = nombre;
+
+            // Selecciona la opción correcta en el select (Activo o Inactivo)
+            document.getElementById('editEstadoCategoria').value = estado;
+        }
+    </script>
+}
+
 <style>
-    /* Ajustes específicos para que la tabla respete el modo oscuro/claro */
     .table-hover tbody tr:hover {
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;

@@ -6,23 +6,21 @@
 
 <style>
     :root {
-        --bg-main: #13131A; /* Fondo profundo de la aplicación */
-        --bg-card: #1C1C24; /* Fondo de tarjetas y tablas */
-        --text-main: #FFFFFF; /* Texto principal */
-        --text-muted: #8A8A98; /* Texto secundario */
-        --accent-purple: #C6C3F2; /* Color de acento morado YuNet */
-        --border-color: #2D2D3A; /* Color de bordes sutiles */
-        --success-color: #20C997; /* Verde para éxitos/activo */
-        --danger-color: #E83E8C; /* Rosa/rojo para errores/inactivo */
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --accent-purple: #C6C3F2;
+        --border-color: #2D2D3A;
+        --success-color: #20C997;
+        --danger-color: #E83E8C;
     }
 
-    /* Estilos base para la vista */
     .yunet-container {
         color: var(--text-main);
         font-family: system-ui, -apple-system, sans-serif;
     }
 
-    /* Estilos para la tabla moderna YuNet */
     .yunet-table-container {
         background-color: var(--bg-card);
         border-radius: 12px;
@@ -56,10 +54,6 @@
             transition: background-color 0.2s;
         }
 
-            .yunet-table tbody tr:last-child {
-                border-bottom: none;
-            }
-
             .yunet-table tbody tr:hover {
                 background-color: rgba(255, 255, 255, 0.02);
             }
@@ -69,7 +63,6 @@
             vertical-align: middle;
         }
 
-    /* Elementos visuales específicos */
     .product-img {
         width: 48px;
         height: 48px;
@@ -96,7 +89,6 @@
         display: block;
     }
 
-    /* Badges minimalistas estilo YuNet */
     .yunet-badge {
         font-size: 0.75rem;
         font-weight: 600;
@@ -116,7 +108,6 @@
         color: var(--danger-color);
     }
 
-    /* Botones de acción minimalistas */
     .action-btn {
         background: transparent;
         border: none;
@@ -140,7 +131,6 @@
         color: var(--danger-color);
     }
 
-    /* Botón principal Crear */
     .btn-create {
         background-color: var(--accent-purple);
         color: #13131A;
@@ -160,7 +150,6 @@
             color: #13131A;
         }
 
-    /* Alertas estilo YuNet */
     .yunet-alert {
         border-radius: 8px;
         border: none;
@@ -183,17 +172,17 @@
         </a>
     </div>
 
-    @if (TempData["Success"] != null)
+    @if (TempData["MensajeExito"] != null)
     {
         <div class="yunet-alert shadow" style="background-color: var(--success-color);">
-            <span><i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]</span>
+            <span><i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]</span>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.7;"></button>
         </div>
     }
-    @if (TempData["Error"] != null)
+    @if (TempData["MensajeError"] != null)
     {
         <div class="yunet-alert shadow" style="background-color: var(--danger-color);">
-            <span><i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]</span>
+            <span><i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]</span>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.7;"></button>
         </div>
     }
@@ -243,12 +232,30 @@
                                     }
                                 </td>
                                 <td style="text-align: center;">
-                                    <a href="#" class="action-btn" title="Editar">
+
+                                    <button type="button" class="action-btn" title="Editar"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditar"
+                                            data-id="@item.ID_PRODUCTO"
+                                            data-marca="@item.ID_MARCA"
+                                            data-categoria="@item.ID_CATEGORIA"
+                                            data-modelo="@item.MODELO"
+                                            data-desc="@item.DESCRIPCION"
+                                            data-caracteristicas="@item.CARACTERISTICAS"
+                                            data-precio="@item.PRECIO"
+                                            data-existencias="@item.EXISTENCIAS"
+                                            data-estado="@(item.ESTADO ? "true" : "false")">
                                         <i class="bi bi-pencil-square" style="font-size: 1.1rem;"></i>
-                                    </a>
-                                    <button class="action-btn action-btn-dangerms-1" title="Desactivar" onclick="return confirm('¿Seguro que desea desactivar este producto?');">
-                                        <i class="bi bi-trash3" style="font-size: 1.1rem;"></i>
                                     </button>
+
+                                    @if (item.ESTADO)
+                                    {
+                                        <form asp-action="Desactivar" asp-route-id="@item.ID_PRODUCTO" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que desea desactivar este producto?');">
+                                            <button type="submit" class="action-btn action-btn-danger ms-1" title="Desactivar">
+                                                <i class="bi bi-trash3" style="font-size: 1.1rem;"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -267,3 +274,108 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade yunet-container" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title fw-bold">Editar Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+            </div>
+
+            <form asp-action="Editar" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_IdProducto" name="ID_PRODUCTO" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Modelo</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="edit_Modelo" name="MODELO" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Nueva Imagen (Opcional)</label>
+                            <input type="file" class="form-control bg-dark text-white border-secondary" name="archivoImagen" accept="image/*" />
+                            <small class="text-muted" style="font-size: 0.8rem;">Deja esto vacío si quieres conservar la imagen actual.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Marca</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="edit_Marca" name="ID_MARCA" asp-items="ViewBag.Marcas" required>
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Categoría</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Precio</label>
+                            <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="edit_Precio" name="PRECIO" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Existencias</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="edit_Existencias" name="EXISTENCIAS" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Estado</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="edit_Estado" name="ESTADO" required>
+                                <option value="true">Activo</option>
+                                <option value="false">Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted">Características</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Caracteristicas" name="CARACTERISTICAS" rows="2" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted">Descripción</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Descripcion" name="DESCRIPCION" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-create" style="border:none;">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modalEditar = document.getElementById('modalEditar');
+            if (modalEditar) {
+                modalEditar.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+
+                    var id = button.getAttribute('data-id');
+                    var estado = button.getAttribute('data-estado');
+
+                    console.log("Editando ID: " + id);
+                    console.log("Estado que llega: " + estado);
+
+                    document.getElementById('edit_IdProducto').value = id;
+                    document.getElementById('edit_Marca').value = button.getAttribute('data-marca');
+                    document.getElementById('edit_Categoria').value = button.getAttribute('data-categoria');
+                    document.getElementById('edit_Modelo').value = button.getAttribute('data-modelo');
+                    document.getElementById('edit_Descripcion').value = button.getAttribute('data-desc');
+                    document.getElementById('edit_Caracteristicas').value = button.getAttribute('data-caracteristicas');
+
+                    // Aseguramos que el estado se marque correctamente en el select
+                    if (estado) {
+                        document.getElementById('edit_Estado').value = estado.toLowerCase();
+                    }
+
+                    var precioFormateado = button.getAttribute('data-precio').replace(',', '.');
+                    document.getElementById('edit_Precio').value = precioFormateado;
+                    document.getElementById('edit_Existencias').value = button.getAttribute('data-existencias');
+                });
+            }
+        });
+    </script>
+}

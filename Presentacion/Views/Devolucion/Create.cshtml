@@ -1,129 +1,129 @@
-﻿@model Entidades.Producto
+﻿@model Entidades.Devolucion
 
 @{
-    ViewData["Title"] = "Registrar Producto";
+    ViewData["Title"] = "Registrar Devolución";
 }
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">
+            <i class="bi bi-arrow-return-left me-2" style="color: #dc3545;"></i>Registrar Devolución
+        </h2>
+        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">
+            Ingresa el motivo y estado del dispositivo recibido.
+        </p>
+    </div>
+    <a href="@Url.Action("Index", "Pedido")" class="btn border-0 shadow-sm px-4" style="background-color: var(--bg-card); color: var(--text-main); font-weight: 600; border-radius: 8px; border: 1px solid var(--border-color) !important; transition: 0.3s;" onmouseover="this.style.backgroundColor='var(--bg-main)'" onmouseout="this.style.backgroundColor='var(--bg-card)'">
+        <i class="bi bi-arrow-left me-2"></i> Cancelar
+    </a>
+</div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Nuevo Producto</h2>
-                    <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Ingrese las especificaciones técnicas y comerciales del equipo.</p>
-                </div>
-                <a href="@Url.Action("Index", "Producto")" class="btn btn-outline-secondary border-0 shadow-sm px-3">
-                    <i class="bi bi-arrow-left me-2"></i> Volver al Catálogo
-                </a>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm form-card" style="background-color: var(--bg-card); border-radius: 12px; border-top: 0.25rem solid #dc3545 !important; transition: 0.3s;">
+            <div class="card-header py-3" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
+                <h6 class="m-0 fw-bold" style="color: #dc3545;">
+                    <i class="bi bi-file-earmark-text me-2"></i>Detalles de la Recepción
+                </h6>
             </div>
 
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px;">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> @ViewBag.Error
-                </div>
-            }
-
-            <form asp-action="Create" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-
-                <div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; border-left: 0.25rem solid #C6C3F2 !important;">
-                    <div class="card-body p-4">
-
-                        <h6 class="text-uppercase fw-bold mb-4" style="color: #C6C3F2; font-size: 0.8rem; letter-spacing: 1px;">
-                            <i class="bi bi-tag me-2"></i> Clasificación y Modelo
-                        </h6>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold" style="color: var(--text-muted);">Marca</label>
-                                <select asp-for="ID_MARCA" class="form-select border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);" asp-items="@ViewBag.Marcas" required>
-                                    <option value="">-- Seleccione Marca --</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold" style="color: var(--text-muted);">Categoría</label>
-                                <select name="ID_CATEGORIA" class="form-select border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);" asp-items="@ViewBag.Categorias">
-                                    <option value="">-- Seleccione Categoría --</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label asp-for="MODELO" class="form-label small fw-bold" style="color: var(--text-muted);">Modelo del Dispositivo</label>
-                                <input asp-for="MODELO" class="form-control border-0 shadow-sm py-2" style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Ej: iPhone 15 Pro Max" required />
-                            </div>
-                        </div>
-
-                        <h6 class="text-uppercase fw-bold mb-4" style="color: #C6C3F2; font-size: 0.8rem; letter-spacing: 1px;">
-                            <i class="bi bi-cpu me-2"></i> Especificaciones Técnicas
-                        </h6>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-12">
-                                <label asp-for="DESCRIPCION" class="form-label small fw-bold" style="color: var(--text-muted);">Descripción General</label>
-                                <textarea asp-for="DESCRIPCION" class="form-control border-0 shadow-sm" rows="2" style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Breve resumen comercial..." required></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label asp-for="CARACTERISTICAS" class="form-label small fw-bold" style="color: var(--text-muted);">Ficha Técnica / Características</label>
-                                <textarea asp-for="CARACTERISTICAS" class="form-control border-0 shadow-sm" rows="4" style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Procesador, RAM, Almacenamiento, Cámara..." required></textarea>
-                            </div>
-                        </div>
-
-                        <h6 class="text-uppercase fw-bold mb-4" style="color: #C6C3F2; font-size: 0.8rem; letter-spacing: 1px;">
-                            <i class="bi bi-currency-dollar me-2"></i> Valores e Imagen
-                        </h6>
-
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label asp-for="PRECIO" class="form-label small fw-bold" style="color: var(--text-muted);">Precio de Venta ($)</label>
-                                <input asp-for="PRECIO" type="number" step="0.01" min="0" class="form-control border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="EXISTENCIAS" class="form-label small fw-bold" style="color: var(--text-muted);">Stock Inicial</label>
-                                <input asp-for="EXISTENCIAS" type="number" min="0" class="form-control border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);" required />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold" style="color: var(--text-muted);">Imagen del Equipo</label>
-                                <input type="file" name="archivoImagen" id="inputImagen" class="form-control border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);" accept="image/*" />
-                            </div>
-
-                            <div class="col-12 mt-3 d-none" id="previewContainer">
-                                <div class="p-3 rounded-3 text-center" style="background-color: var(--bg-main); border: 1px dashed #C6C3F2;">
-                                    <p class="small text-muted mb-2">Vista previa de la imagen:</p>
-                                    <img id="imgPreview" src="#" alt="Preview" style="max-height: 150px; border-radius: 8px;" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-5">
-                            <button type="submit" class="btn w-100 py-2 shadow-sm border-0" style="background-color: #C6C3F2; color: #262628; font-weight: 700; border-radius: 8px;">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> GUARDAR PRODUCTO EN CATÁLOGO
-                            </button>
-                        </div>
-
+            <div class="card-body p-4">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
+                        <div>@ViewBag.Error</div>
                     </div>
-                </div>
-            </form>
+                }
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="ID_DETALLE_DEVOLUCION" />
+
+                    <div class="row g-4 mb-4">
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold mb-1" style="color: var(--text-main);">ID Ref. Producto</label>
+                            <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                                    <i class="bi bi-hash"></i>
+                                </span>
+                                <input type="text" class="form-control border-0" value="@Model.ID_DETALLE_DEVOLUCION" disabled style="background-color: var(--bg-main); color: var(--text-muted);" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold mb-1" style="color: var(--text-main);">Motivo del Cliente <span class="text-danger">*</span></label>
+                            <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                                    <i class="bi bi-chat-left-text"></i>
+                                </span>
+                                <textarea asp-for="MOTIVO_CLIENTE" class="form-control border-0" rows="2" required style="background-color: var(--bg-main); color: var(--text-main);" placeholder="¿Por qué se devuelve el equipo?"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold mb-1" style="color: var(--text-main);">Estado del Dispositivo <span class="text-danger">*</span></label>
+                            <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                                    <i class="bi bi-phone"></i>
+                                </span>
+                                <select asp-for="ESTADO_DISPOSITIVO_RECIBIDO" class="form-select border-0" required style="background-color: var(--bg-main); color: var(--text-main);">
+                                    <option value="">-- Seleccione estado --</option>
+                                    <option value="Nuevo/Sellado">Nuevo/Sellado</option>
+                                    <option value="Abierto/Buen Estado">Abierto/Buen Estado</option>
+                                    <option value="Dañado/Defectuoso">Dañado/Defectuoso</option>
+                                    <option value="Incompleto">Incompleto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold mb-1" style="color: var(--text-main);">Acción a Tomar <span class="text-danger">*</span></label>
+                            <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
+                                    <i class="bi bi-tools"></i>
+                                </span>
+                                <select asp-for="ACCION_TOMADA" class="form-select border-0" required style="background-color: var(--bg-main); color: var(--text-main);">
+                                    <option value="">-- Seleccione acción --</option>
+                                    <option value="Reembolso de Dinero">Reembolso de Dinero</option>
+                                    <option value="Cambio de Equipo">Cambio de Equipo</option>
+                                    <option value="Enviado a Garantía">Enviado a Garantía</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-4">
+                            <div class="form-check form-switch p-3 shadow-sm" style="background-color: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color);">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" asp-for="REGRESAR_INVENTARIO" id="switchInventario" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                                <label class="form-check-label fw-bold mb-0" for="switchInventario" style="color: var(--text-main); cursor: pointer; display: inline-block; transform: translateY(2px);">
+                                    ¿Devolver este equipo al inventario disponible?
+                                </label>
+                                <p class="mb-0 ms-5 mt-1" style="font-size: 0.8rem; color: var(--text-muted);">Márcalo solo si el equipo está en condiciones para volver a venderse.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end border-top pt-4" style="border-color: var(--border-color) !important;">
+                        <button type="submit" class="btn border-0 shadow-sm px-5 py-2" style="background-color: #dc3545; color: white; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                            <i class="bi bi-check2-circle me-2"></i> Procesar Devolución
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Lógica para mostrar la preview de la imagen antes de subirla
-        document.getElementById('inputImagen').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            const preview = document.getElementById('imgPreview');
-            const container = document.getElementById('previewContainer');
-
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                container.classList.remove('d-none');
-            }
-
-            if(this.files[0]) {
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    </script>
-}
+<style>
+    select option {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+    }
+    /* Estilos para que el switch se vea rojo al activarse */
+    .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+</style>

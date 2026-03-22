@@ -25,6 +25,7 @@
                         </div>
                     }
 
+                    @* Importante: enctype para permitir subir archivos *@
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
@@ -38,7 +39,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label text-muted fw-semibold">Categoría</label>
-                                <select name="ID_CATEGORIA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Categorias">
+                                @* Cambiado a asp-for para mejor vinculación *@
+                                <select asp-for="ID_CATEGORIA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Categorias">
                                     <option value="">-- Seleccione --</option>
                                 </select>
                             </div>
@@ -52,6 +54,7 @@
                                 <label class="form-label text-muted fw-semibold">Descripción del Producto</label>
                                 <textarea asp-for="DESCRIPCION" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Características principales..."></textarea>
                             </div>
+
                             <div class="col-md-12">
                                 <label class="form-label text-muted fw-semibold">Características</label>
                                 <textarea asp-for="CARACTERISTICAS" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Ej. Procesador Snapdragon, 8GB RAM..."></textarea>
@@ -69,13 +72,14 @@
 
                             <div class="col-md-12">
                                 <label class="form-label text-muted fw-semibold">Imagen Referencial</label>
+                                @* El name debe coincidir con el parámetro del controlador *@
                                 <input type="file" name="archivoImagen" class="form-control bg-dark text-light border-secondary" accept="image/*" />
                             </div>
                         </div>
 
                         <div class="mt-5 d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary px-5 py-2" style="border-radius: 8px;">
-                                Guardar Registro
+                                <i class="bi bi-save me-2"></i> Guardar Registro
                             </button>
                         </div>
                     </form>

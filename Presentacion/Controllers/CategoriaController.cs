@@ -3,7 +3,7 @@ using Entidades;
 using LogicaNegocio;
 using System;
 
-namespace TuProyecto.Controllers 
+namespace TuProyecto.Controllers
 {
     public class CategoriaController : Controller
     {
@@ -63,11 +63,11 @@ namespace TuProyecto.Controllers
 
         // 5. DESACTIVAR (POST: /Categoria/Desactivar/5)
         [HttpPost]
-        public IActionResult Desactivar(int idCategoria)
+        public IActionResult Desactivar(int id)
         {
             try
             {
-                _logicaCategoria.Desactivar(idCategoria);
+                _logicaCategoria.Desactivar(id);
                 TempData["MensajeExito"] = "Categoría desactivada.";
             }
             catch (Exception ex)
@@ -78,4 +78,5 @@ namespace TuProyecto.Controllers
             return RedirectToAction("Index");
         }
     }
-}
+    
+    }

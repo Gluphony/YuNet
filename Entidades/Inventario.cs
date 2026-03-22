@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entidades
 {
@@ -10,6 +6,10 @@ namespace Entidades
     {
         public int ID_INVENTARIO { get; set; }
         public int ID_PRODUCTO { get; set; }
+
+        // ¡NUEVA PROPIEDAD PARA LA VISTA!
+        public string? MODELO { get; set; }
+
         public int ID_USUARIO { get; set; }
         public string? TIPO_MOVIMIENTO { get; set; }
         public int CANTIDAD { get; set; }

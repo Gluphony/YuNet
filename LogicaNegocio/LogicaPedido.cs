@@ -94,6 +94,12 @@ namespace LogicaNegocio
             // Llamamos a la capa de datos
             return _datosPedidos.ObtenerPorId(idPedido);
         }
+        // Dentro de tu clase LogicaPedido:
+        public List<dynamic> ObtenerDetallesPorPedido(int idPedido)
+        {
+            // Llama al método que creamos en DatosPedidos
+            return _datosPedidos.ObtenerDetallesPorPedido(idPedido);
+        }
     }
 }
  

@@ -248,8 +248,8 @@ namespace CapaDatos
 
             return lista;
         }
-    
-    // 7. OBTENER PEDIDO POR ID (Para los Detalles)
+
+        // 7. OBTENER PEDIDO POR ID (Para los Detalles)
         public Pedido ObtenerPorId(int idPedido)
         {
             Pedido pedido = null; // Inicializamos en null por si no existe
@@ -293,6 +293,50 @@ namespace CapaDatos
             }
 
             return pedido; // Retornará el pedido lleno, o null si no lo encontró
+        }
+    
+    // 8. OBTENER EL TICKET/DETALLES DEL PEDIDO
+        public List<dynamic> ObtenerDetallesPorPedido(int idPedido)
+        {
+            // Usamos dynamic para no obligarte a crear una entidad nueva si no quieres, 
+            // aunque lo ideal a futuro es tener una clase DetallePedido en tus Entidades.
+            List<dynamic> detalles = new List<dynamic>();
+
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+                {
+                    SqlCommand cmd = new SqlCommand("Venta.Sp_ListarTicketPedido", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id_Pedido", idPedido);
+
+                    conexion.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            // Usamos un objeto anónimo (ExpandoObject) simulado o creamos la estructura
+                            var detalle = new
+                            {
+                                Id_Detalle_Pedido = Convert.ToInt32(dr["Id_Detalle_Pedido"]),
+                                Producto = dr["Producto"].ToString(),
+                                Numero_Serie_IMEI = dr["Numero_Serie_IMEI"].ToString(),
+                                Cantidad = Convert.ToInt32(dr["Cantidad"]),
+                                Precio_Unitario = Convert.ToDecimal(dr["Precio_Unitario"]),
+                                Subtotal = Convert.ToDecimal(dr["Subtotal"])
+                            };
+                            detalles.Add(detalle);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el ticket del pedido: " + ex.Message);
+            }
+
+            return detalles;
         }
     }
 }

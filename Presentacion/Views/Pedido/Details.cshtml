@@ -14,6 +14,9 @@
     string iconBadge = estadoStr == "COMPLETADO" ? "bi-check-circle" :
                        estadoStr == "PENDIENTE" ? "bi-hourglass-split" :
                        estadoStr == "CANCELADO" ? "bi-x-circle" : "bi-info-circle";
+
+    // Recuperamos los detalles del ViewBag que mandó el Controlador
+    var detallesTicket = ViewBag.Detalles as IEnumerable<dynamic> ?? new List<dynamic>();
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -86,27 +89,36 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model.Detalles != null && Model.Detalles.Count > 0)
+                            @if (detallesTicket.Any())
                             {
-                                foreach (var item in Model.Detalles)
+                                foreach (var item in detallesTicket)
                                 {
                                     <tr style="border-bottom: 1px solid var(--border-color);">
                                         <td class="py-3">
-                                            <strong style="color: var(--text-main);">@item.PRODUCTO</strong><br>
-                                            <small style="color: #C6C3F2;">IMEI: @(string.IsNullOrEmpty(item.IMEI_VENDIDO) ? "N/A" : item.IMEI_VENDIDO)</small>
+                                            <strong style="color: var(--text-main);">@item.Producto</strong><br>
+                                            <small style="color: #C6C3F2;">IMEI/Serie: @item.Numero_Serie_IMEI</small>
                                         </td>
                                         <td class="py-3 text-center fw-bold" style="color: var(--text-main);">
-                                            @item.CANTIDAD
+                                            @item.Cantidad
                                         </td>
                                         <td class="py-3 text-end">
 
-                                            <a href="@Url.Action("Create", "Devolucion", new { idDetalle = item.ID_DETALLE_PEDIDO })"
-                                               class="btn btn-sm shadow-sm"
-                                               style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2); transition: 0.2s;"
-                                               onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='white';"
-                                               onmouseout="this.style.backgroundColor='rgba(220, 53, 69, 0.1)'; this.style.color='#dc3545';">
-                                                <i class="bi bi-arrow-return-left me-1"></i> Devolver
-                                            </a>
+                                            @if (estadoStr == "COMPLETADO")
+                                            {
+                                                <a href="@Url.Action("Create", "Devolucion", new { idDetalle = item.Id_Detalle_Pedido })"
+                                                   class="btn btn-sm shadow-sm"
+                                                   style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2); transition: 0.2s;"
+                                                   onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='white';"
+                                                   onmouseout="this.style.backgroundColor='rgba(220, 53, 69, 0.1)'; this.style.color='#dc3545';">
+                                                    <i class="bi bi-arrow-return-left me-1"></i> Devolver
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge" style="background-color: var(--bg-main); color: var(--text-muted); border: 1px solid var(--border-color);">
+                                                    No elegible
+                                                </span>
+                                            }
 
                                         </td>
                                     </tr>
