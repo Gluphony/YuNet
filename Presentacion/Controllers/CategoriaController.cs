@@ -63,11 +63,11 @@ namespace TuProyecto.Controllers
 
         // 5. DESACTIVAR (POST: /Categoria/Desactivar/5)
         [HttpPost]
-        public IActionResult Desactivar(int id)
+        public IActionResult Desactivar(int idCategoria)
         {
             try
             {
-                _logicaCategoria.Desactivar(id);
+                _logicaCategoria.Desactivar(idCategoria);
                 TempData["MensajeExito"] = "Categoría desactivada.";
             }
             catch (Exception ex)
@@ -78,5 +78,4 @@ namespace TuProyecto.Controllers
             return RedirectToAction("Index");
         }
     }
-    
-    }
+}

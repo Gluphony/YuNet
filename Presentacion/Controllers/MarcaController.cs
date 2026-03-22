@@ -79,10 +79,10 @@ namespace Presentacion.Controllers
                 {
                     TempData["MensajeExito"] = "Marca actualizada correctamente.";
                 }
-                else
-                {
-                    TempData["MensajeError"] = "No se pudo actualizar la marca.";
-                }
+                //else
+                //{
+                //    TempData["MensajeError"] = "No se pudo actualizar la marca.";
+                //}
             }
             catch (Exception ex)
             {

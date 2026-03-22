@@ -1,145 +1,160 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Entidades;
+﻿using Entidades;
 using LogicaNegocio;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 
 namespace Presentacion.Controllers
 {
     public class PedidoController : Controller
     {
-        private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario();
-        private readonly LogicaProducto _logicaProducto = new LogicaProducto();
         private readonly LogicaPedido _logicaPedido = new LogicaPedido();
-        private readonly LogicaDetallePedido _logicaDetallePedido = new LogicaDetallePedido();
+        private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario(); // Asumo que aún lo necesitas para el Dropdown
 
-        // 1. LISTADO DE PEDIDOS
-        public IActionResult Index()
+        // GET: Pedido/Index
+        public ActionResult Index()
         {
             try
             {
-                // Se asume que LogicaPedido tiene el método Listar()
-                var lista = _logicaPedido.Listar();
-                return View(lista);
+                // Consumimos el método Listar() que creaste en tu capa de Lógica
+                var listaPedidos = _logicaPedido.Listar();
+                return View(listaPedidos);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al obtener pedidos: " + ex.Message;
+                ViewBag.Error = "Error al cargar la lista de pedidos: " + ex.Message;
+                // Devolvemos una lista vacía para que la vista no explote por recibir un modelo nulo
                 return View(new List<Pedido>());
             }
         }
 
-        // 2. FORMULARIO DE NUEVO PEDIDO (GET)
-        [HttpGet]
-        public IActionResult Create()
+        // ==========================================
+        // NUEVO MÉTODO: GET: Pedido/Details/5
+        // ==========================================
+        public ActionResult Details(int id)
         {
-            // Forzamos la carga de datos
-            CargarCombos();
+            try
+            {
+                // Consumimos el método de tu lógica para buscar un pedido específico.
+                // IMPORTANTE: Asegúrate de que este método exista en tu clase LogicaPedido.
+                var pedido = _logicaPedido.ObtenerPorId(id);
 
-            // Si después de CargarCombos los ViewBag siguen siendo null, 
-            // los inicializamos aquí mismo para que la vista NO explote.
-            ViewBag.ListaUsuarios ??= new SelectList(new List<SelectListItem>());
-            ViewBag.ListaProductos ??= new SelectList(new List<SelectListItem>());
+                if (pedido == null)
+                {
+                    TempData["MensajeError"] = "El pedido solicitado no existe o fue eliminado.";
+                    return RedirectToAction("Index");
+                }
 
+                return View(pedido);
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al cargar los detalles del pedido: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: Pedido/Create
+        public ActionResult Create()
+        {
+            CargarUsuariosDropdown();
             return View(new Pedido());
         }
 
-        // 3. GUARDAR PEDIDO Y DETALLES (POST)
+        // POST: Pedido/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Pedido nuevoPedido, List<DetallePedido> Detalles)
+        public ActionResult Create(Pedido nuevoPedido)
         {
             try
             {
-                // Validación manual de la lista de detalles
-                if (Detalles == null || Detalles.Count == 0)
-                {
-                    ViewBag.Error = "Debe agregar al menos un producto al pedido.";
-                    CargarCombos();
-                    return View(nuevoPedido);
-                }
+                nuevoPedido.FECHA_PEDIDO = DateTime.Now;
 
-                // Limpiamos errores de validación de campos automáticos
+                // Limpiamos validaciones de propiedades que se llenan en la BD o son relaciones
                 ModelState.Remove("ID_PEDIDO");
+                ModelState.Remove("Usuario");
                 ModelState.Remove("Detalles");
+                ModelState.Remove("DetallePedidos");
 
                 if (ModelState.IsValid)
                 {
-                    nuevoPedido.FECHA_PEDIDO = DateTime.Now;
-                    nuevoPedido.ESTADO = "Pendiente";
-
-                    // Usamos el método Crear que retorna el ID generado (ajustado según tu error)
+                    // Consumimos tu método Crear, el cual devuelve el ID del nuevo pedido
                     int idGenerado = _logicaPedido.Crear(nuevoPedido);
 
-                    if (idGenerado > 0)
-                    {
-                        foreach (var item in Detalles)
-                        {
-                            item.ID_PEDIDO = idGenerado;
-                            // Se asume usuario ID 1 (puedes cambiarlo por el usuario logueado)
-                            _logicaDetallePedido.InsertarDetalle(item, 1);
-                        }
-
-                        return RedirectToAction("Index");
-                    }
+                    // TempData nos sirve para mandar mensajes a la vista Index después de un Redirect
+                    TempData["MensajeExito"] = $"¡Pedido #{idGenerado} creado correctamente!";
+                    return RedirectToAction("Index");
                 }
+                else
+                {
+                    var listaErrores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                    ViewBag.Error = "Revise los campos: " + string.Join(" | ", listaErrores);
+                }
+            }
+            catch (ArgumentException argEx)
+            {
+                // ¡AQUÍ ATRAPAMOS TUS EXCEPCIONES PERSONALIZADAS!
+                // Por ejemplo: "El total del pedido no puede ser menor a cero."
+                ViewBag.Error = argEx.Message;
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Ocurrió un error: " + ex.Message;
+                ViewBag.Error = "Error en el servidor: " + ex.Message;
             }
 
-            // Si llegamos aquí es porque algo falló, recargamos combos
-            CargarCombos();
+            // Si llegamos aquí es porque falló, recargamos el dropdown y devolvemos la vista
+            CargarUsuariosDropdown();
             return View(nuevoPedido);
         }
 
-        // 4. ACTUALIZAR ESTADO (AJAX)
+        // POST: Pedido/ActualizarEstado
+        // Te dejo este método listo por si quieres agregar un botón para cambiar estados desde el Index
         [HttpPost]
-        public IActionResult ActualizarEstado(int id, string nuevoEstado)
+        public ActionResult CambiarEstado(int idPedido, string nuevoEstado)
         {
             try
             {
-                bool ok = _logicaPedido.ActualizarEstado(id, nuevoEstado);
-                return Json(new { success = ok });
+                bool exito = _logicaPedido.ActualizarEstado(idPedido, nuevoEstado);
+                if (exito)
+                {
+                    TempData["MensajeExito"] = $"El estado del pedido #{idPedido} se actualizó a {nuevoEstado}.";
+                }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                TempData["MensajeError"] = "Error al cambiar estado: " + ex.Message;
             }
+
+            return RedirectToAction("Index");
         }
 
-        // --- MÉTODOS AUXILIARES ---
-        private void CargarCombos()
+        // === MÉTODO AUXILIAR PARA EL MENÚ DESPLEGABLE ===
+        private void CargarUsuariosDropdown()
         {
             try
             {
-                // 1. Usuarios
-                DataTable dtUsuarios = _logicaUsuario.ListarUsuarios();
-                if (dtUsuarios != null && dtUsuarios.Rows.Count > 0)
-                {
-                    ViewBag.ListaUsuarios = new SelectList(dtUsuarios.AsEnumerable(), "ID_USUARIO", "NOMBRE");
-                }
+                var dtUsuarios = _logicaUsuario.ListarUsuarios();
+                var listaOpciones = new List<SelectListItem>();
 
-                // 2. Productos
-                DataTable dtProductos = _logicaProducto.ListarProductos();
-                if (dtProductos != null && dtProductos.Rows.Count > 0)
+                if (dtUsuarios != null)
                 {
-                    var prodItems = dtProductos.AsEnumerable().Select(r => new
+                    foreach (System.Data.DataRow row in dtUsuarios.Rows)
                     {
-                        ID_PRODUCTO = r["ID_PRODUCTO"],
-                        DESCRIPCION = $"{r["MODELO"]} (${r["PRECIO"]})"
-                    });
-                    ViewBag.ListaProductos = new SelectList(prodItems, "ID_PRODUCTO", "DESCRIPCION");
+                        listaOpciones.Add(new SelectListItem
+                        {
+                            Value = row["ID_USUARIO"].ToString(),
+                            Text = $"{row["NOMBRE"]} (ID: {row["ID_USUARIO"]})"
+                        });
+                    }
                 }
+                ViewBag.ListaUsuarios = listaOpciones;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Si hay un error de conexión, esto evita el crash
-                ViewBag.Error = "Error al conectar con la base de datos: " + ex.Message;
+                // Mandamos lista vacía para prevenir errores de referencia nula en la vista
+                ViewBag.ListaUsuarios = new List<SelectListItem>();
             }
         }
     }

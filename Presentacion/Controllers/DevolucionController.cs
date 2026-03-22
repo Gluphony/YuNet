@@ -3,7 +3,6 @@ using Entidades;
 using LogicaNegocio;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims; // Necesario para obtener el ID de usuario de la sesión
 
 namespace Presentacion.Controllers
 {
@@ -29,62 +28,37 @@ namespace Presentacion.Controllers
 
         // ========================================================
         // NUEVO: GET: Devolucion/Create (Muestra el formulario)
-        // Recibe el ID del detalle del pedido a devolver
-        // ========================================================
-        // ========================================================
-        // GET: Devolucion/Create
         // ========================================================
         [HttpGet]
-        public IActionResult Create(int? idDetalle)
+        public IActionResult Create()
         {
-            var modelo = new Devolucion();
-
-            if (idDetalle.HasValue)
-            {
-                // Ahora sí usamos la propiedad exacta de tu Entidad
-                modelo.ID_DETALLE_DEVOLUCION = idDetalle.Value;
-                modelo.FECHA_DEVOLUCION = DateTime.Now;
-                modelo.REGRESAR_INVENTARIO = false; // Valor por defecto
-            }
-            else
-            {
-                ViewBag.Error = "Atención: No se ha seleccionado un producto específico para devolver.";
-            }
-
-            return View(modelo);
+            // Mandamos una entidad en blanco a la vista
+            return View(new Devolucion());
         }
 
         // ========================================================
-        // POST: Devolucion/Create
+        // NUEVO: POST: Devolucion/Create (Guarda los datos)
         // ========================================================
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // Seguridad contra ataques CSRF
         public IActionResult Create(Devolucion nuevaDevolucion)
         {
             try
             {
-                // 1. Asignar el usuario que autoriza (desde Claim o estático)
-                var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                nuevaDevolucion.ID_USUARIO_AUTORIZA = !string.IsNullOrEmpty(claimId) ? int.Parse(claimId) : 1;
-                nuevaDevolucion.FECHA_DEVOLUCION = DateTime.Now;
-
-                // 2. Limpiamos validaciones de PK, FKs y propiedades de solo lectura/reporte
+                // Limpiamos la validación del ID por si la BD lo genera automáticamente
                 ModelState.Remove("ID_DEVOLUCION");
-                ModelState.Remove("ID_USUARIO_AUTORIZA");
-                ModelState.Remove("PRODUCTO_NOMBRE");
-                ModelState.Remove("IMEI");
-                ModelState.Remove("AUTORIZADO_POR_NOMBRE");
-                // FACTURA_ORIGINAL al ser int, si no viene en el form, asume 0. Lo removemos por si acaso.
-                ModelState.Remove("FACTURA_ORIGINAL");
 
                 if (ModelState.IsValid)
                 {
+                    // Llamamos a tu capa lógica para guardar
+                    // Asumo que tienes un método Crear() en tu LogicaDevolucion
                     _logicaDevolucion.Crear(nuevaDevolucion);
 
                     TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
-                    return RedirectToAction("Index", "Pedido"); // Te regreso a pedidos tras el éxito
+                    return RedirectToAction("Index");
                 }
 
+                // Si hay errores de validación, recargamos la vista con los datos que escribió el usuario
                 ViewBag.Error = "Por favor, revisa los campos del formulario.";
                 return View(nuevaDevolucion);
             }
