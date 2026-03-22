@@ -18,7 +18,7 @@ namespace Cristal_Report
 				rd.Load(ruta);
 
 				using (SqlConnection con = new SqlConnection(
-					"Server=DESKTOP-H5Q9CH5\\SQLEXPRESS;Database=YuNet;Integrated Security=true"))
+                    "Data Source=MSI\\SQLEXPRESS;Initial Catalog=YuNet;User ID=Marcelo;Password=Pipizza21;Trust Server Certificate=True"))
 				{
 					con.Open();
 
