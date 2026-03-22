@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
 <html lang="es" data-theme="light">
 <head>
     <meta charset="utf-8" />
@@ -69,25 +70,23 @@
             overflow-x: hidden;
         }
 
-        /* FIX: SIDEBAR FIJO (STICKY) */
         .sidebar {
             background-color: #262628 !important;
             min-width: 250px;
             max-width: 250px;
             transition: all 0.3s ease;
-            height: 100vh; /* Ocupa el 100% de la pantalla */
-            position: sticky; /* Se queda pegado */
+            height: 100vh;
+            position: sticky;
             top: 0;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Scroll interno si es necesario */
-            scrollbar-width: none; /* Oculta scrollbar en Firefox */
+            overflow-y: auto;
+            scrollbar-width: none;
         }
 
             .sidebar::-webkit-scrollbar {
                 display: none;
             }
-            /* Oculta scrollbar en Chrome/Edge */
 
             .sidebar.toggled {
                 min-width: 85px !important;
@@ -101,16 +100,8 @@
                     display: none !important;
                 }
 
-                .sidebar.toggled .collapse,
-                .sidebar.toggled .collapsing,
-                .sidebar.toggled .collapse.show {
+                .sidebar.toggled .collapse {
                     display: none !important;
-                    height: 0 !important;
-                    transition: none !important;
-                }
-
-                .sidebar.toggled .nav-link[data-bs-toggle="collapse"] {
-                    pointer-events: none;
                 }
 
             .sidebar .nav-link {
@@ -133,11 +124,6 @@
                     .sidebar .nav-link:hover i, .sidebar .nav-item.active .nav-link i {
                         color: #C6C3F2 !important;
                     }
-
-        .collapse-inner a:hover {
-            background-color: var(--bg-main);
-            color: #C6C3F2 !important;
-        }
 
         .topbar {
             height: 4.375rem;
@@ -164,10 +150,6 @@
             justify-content: center;
             transition: 0.3s;
         }
-
-            .btn-theme-toggle:hover {
-                background-color: var(--border-color);
-            }
     </style>
 </head>
 <body>
@@ -180,64 +162,66 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link px-4 py-3" href="@Url.Action("Index", "Home")"><i class="bi bi-grid-1x2-fill me-3"></i><span>Dashboard</span></a>
-            </li>
+            @* --- MENÚ DINÁMICO SEGÚN ROL --- *@
+            @{
+                var rol = Context.Session.GetString("Rol") ?? "Cliente";
+            }
 
-            <div class="sidebar-heading mt-3 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Operaciones</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseVentas">
-                    <i class="bi bi-cart3 me-3"></i><span>Ventas</span>
-                </a>
-                <div id="collapseVentas" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Carrito" asp-action="Index">
-                            <i class="bi bi-cart-plus me-2 text-muted"></i>Punto de Venta
-                        </a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Pedido" asp-action="Index">
-                            <i class="bi bi-receipt me-2 text-muted"></i>Pedidos
-                        </a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Devolucion" asp-action="Index">
-                            <i class="bi bi-arrow-return-left me-2 text-muted"></i>Devoluciones
-                        </a>
+            @if (rol == "Admin")
+            {
+                <li class="nav-item">
+                    <a class="nav-link px-4 py-3" href="@Url.Action("Index", "Home")"><i class="bi bi-grid-1x2-fill me-3"></i><span>Dashboard</span></a>
+                </li>
+
+                <div class="sidebar-heading mt-3 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Operaciones</div>
+
+                <li class="nav-item">
+                    <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseVentas">
+                        <i class="bi bi-cart3 me-3"></i><span>Ventas</span>
+                    </a>
+                    <div id="collapseVentas" class="collapse" data-bs-parent="#accordionSidebar">
+                        <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
+                            <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Carrito" asp-action="Index">Punto de Venta</a>
+                            <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Pedido" asp-action="Index">Pedidos</a>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseInventario">
-                    <i class="bi bi-box-seam me-3"></i><span>Inventario</span>
-                </a>
-                <div id="collapseInventario" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Producto")"><i class="bi bi-phone me-2 text-muted"></i>Catálogo</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Categoria")"><i class="bi bi-tags me-2 text-muted"></i>Categorías</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Marca")"><i class="bi bi-award me-2 text-muted"></i>Marcas</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Inventario")"><i class="bi bi-clipboard-data me-2 text-muted"></i>Existencias</a>
+                <li class="nav-item">
+                    <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseInventario">
+                        <i class="bi bi-box-seam me-3"></i><span>Inventario</span>
+                    </a>
+                    <div id="collapseInventario" class="collapse" data-bs-parent="#accordionSidebar">
+                        <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
+                            <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Producto")">Catálogo</a>
+                            <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Inventario")">Existencias</a>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link px-4 py-2" href="@Url.Action("Index", "Proveedor")"><i class="bi bi-truck me-3"></i><span>Proveedores</span></a>
-            </li>
-
-            <div class="sidebar-heading mt-4 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Administración</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseSeguridad">
-                    <i class="bi bi-gear me-3"></i><span>Ajustes</span>
-                </a>
-                <div id="collapseSeguridad" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-people me-2 text-muted"></i>Usuarios</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Rol")"><i class="bi bi-shield-lock me-2 text-muted"></i>Perfiles</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Permisos")"><i class="bi bi-key me-2 text-muted"></i>Permisos</a>
-                    </div>
-                </div>
-            </li>
+                <div class="sidebar-heading mt-4 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Administración</div>
+                <li class="nav-item">
+                    <a class="nav-link px-4 py-2" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-people me-3"></i><span>Usuarios</span></a>
+                </li>
+            }
+            else
+            {
+                @* --- VISTA CLIENTE (SINSA STYLE) --- *@
+                <div class="sidebar-heading mt-3 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Menú Cliente</div>
+                <li class="nav-item">
+                    <a class="nav-link px-4 py-3" href="@Url.Action("Catalogo", "Tienda")">
+                        <i class="bi bi-shop me-3"></i><span>Ir a la Tienda</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-4 py-3" href="#">
+                        <i class="bi bi-bag-check me-3"></i><span>Mis Pedidos</span>
+                    </a>
+                </li>
+            }
 
             <div class="text-center mt-auto mb-4 d-none d-md-inline pt-5">
-                <button class="rounded-circle border-0 d-flex align-items-center justify-content-center mx-auto" id="sidebarToggle" style="background-color: rgba(255,255,255,0.1); width: 40px; height: 40px; color: #C6C3F2; transition: 0.3s;">
+                <button class="rounded-circle border-0 d-flex align-items-center justify-content-center mx-auto" id="sidebarToggle" style="background-color: rgba(255,255,255,0.1); width: 40px; height: 40px; color: #C6C3F2;">
                     <i class="bi bi-chevron-left"></i>
                 </button>
             </div>
@@ -247,21 +231,23 @@
             <nav class="navbar navbar-expand topbar mb-4 shadow-sm px-4">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item me-4">
-                        <button id="themeToggleBtn" class="btn-theme-toggle" title="Cambiar tema">
+                        <button id="themeToggleBtn" class="btn-theme-toggle">
                             <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
                         </button>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <div class="d-flex flex-column text-end me-3 d-none d-lg-flex" style="color: var(--text-main);">
-                                <span class="fw-bold" style="font-size: 0.9rem;">@(User.Identity.Name ?? "Usuario")</span>
-                                <span class="text-muted" style="font-size: 0.75rem;">Administrador</span>
+                                <span class="fw-bold" style="font-size: 0.9rem;">@(Context.Session.GetString("UsuarioNombre") ?? "Invitado")</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">@rol</span>
                             </div>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center user-circle shadow-sm">C</div>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center user-circle shadow-sm">
+                                @((Context.Session.GetString("UsuarioNombre") ?? "U").Substring(0, 1).ToUpper())
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown" style="background-color: var(--bg-card);">
-                            <li><a class="dropdown-item py-2" style="color: var(--text-main);" href="#"><i class="bi bi-person me-2 text-muted"></i> Mi Perfil</a></li>
-                            <li><hr class="dropdown-divider border-secondary"></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background-color: var(--bg-card);">
+                            <li><a class="dropdown-item py-2" style="color: var(--text-main);" href="#"><i class="bi bi-person me-2"></i> Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item py-2 text-danger" href="@Url.Action("Salir", "Home")"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a></li>
                         </ul>
                     </li>
@@ -272,11 +258,9 @@
                 @RenderBody()
             </div>
 
-            <footer class="sticky-footer mt-auto py-3 shadow-sm border-top" style="background-color: var(--bg-card); border-color: var(--border-color) !important;">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto text-muted" style="font-size: 0.85rem;">
-                        <span>&copy; 2026 - YuNet Sistema de Inventario y POS</span>
-                    </div>
+            <footer class="sticky-footer mt-auto py-3 shadow-sm border-top" style="background-color: var(--bg-card);">
+                <div class="container my-auto text-center text-muted" style="font-size: 0.85rem;">
+                    <span>&copy; 2026 - YuNet Sistema de Inventario y POS</span>
                 </div>
             </footer>
         </div>
@@ -284,56 +268,24 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const sidebarToggle = document.querySelector('#sidebarToggle');
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', event => {
-                    event.preventDefault();
-                    const sidebar = document.querySelector('.sidebar');
-                    sidebar.classList.toggle('toggled');
-
-                    if (sidebar.classList.contains('toggled')) {
-                        let openMenus = document.querySelectorAll('.sidebar .collapse.show');
-                        openMenus.forEach(menu => {
-                            let bsCollapse = bootstrap.Collapse.getInstance(menu);
-                            if(bsCollapse) bsCollapse.hide();
-                        });
-                    }
-
-                    const icon = sidebarToggle.querySelector('i');
-                    icon.classList.toggle('bi-chevron-left');
-                    icon.classList.toggle('bi-chevron-right');
-                });
-            }
-
-            const themeToggleBtn = document.getElementById('themeToggleBtn');
-            const themeIcon = document.getElementById('themeIcon');
-            const htmlEl = document.documentElement;
-
-            const savedTheme = localStorage.getItem('yunet_theme') || 'light';
-            htmlEl.setAttribute('data-theme', savedTheme);
-            updateIcon(savedTheme);
-
-            themeToggleBtn.addEventListener('click', () => {
-                const currentTheme = htmlEl.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                htmlEl.setAttribute('data-theme', newTheme);
-                localStorage.setItem('yunet_theme', newTheme);
-                updateIcon(newTheme);
+            // Sidebar Toggle
+            document.querySelector('#sidebarToggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('toggled');
             });
 
-            function updateIcon(theme) {
-                if(theme === 'dark') {
-                    themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-                    themeIcon.style.color = '#C6C3F2';
-                } else {
-                    themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
-                    themeIcon.style.color = '';
-                }
-            }
+            // Theme Toggle
+            const themeBtn = document.getElementById('themeToggleBtn');
+            const html = document.documentElement;
+            themeBtn.addEventListener('click', () => {
+                const theme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                html.setAttribute('data-theme', theme);
+                localStorage.setItem('yunet_theme', theme);
+            });
+
+            const savedTheme = localStorage.getItem('yunet_theme') || 'light';
+            html.setAttribute('data-theme', savedTheme);
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
