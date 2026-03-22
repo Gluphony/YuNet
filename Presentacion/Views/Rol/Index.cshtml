@@ -67,6 +67,7 @@
                                                 data-nombre="@fila["Nombre_Rol"]"
                                                 data-desc="@fila["Descripcion"]"
                                                 data-estado="@(Convert.ToBoolean(fila["Estado"]) ? "1" : "0")"
+                                                data-version="@Convert.ToBase64String((byte[])fila["VERSION_FILA"])"
                                                 data-bs-toggle="modal" data-bs-target="#modalEditar">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -100,26 +101,33 @@
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
+
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Rol</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <form action="/Rol/Crear" method="post">
                 <div class="modal-body p-4">
+
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Nombre del Rol</label>
-                        <input type="text" class="form-control text-uppercase" name="NOMBRE_ROL" required placeholder="Ej. ADMINISTRADOR">
+                        <label for="txtNombreRol" class="form-label fw-bold">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="txtNombreRol" name="NOMBRE_ROL" required placeholder="Escribe el nombre del rol (ej: Cajero, Supervisor...)">
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Descripción (Opcional)</label>
-                        <textarea class="form-control" name="DESCRIPCION" rows="3" placeholder="Define qué hace este rol..."></textarea>
+                        <label for="txtDescripcion" class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control" id="txtDescripcion" name="DESCRIPCION" rows="3" required placeholder="Escribe para qué sirve este rol..."></textarea>
                     </div>
+
                 </div>
-                <div class="modal-footer bg-light">
+
+                <div class="modal-footer bg-light border-top-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Rol</button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
@@ -134,13 +142,15 @@
             <form action="/Rol/Editar" method="post">
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId" name="ID_ROL" />
+                    <input type="hidden" id="editVersion" name="VersionOriginalBase64" />
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre del Rol</label>
-                        <input type="text" class="form-control text-uppercase" id="editNombre" name="NOMBRE_ROL" required>
+                        <input type="text" class="form-control" id="editNombre" name="NOMBRE_ROL" rows="3" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Descripción</label>
-                        <textarea class="form-control" id="editDesc" name="DESCRIPCION" rows="3"></textarea>
+                        <textarea class="form-control bg-light" id="editDesc" name="DESCRIPCION" rows="3" readonly></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Estado</label>
@@ -171,7 +181,9 @@
                     document.getElementById('editNombre').value = this.getAttribute('data-nombre');
                     document.getElementById('editDesc').value = this.getAttribute('data-desc');
                     document.getElementById('editEstado').value = this.getAttribute('data-estado');
-                    // Se eliminó la lectura de data-version
+
+                     // Cargar valores al modal desde los atributos 'data-'
+                    document.getElementById('editVersion').value = this.getAttribute('data-version');
                 });
             });
         });
