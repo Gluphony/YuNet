@@ -1,0 +1,429 @@
+﻿@model IEnumerable<Entidades.Producto>
+
+@{
+    ViewData["Title"] = "YuNet POS - Store";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Diseño Tech/Mobile Store Premium */
+    .tech-card {
+        background: var(--bg-card);
+        border: 1px solid rgba(198, 195, 242, 0.1);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
+    }
+
+        .tech-card:hover {
+            border-color: rgba(198, 195, 242, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+        }
+
+    .tech-img-box {
+        height: 190px;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%);
+        padding: 1.5rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tech-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+        transition: transform 0.4s ease;
+    }
+
+    .tech-card:hover .tech-img {
+        transform: scale(1.1);
+    }
+
+    .btn-tech {
+        background: rgba(198, 195, 242, 0.1);
+        color: #C6C3F2;
+        border: 1px solid rgba(198, 195, 242, 0.2);
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+        .btn-tech:hover:not(:disabled) {
+            background: #C6C3F2;
+            color: #13131A;
+            box-shadow: 0 0 15px rgba(198, 195, 242, 0.4);
+        }
+
+        .btn-tech:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border-color: transparent;
+            cursor: not-allowed;
+        }
+
+    /* Scrollbar invisible para el ticket */
+    .ticket-scroll::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    /* Efecto "Pulse" para el icono de stock */
+    @@keyframes pulse-warning {
+        0% {
+            box-shadow: 0 0 0 0 rgba(232, 62, 140, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 6px rgba(232, 62, 140, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(232, 62, 140, 0);
+        }
+    }
+
+    .stock-warning {
+        border-radius: 50%;
+        animation: pulse-warning 2s infinite;
+    }
+
+    /* Toasts */
+    #toastContainer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .yunet-toast {
+        min-width: 280px;
+        background: #1C1C24;
+        border-left: 4px solid #E83E8C;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        margin-top: 12px;
+        transform: translateX(150%);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+        .yunet-toast.show {
+            transform: translateX(0);
+        }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+
+        <div class="col-xl-8 col-lg-7 mb-4">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-3 rounded-4" style="background-color: var(--bg-card); border: 1px solid rgba(255,255,255,0.05);">
+                <div class="mb-3 mb-md-0">
+                    <h4 class="fw-bold mb-0 text-white d-flex align-items-center">
+                        <i class="bi bi-phone-vibrate me-2" style="color: #C6C3F2;"></i> Terminales
+                    </h4>
+                    <small style="color: var(--text-muted);">Inventario en tiempo real</small>
+                </div>
+                <div class="input-group shadow-sm" style="max-width: 350px; border-radius: 10px; overflow: hidden;">
+                    <span class="input-group-text bg-dark border-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-dark border-0 text-white shadow-none" placeholder="Buscar iPhone, Samsung...">
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
+                @foreach (var item in Model)
+                {
+                    if (item.ESTADO && item.EXISTENCIAS > 0)
+                    {
+                        string modeloJs = item.MODELO.Replace("'", "\\'");
+                        string precioJs = item.PRECIO.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+
+                        <div class="col">
+                            <div class="tech-card d-flex flex-column h-100" data-id="@item.ID_PRODUCTO" data-stock="@item.EXISTENCIAS">
+
+                                <div class="tech-img-box">
+                                    <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"
+                                         alt="@item.MODELO" class="tech-img"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                    <i class="bi bi-phone" style="font-size: 5rem; color: rgba(255,255,255,0.1); display: none;"></i>
+                                </div>
+
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h6 class="fw-bold mb-2 text-white text-truncate" title="@item.MODELO" style="font-size: 1.1rem;">
+                                        @item.MODELO
+                                    </h6>
+
+                                    <div class="d-flex align-items-center mb-4 bg-dark rounded-pill px-3 py-1" style="width: fit-content; border: 1px solid rgba(255,255,255,0.05);">
+                                        <i class="bi bi-circle-fill me-2 icon-stock" style="font-size: 0.5rem; color: #20C997;"></i>
+                                        <small class="lbl-stock fw-semibold" style="color: var(--text-muted); font-size: 0.8rem;">
+                                            Disp: @item.EXISTENCIAS
+                                        </small>
+                                    </div>
+
+                                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-4" style="color: #20C997;">
+                                            $@item.PRECIO.ToString("N2")
+                                        </span>
+                                        <button class="btn btn-tech px-3 py-2 btn-agregar"
+                                                onclick="iniciarAgregado(@item.ID_PRODUCTO, '@modeloJs', @precioJs)">
+                                            <i class="bi bi-cart-plus me-1"></i> Añadir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-lg position-sticky" style="top: 80px; background-color: var(--bg-card); border-radius: 16px;">
+
+                <div class="card-header border-0 p-4 d-flex justify-content-between align-items-center" style="background: rgba(0,0,0,0.2);">
+                    <h5 class="fw-bold mb-0 text-white">
+                        <i class="bi bi-receipt-cutoff me-2" style="color: #C6C3F2;"></i> Venta Actual
+                    </h5>
+                    <span id="contadorItems" class="badge rounded-pill" style="background-color: #C6C3F2; color: #13131A; font-size: 0.85rem;">0 Items</span>
+                </div>
+
+                <div class="card-body p-0 ticket-scroll" id="listaCarrito" style="min-height: 350px; max-height: 55vh; overflow-y: auto;">
+                    <div id="carritoVacio" class="p-5 text-center d-flex flex-column justify-content-center align-items-center h-100" style="color: var(--text-muted);">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; background: rgba(255,255,255,0.02);">
+                            <i class="bi bi-cart2" style="font-size: 2.5rem; color: rgba(255,255,255,0.2);"></i>
+                        </div>
+                        <h6 class="fw-bold text-white">Carrito Vacío</h6>
+                        <small>Los equipos seleccionados aparecerán aquí.</small>
+                    </div>
+                </div>
+
+                <div class="card-footer border-0 p-4" style="background: rgba(0,0,0,0.2);">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <span class="fw-semibold text-white" id="resumenSubtotal">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4 pb-3 border-bottom border-secondary">
+                        <span style="color: var(--text-muted);">Impuestos (0%)</span>
+                        <span class="fw-semibold text-white">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4 align-items-end">
+                        <span class="text-white mb-1">Total a cobrar</span>
+                        <span class="fw-bold" style="color: #20C997; font-size: 2.2rem; line-height: 1;" id="resumenTotal">$0.00</span>
+                    </div>
+
+                    <button class="btn w-100 fw-bold py-3 mb-2 shadow" style="background: linear-gradient(135deg, #20C997 0%, #16a085 100%); color: #13131A; border-radius: 12px; font-size: 1.1rem;">
+                        <i class="bi bi-credit-card-fill me-2"></i> Procesar Pago
+                    </button>
+                    <button class="btn w-100 text-danger border-0 py-2 bg-transparent fw-semibold" onclick="limpiarCarrito()">
+                        Cancelar Orden
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+@section Scripts {
+    <script>
+        let carrito = [];
+
+        // 1. Notificaciones modernas
+        function mostrarNotificacion(mensaje, tipo = "error") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.className = "yunet-toast";
+
+            if(tipo === "success") {
+                toast.style.borderLeftColor = "#20C997";
+                toast.innerHTML = `<i class="bi bi-check-circle-fill me-2" style="color: #20C997;"></i> <span>${mensaje}</span>`;
+            } else {
+                toast.style.borderLeftColor = "#E83E8C";
+                toast.innerHTML = `<i class="bi bi-info-circle-fill me-2" style="color: #E83E8C;"></i> <span>${mensaje}</span>`;
+            }
+
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add("show"), 10);
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // 2. Agregar desde el Catálogo
+        // Nota: Ya no pasamos el stockMaximo por parámetro, JS lo lee del HTML directamente.
+        function iniciarAgregado(id, modelo, precio) {
+            // Buscamos la tarjeta HTML de este producto para leer el stock original
+            const card = document.querySelector(`.tech-card[data-id="${id}"]`);
+            if(!card) return;
+
+            const stockMaximo = parseInt(card.getAttribute("data-stock"));
+            let producto = carrito.find(p => p.id === id);
+
+            if (producto) {
+                // Si ya está en el carrito, intentamos sumarle 1
+                modificarCantidad(id, 1);
+            } else {
+                // Si es nuevo, verificamos que haya stock lógico
+                if (stockMaximo <= 0) return;
+
+                carrito.push({
+                    id: parseInt(id),
+                    modelo: modelo,
+                    precio: parseFloat(precio),
+                    stockMaximo: stockMaximo,
+                    cantidad: 1
+                });
+
+                actualizarTicketVisual();
+            }
+        }
+
+        // 3. Modificar Cantidades (Los botones + y - del ticket)
+        function modificarCantidad(id, variacion) {
+            let producto = carrito.find(p => p.id === id);
+            if (!producto) return;
+
+            let nuevaCantidad = producto.cantidad + variacion;
+
+            // VALIDACIÓN ESTRICTA: No pasar el stock
+            if (nuevaCantidad > producto.stockMaximo) {
+                mostrarNotificacion(`Límite de inventario: Solo ${producto.stockMaximo} unidades disponibles.`);
+                return;
+            }
+
+            // Si llega a 0, se elimina del ticket
+            if (nuevaCantidad <= 0) {
+                carrito = carrito.filter(p => p.id !== id);
+            } else {
+                producto.cantidad = nuevaCantidad;
+            }
+
+            actualizarTicketVisual();
+        }
+
+        // 4. Cancelar Venta
+        function limpiarCarrito() {
+            if(carrito.length > 0) {
+                if(confirm("¿Estás seguro de cancelar y vaciar el ticket?")) {
+                    carrito = [];
+                    actualizarTicketVisual();
+                    mostrarNotificacion("Ticket vaciado correctamente.", "success");
+                }
+            }
+        }
+
+        // 5. El Motor: Dibuja el Ticket Y SINCRONIZA EL CATÁLOGO
+        function actualizarTicketVisual() {
+            const contenedorLista = document.getElementById("listaCarrito");
+            const divVacio = document.getElementById("carritoVacio");
+            const spanSubtotal = document.getElementById("resumenSubtotal");
+            const spanTotal = document.getElementById("resumenTotal");
+            const contadorItems = document.getElementById("contadorItems");
+
+            // --- A) DIBUJAR EL TICKET ---
+            if (carrito.length === 0) {
+                contenedorLista.innerHTML = '';
+                contenedorLista.appendChild(divVacio);
+                divVacio.style.display = 'flex';
+                spanSubtotal.innerText = "$0.00";
+                spanTotal.innerText = "$0.00";
+                contadorItems.innerText = "0 Items";
+            } else {
+                divVacio.style.display = 'none';
+                let htmlHTML = '';
+                let total = 0;
+                let totalArticulos = 0;
+
+                carrito.forEach(item => {
+                    let subtotalItem = item.precio * item.cantidad;
+                    total += subtotalItem;
+                    totalArticulos += item.cantidad;
+
+                    htmlHTML += `
+                        <div class="p-4" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h6 class="mb-0 fw-bold text-white text-truncate" style="font-size: 0.95rem; max-width: 60%;" title="${item.modelo}">
+                                    ${item.modelo}
+                                </h6>
+                                <span class="fw-bold" style="color: #20C997;">$${subtotalItem.toFixed(2)}</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small style="color: var(--text-muted);">$${item.precio.toFixed(2)} c/u</small>
+
+                                <div class="d-flex align-items-center bg-dark rounded-pill p-1" style="border: 1px solid rgba(255,255,255,0.1);">
+                                    <button class="btn btn-sm border-0 rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 28px; height: 28px; background: rgba(255,255,255,0.05); color: white;"
+                                            onclick="modificarCantidad(${item.id}, -1)">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+
+                                    <span class="fw-bold text-center text-white" style="width: 35px; font-size: 0.95rem;">
+                                        ${item.cantidad}
+                                    </span>
+
+                                    <button class="btn btn-sm border-0 rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 28px; height: 28px; background: #C6C3F2; color: #13131A;"
+                                            onclick="modificarCantidad(${item.id}, 1)">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                contenedorLista.innerHTML = htmlHTML;
+                spanSubtotal.innerText = "$" + total.toFixed(2);
+                spanTotal.innerText = "$" + total.toFixed(2);
+                contadorItems.innerText = `${totalArticulos} Item${totalArticulos > 1 ? 's' : ''}`;
+            }
+
+            // --- B) SINCRONIZAR CATÁLOGO VISUAL EN TIEMPO REAL ---
+            document.querySelectorAll('.tech-card').forEach(card => {
+                let id = parseInt(card.getAttribute('data-id'));
+                let stockOriginal = parseInt(card.getAttribute('data-stock'));
+
+                let itemCarrito = carrito.find(p => p.id === id);
+                let cantidadEnCarrito = itemCarrito ? itemCarrito.cantidad : 0;
+
+                // Descontamos lo que ya metimos al carrito
+                let disponible = stockOriginal - cantidadEnCarrito;
+
+                // Elementos HTML de la tarjeta a modificar
+                let lbl = card.querySelector('.lbl-stock');
+                let iconStock = card.querySelector('.icon-stock');
+                let btn = card.querySelector('.btn-agregar');
+
+                lbl.innerText = `Disp: ${disponible}`;
+
+                if (disponible <= 0) {
+                    // SE AGOTÓ: Bloqueamos botón, cambiamos textos y colores
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Agotado';
+                    iconStock.style.color = '#E83E8C'; // Rojo
+                    iconStock.classList.remove('stock-warning');
+                } else if (disponible <= 2) {
+                    // QUEDAN POCOS: Alerta amarilla con efecto de pulso
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-cart-plus me-1"></i> Añadir';
+                    iconStock.style.color = '#ffc107'; // Amarillo
+                    iconStock.classList.add('stock-warning');
+                } else {
+                    // STOCK NORMAL: Verde
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-cart-plus me-1"></i> Añadir';
+                    iconStock.style.color = '#20C997'; // Verde
+                    iconStock.classList.remove('stock-warning');
+                }
+            });
+        }
+    </script>
+}

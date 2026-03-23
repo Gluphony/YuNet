@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering; // IMPORTANTE: Necesario para los menús desplegables
+using Microsoft.AspNetCore.Mvc.Rendering;
 using LogicaNegocio;
 using Entidades;
 
@@ -13,9 +13,6 @@ namespace Presentacion.Controllers
     public class ProductoController : Controller
     {
         private readonly LogicaProducto _logicaProducto = new LogicaProducto();
-
-        // --- INSTANCIAS DE LÓGICA PARA MARCA Y CATEGORÍA ---
-        // (Asegúrate de tener estas clases creadas en tu capa LogicaNegocio)
         private readonly LogicaMarca _logicaMarca = new LogicaMarca();
         private readonly LogicaCategoria _logicaCategoria = new LogicaCategoria();
 
@@ -24,26 +21,45 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // Convertimos el DataTable de la Lógica a una Lista de Entidades
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
 
-                // --- CARGAMOS LAS LISTAS PARA EL MODAL ---
-                CargarListasDesplegables();
+                // ========================================================
+                // 🚦 LÓGICA DE SEMÁFORO: SEPARAR VISTA SEGÚN EL ROL
+                // ========================================================
 
-                return View(lista);
+                // Si el usuario es Administrador, le mostramos la vista clásica (la tabla)
+                if (User.IsInRole("Administrador") || User.IsInRole("Admin"))
+                {
+                    CargarListasDesplegables(); // Solo el Admin necesita listas para editar/crear
+                    return View(lista); // Retorna "Views/Producto/Index.cshtml"
+                }
+                else
+                {
+                    // Si es Cajero, Vendedor o cualquier otro, le mostramos el POS
+                    // Retorna "Views/Producto/Tienda.cshtml"
+                    return View("Tienda", lista);
+                }
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al listar productos: " + ex.Message;
 
-                // Si falla, enviamos listas vacías para que no truene la vista
-                ViewBag.Marcas = new List<SelectListItem>();
-                ViewBag.Categorias = new List<SelectListItem>();
-
-                return View(new List<Producto>());
+                if (User.IsInRole("Administrador"))
+                {
+                    ViewBag.Marcas = new List<SelectListItem>();
+                    ViewBag.Categorias = new List<SelectListItem>();
+                    return View(new List<Producto>());
+                }
+                else
+                {
+                    return View("Tienda", new List<Producto>());
+                }
             }
         }
+
+        // ... MANTÉN TODOS TUS OTROS MÉTODOS IGUALES DE AQUÍ HACIA ABAJO ...
+        // (VerImagen, Create, Editar, Desactivar, CargarListasDesplegables, ConvertirDataTableALista)
 
         // GET: Producto/Imagen/5
         public ActionResult VerImagen(int id)

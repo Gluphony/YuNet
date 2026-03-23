@@ -4,83 +4,135 @@
     ViewData["Title"] = "Crear Producto";
 }
 
-<div class="container-fluid mt-4 text-light">
+<style>
+    :root {
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --accent-purple: #C6C3F2;
+        --border-color: #2D2D3A;
+    }
+
+    body {
+        background-color: var(--bg-main);
+    }
+
+    .form-control, .form-select {
+        background-color: #13131A !important;
+        color: white !important;
+        border: 1px solid var(--border-color) !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-purple) !important;
+            box-shadow: 0 0 0 0.25rem rgba(198, 195, 242, 0.1) !important;
+        }
+
+        .form-control::placeholder, .form-select::placeholder {
+            color: #4a4a5a !important;
+        }
+
+    .btn-create-submit {
+        background-color: var(--accent-purple);
+        color: #13131A;
+        font-weight: 700;
+        border-radius: 8px;
+        transition: opacity 0.2s, transform 0.2s;
+        border: none;
+    }
+
+        .btn-create-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            color: #13131A;
+        }
+</style>
+
+<div class="container-fluid mt-4 text-light" style="font-family: system-ui, -apple-system, sans-serif;">
     <div class="row">
         <div class="col-md-8 offset-md-2">
 
             <div class="d-flex align-items-center mb-4">
-                <h2 class="fw-bold mb-0">Nuevo Producto</h2>
-                <a asp-action="Index" class="btn btn-link text-muted ms-auto text-decoration-none">
+                <h2 class="fw-bold mb-0 text-white">Nuevo Producto</h2>
+                <a asp-action="Index" class="btn btn-link ms-auto text-decoration-none" style="color: var(--text-muted);">
                     <i class="bi bi-arrow-left"></i> Volver o Cancelar
                 </a>
             </div>
 
-            <div class="card border-0 shadow-lg" style="background-color: #1e1e2d; border-radius: 12px;">
+            <div class="card border-0 shadow-lg" style="background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color) !important;">
                 <div class="card-body p-5">
 
                     @if (ViewBag.Error != null)
                     {
-                        <div class="alert alert-danger bg-danger text-white border-0">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                        <div class="alert alert-danger text-white border-0 d-flex align-items-center" style="background-color: rgba(232, 62, 140, 0.1); color: #E83E8C !important;">
+                            <i class="bi bi-exclamation-triangle-fill me-3 fs-5"></i>
+                            <div>@ViewBag.Error</div>
                         </div>
                     }
 
-                    @* Importante: enctype para permitir subir archivos *@
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="form-label text-muted fw-semibold">Marca</label>
-                                <select asp-for="ID_MARCA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Marcas" required>
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Marca</label>
+                                <select asp-for="ID_MARCA" class="form-select p-2" asp-items="@ViewBag.Marcas" required>
                                     <option value="">-- Seleccione --</option>
                                 </select>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-muted fw-semibold">Categoría</label>
-                                @* Cambiado a asp-for para mejor vinculación *@
-                                <select asp-for="ID_CATEGORIA" class="form-select bg-dark text-light border-secondary" asp-items="@ViewBag.Categorias">
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Categoría</label>
+                                <select asp-for="ID_CATEGORIA" class="form-select p-2" asp-items="@ViewBag.Categorias" required>
                                     <option value="">-- Seleccione --</option>
                                 </select>
                             </div>
 
                             <div class="col-md-12">
-                                <label class="form-label text-muted fw-semibold">Modelo / Nombre</label>
-                                <input asp-for="MODELO" class="form-control bg-dark text-light border-secondary" required maxlength="100" placeholder="Ej. Galaxy S23" />
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Modelo / Nombre</label>
+                                <input asp-for="MODELO" class="form-control p-2 text-white" required maxlength="100" placeholder="Ej. Galaxy S23" />
                             </div>
 
                             <div class="col-md-12">
-                                <label class="form-label text-muted fw-semibold">Descripción del Producto</label>
-                                <textarea asp-for="DESCRIPCION" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Características principales..."></textarea>
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Características Breves</label>
+                                <textarea asp-for="CARACTERISTICAS" class="form-control p-2 text-white" rows="2" required maxlength="200" placeholder="Ej. Procesador Snapdragon, 8GB RAM..."></textarea>
                             </div>
 
                             <div class="col-md-12">
-                                <label class="form-label text-muted fw-semibold">Características</label>
-                                <textarea asp-for="CARACTERISTICAS" class="form-control bg-dark text-light border-secondary" rows="3" required placeholder="Ej. Procesador Snapdragon, 8GB RAM..."></textarea>
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Descripción del Producto</label>
+                                <textarea asp-for="DESCRIPCION" class="form-control p-2 text-white" rows="4" required maxlength="500" placeholder="Redacta la descripción detallada del producto aquí..."></textarea>
+                                <div class="text-end mt-1">
+                                    <small style="color: var(--text-muted); font-size: 0.8rem;">Máximo 500 caracteres.</small>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-muted fw-semibold">Precio Unitario ($)</label>
-                                <input asp-for="PRECIO" type="number" step="0.01" min="0" class="form-control bg-dark text-light border-secondary" required placeholder="0.00" />
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Precio Unitario ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary text-white" style="background-color: #13131A;">$</span>
+                                    <input asp-for="PRECIO" type="number" step="0.01" min="0.01" class="form-control p-2 text-white fw-bold" required placeholder="0.00" style="color: #20C997 !important;" />
+                                </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-muted fw-semibold">Stock Inicial</label>
-                                <input asp-for="EXISTENCIAS" type="number" min="0" class="form-control bg-dark text-light border-secondary" required placeholder="0" />
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Stock Inicial</label>
+                                <input asp-for="EXISTENCIAS" type="number" min="0" step="1" class="form-control p-2 text-white" required placeholder="0" />
                             </div>
 
                             <div class="col-md-12">
-                                <label class="form-label text-muted fw-semibold">Imagen Referencial</label>
-                                @* El name debe coincidir con el parámetro del controlador *@
-                                <input type="file" name="archivoImagen" class="form-control bg-dark text-light border-secondary" accept="image/*" />
+                                <label class="form-label fw-semibold" style="color: var(--text-muted);">Imagen Referencial</label>
+                                <input type="file" name="archivoImagen" class="form-control p-2" accept="image/*" />
                             </div>
                         </div>
 
-                        <div class="mt-5 d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary px-5 py-2" style="border-radius: 8px;">
-                                <i class="bi bi-save me-2"></i> Guardar Registro
-                            </button>
+                        <div class="mt-5 pt-4 border-top" style="border-color: var(--border-color) !important;">
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-create-submit px-5 py-2">
+                                    <i class="bi bi-save me-2"></i> Guardar Registro
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

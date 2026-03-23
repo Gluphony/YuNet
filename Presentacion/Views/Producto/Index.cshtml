@@ -284,41 +284,43 @@
             </div>
 
             <form asp-action="Editar" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" id="edit_IdProducto" name="ID_PRODUCTO" />
 
-                    <div class="row g-3">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Modelo</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="edit_Modelo" name="MODELO" required />
+                            <label class="form-label text-muted fw-semibold">Modelo / Nombre</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="edit_Modelo" name="MODELO" maxlength="100" required />
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Nueva Imagen (Opcional)</label>
+                            <label class="form-label text-muted fw-semibold">Nueva Imagen</label>
                             <input type="file" class="form-control bg-dark text-white border-secondary" name="archivoImagen" accept="image/*" />
-                            <small class="text-muted" style="font-size: 0.8rem;">Deja esto vacío si quieres conservar la imagen actual.</small>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Opcional: Deja vacío para conservar la actual.</small>
                         </div>
+
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Marca</label>
+                            <label class="form-label text-muted fw-semibold">Marca</label>
                             <select class="form-select bg-dark text-white border-secondary" id="edit_Marca" name="ID_MARCA" asp-items="ViewBag.Marcas" required>
                                 <option value="">Seleccione...</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Categoría</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias">
+                            <label class="form-label text-muted fw-semibold">Categoría</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias" required>
                                 <option value="">Seleccione...</option>
                             </select>
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label text-muted">Precio</label>
-                            <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="edit_Precio" name="PRECIO" required />
+                            <label class="form-label text-muted fw-semibold">Precio ($)</label>
+                            <input type="number" step="0.01" min="0.01" class="form-control bg-dark text-white border-secondary fw-bold text-success" id="edit_Precio" name="PRECIO" required />
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label text-muted">Existencias</label>
-                            <input type="number" class="form-control bg-dark text-white border-secondary" id="edit_Existencias" name="EXISTENCIAS" required />
+                            <label class="form-label text-muted fw-semibold">Existencias</label>
+                            <input type="number" min="0" step="1" class="form-control bg-dark text-white border-secondary" id="edit_Existencias" name="EXISTENCIAS" required />
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label text-muted">Estado</label>
+                            <label class="form-label text-muted fw-semibold">Estado</label>
                             <select class="form-select bg-dark text-white border-secondary" id="edit_Estado" name="ESTADO" required>
                                 <option value="true">Activo</option>
                                 <option value="false">Inactivo</option>
@@ -326,18 +328,21 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label text-muted">Características</label>
-                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Caracteristicas" name="CARACTERISTICAS" rows="2" required></textarea>
+                            <label class="form-label text-muted fw-semibold">Características Breves</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Caracteristicas" name="CARACTERISTICAS" rows="2" maxlength="200" required></textarea>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label text-muted">Descripción</label>
-                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Descripcion" name="DESCRIPCION" rows="3"></textarea>
+                            <label class="form-label text-muted fw-semibold">Descripción Detallada</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Descripcion" name="DESCRIPCION" rows="3" maxlength="500"></textarea>
+                            <div class="text-end mt-1">
+                                <small class="text-muted" style="font-size: 0.75rem;">Máximo 500 caracteres.</small>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer bg-dark" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn-create" style="border:none;">Guardar Cambios</button>
                 </div>
             </form>
