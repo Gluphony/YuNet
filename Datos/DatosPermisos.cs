@@ -32,9 +32,9 @@ namespace Datos
                             {
                                 olista.Add(new Permisos()
                                 {
-                                    ID_PERMISO = Convert.ToInt32(reader["IdPermiso"]),
-                                    CLAVE_PERMISO = reader["ClavePermiso"].ToString(),
-                                    DESCRIPCION = reader["Descripcion"].ToString(),
+                                    ID_PERMISO = Convert.ToInt32(reader["ID_PERMISO"]),
+                                    CLAVE_PERMISO = reader["CLAVE_PERMISO"].ToString(),
+                                    DESCRIPCION = reader["DESCRIPCION"].ToString(),
                                     ESTADO = Convert.ToBoolean(reader["Estado"])
                                 });
                             }

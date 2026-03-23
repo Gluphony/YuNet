@@ -1,109 +1,168 @@
 ﻿@model IEnumerable<Entidades.Permisos>
 
 @{
-    ViewData["Title"] = "Configuración de Permisos";
+    ViewData["Title"] = "Gestión de Seguridad";
 }
 
 <style>
-    /* Reutilizamos tu ADN de diseño */
+    /* ADN de Diseño: Refinado */
     .stat-card {
         border: none;
-        border-radius: 12px;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
     }
 
     .border-left-info {
-        border-left: 0.25rem solid #0dcaf0 !important;
+        border-left: 5px solid #0dcaf0 !important;
     }
 
+    /* Badge de Clave Estilo 'Developer' */
     .clave-badge {
-        font-family: 'Courier New', Courier, monospace;
-        background-color: #f8f9fc;
-        border: 1px solid #e3e6f0;
-        color: #4e73df;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: bold;
+        font-family: 'Fira Code', 'Cascadia Code', monospace;
+        background: #f1f4f9;
+        border: 1px solid #dce3f1;
+        color: #2c52da;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+    /* Mejora de Tabla */
+    .table thead th {
+        background-color: #f8f9fa;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: #6c757d;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .tr-hover:hover {
+        background-color: rgba(13, 202, 240, 0.02) !important;
+    }
+
+    /* Botones de acción minimalistas */
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .search-container {
+        position: relative;
+    }
+
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+        }
+
+    .search-input {
+        padding-left: 35px;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
         <h3 class="fw-bold mb-0 text-dark">Gestión de Permisos</h3>
-        <p class="text-muted mb-0">Configuración de accesos y llaves del sistema</p>
+        <p class="text-muted mb-0">Control de llaves de acceso al sistema</p>
     </div>
-    <a href="@Url.Action("Create", "Permisos")" class="btn btn-dark shadow-sm">
-        <i class="bi bi-shield-plus me-1"></i> Nuevo Permiso
-    </a>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="@Url.Action("Create", "Permisos")" class="btn btn-dark px-4 shadow-sm border-0" style="border-radius: 10px;">
+            <i class="bi bi-shield-plus me-2"></i> Nuevo Permiso
+        </a>
+    </div>
 </div>
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="border-radius: 12px; border-left: 5px solid #198754 !important;">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>¡Excelente!</strong> @TempData["Success"]
+            </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="card stat-card border-left-info">
-            <div class="card-header bg-white py-3">
-                <h6 class="m-0 fw-bold text-info">Diccionario de Permisos Activos</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 10%">ID</th>
-                                <th style="width: 25%">Clave (Sistema)</th>
-                                <th style="width: 40%">Descripción</th>
-                                <th style="width: 10%">Estado</th>
-                                <th style="width: 15%" class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="text-muted">#@item.ID_PERMISO</td>
-                                    <td><span class="clave-badge">@item.CLAVE_PERMISO</span></td>
-                                    <td class="text-dark">@item.DESCRIPCION</td>
-                                    <td>
-                                        @if (item.ESTADO)
-                                        {
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success">
-                                                <i class="bi bi-check-lg"></i> Activo
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
-                                                <i class="bi bi-x-lg"></i> Inactivo
-                                            </span>
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group shadow-sm">
-                                            <a href="@Url.Action("Edit", "Permisos", new { id = item.ID_PERMISO })"
-                                               class="btn btn-sm btn-outline-primary" title="Editar">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </a>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    onclick="confirmarDesactivar(@item.ID_PERMISO)"
-                                                    title="Desactivar">
-                                                <i class="bi bi-shield-slash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="card stat-card border-left-info">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fw-bold text-info text-uppercase">Diccionario de Accesos</h6>
+        
+        <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="txtBuscador" class="form-control form-control-sm search-input" placeholder="Buscar permiso..." style="width: 250px;">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tablaPermisos">
+                <thead>
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Clave del Sistema</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="tr-hover">
+                            <td class="ps-4 text-muted fw-bold">#@item.ID_PERMISO</td>
+                            <td>
+                                <span class="clave-badge">
+                                    <i class="bi bi-code me-1"></i>@item.CLAVE_PERMISO
+                                </span>
+                            </td>
+                            <td class="text-dark small">@item.DESCRIPCION</td>
+                            <td class="text-center">
+                                @if (item.ESTADO)
+                                {
+                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">
+                                        Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3">
+                                        Inactivo
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="@Url.Action("Edit", "Permisos", new { id = item.ID_PERMISO })"
+                                           class="btn btn-outline-primary btn-action" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-action"
+                                            onclick="confirmarDesactivar(@item.ID_PERMISO)" title="Desactivar">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -111,30 +170,44 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Buscador dinámico por cualquier columna
+        $(document).ready(function () {
+        $("#txtBuscador").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $("#tablaPermisos tbody tr").filter(function () {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+        });
+        });
+
         function confirmarDesactivar(id) {
-            Swal.fire({
-                title: '¿Desactivar permiso?',
-                text: "Esto podría afectar el acceso de los usuarios vinculados.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, desactivar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Llamada AJAX al método Desactivar del controlador
-                    $.post('@Url.Action("Desactivar", "Permisos")', { id: id }, function (data) {
-                        if (data.success) {
-                            Swal.fire('¡Hecho!', data.message, 'success').then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', data.message, 'error');
-                        }
-                    });
-                }
-            })
+        Swal.fire({
+        title: '¿Bloquear permiso?',
+        text: "Los usuarios con esta clave perderán el acceso de inmediato.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, bloquear',
+        cancelButtonText: 'Cancelar',
+        borderRadius: '15px'
+        }).then((result) => {
+        if (result.isConfirmed) {
+        $.post('@Url.Action("Desactivar", "Permisos")', { id: id }, function (data) {
+        if (data.success) {
+        Swal.fire({
+        icon: 'success',
+        title: 'Actualizado',
+        text: data.message,
+        showConfirmButton: false,
+        timer: 1500
+        }).then(() => location.reload());
+        } else {
+        Swal.fire('Error', data.message, 'error');
+        }
+        });
+        }
+        })
         }
     </script>
 }

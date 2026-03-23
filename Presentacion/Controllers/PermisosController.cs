@@ -15,6 +15,7 @@ namespace Presentacion.Controllers
 
         // GET: Permisos
         // Lista todos los permisos registrados
+        [HttpGet]
         public ActionResult Index()
         {
             try
@@ -30,6 +31,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Permisos/Create
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
@@ -60,6 +62,7 @@ namespace Presentacion.Controllers
         }
 
         // GET: Permisos/Edit/5
+        [HttpGet]
         public ActionResult Edit(int id)
         {
             try

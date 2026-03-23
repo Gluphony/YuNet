@@ -1,0 +1,114 @@
+﻿@model Entidades.Permisos
+
+@{
+    ViewBag.Title = "Editar Permiso";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-pencil-square me-2 text-info"></i>Configuración de Permiso
+            </h5>
+            <span class="badge bg-light text-dark fw-bold px-3 py-2 shadow-sm">
+                ID SISTEMA: #@Model.ID_PERMISO
+            </span>
+        </div>
+
+        <div class="card-body p-4">
+            @using (Html.BeginForm("Edit", "Permisos", FormMethod.Post, new { id = "formEdit" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.ID_PERMISO)
+
+                <div class="form-horizontal">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>@ViewBag.Error</div>
+                        </div>
+                    }
+
+                    <div class="row g-4">
+                        @* Clave del Permiso - Bloqueada o Informativa *@
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Clave del Permiso (Sistema)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-primary"><i class="bi bi-code-slash"></i></span>
+                                @Html.EditorFor(model => model.CLAVE_PERMISO, new { htmlAttributes = new { @class = "form-control fw-bold", style = "text-transform:uppercase; letter-spacing: 1px;", placeholder = "EJ: ADM_USERS" } })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.CLAVE_PERMISO, "", new { @class = "text-danger small" })
+                        </div>
+
+                        @* Estado con Toggle Dinámico *@
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Estado Operativo</label>
+                            <div class="p-2 border rounded bg-light d-flex align-items-center justify-content-between">
+                                <span id="statusText" class="fw-bold @(Model.ESTADO ? "text-success" : "text-danger") ms-2">
+                                    <i class="bi @(Model.ESTADO ? "bi-check-circle-fill" : "bi-x-circle-fill") me-1"></i>
+                                    @(Model.ESTADO ? "PERMISO ACTIVO" : "PERMISO INACTIVO")
+                                </span>
+                                <div class="form-check form-switch mb-0">
+                                    @Html.CheckBoxFor(model => model.ESTADO, new { @class = "form-check-input", role = "switch", id = "switchEstado", style = "width: 3em; height: 1.5em; cursor: pointer;" })
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Descripción *@
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-secondary">Descripción del Alcance</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
+                                @Html.TextAreaFor(model => model.DESCRIPCION, new { @class = "form-control", rows = "3", placeholder = "Indique las funciones de este permiso..." })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.DESCRIPCION, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    @* Acciones *@
+                    <div class="d-flex justify-content-end align-items-center gap-3">
+                        <a href="@Url.Action("Index", "Permisos")" class="btn btn-link text-decoration-none text-muted fw-bold">
+                            <i class="bi bi-arrow-left"></i> Descartar Cambios
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5 shadow fw-bold">
+                            <i class="bi bi-cloud-arrow-up me-1"></i> Actualizar Permiso
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+        // Transformar a mayúsculas en tiempo real
+        $('#CLAVE_PERMISO').on('input', function () {
+        this.value = this.value.toUpperCase();
+        });
+
+        // Feedback visual dinámico del switch de estado
+        $('#switchEstado').change(function() {
+        const isChecked = $(this).is(':checked');
+        const statusBox = $('#statusText');
+                
+        if(isChecked) {
+        statusBox.removeClass('text-danger').addClass('text-success')
+        .html('<i class="bi bi-check-circle-fill me-1"></i> PERMISO ACTIVO');
+        } else {
+        statusBox.removeClass('text-success').addClass('text-danger')
+        .html('<i class="bi bi-x-circle-fill me-1"></i> PERMISO INACTIVO');
+        }
+        });
+        });
+    </script>
+}

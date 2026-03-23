@@ -47,6 +47,78 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        public IActionResult AsignarPermiso(int idRol, int idPermiso)
+        {
+            try
+            {
+                // 1. Validaciones básicas de seguridad antes de llamar a la lógica
+                if (idRol <= 0 || idPermiso <= 0)
+                {
+                    TempData["Error"] = "Datos no válidos para la asignación.";
+                    return RedirectToAction("Index");
+                }
+
+                // 2. Llamamos a tu lógica de negocio
+                bool resultado = _logicaRolPermisos.AsignarPermiso(idRol, idPermiso);
+
+                if (resultado)
+                {
+                    TempData["Exito"] = "Permiso asignado correctamente.";
+                }
+                else
+                {
+                    // Esto sucede si el SP devolvió 0 (ej: ya existía el permiso)
+                    TempData["Error"] = "El permiso ya está asignado a este rol o no se pudo procesar.";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Atrapamos el error de la lógica o de SQL
+                TempData["Error"] = "Error: " + ex.Message;
+            }
+
+            // 3. LA CLAVE: Redireccionamos al Index pasando el ID del Rol 
+            // para que la vista se cargue mostrando los cambios de ese rol específico.
+            return RedirectToAction("Index", new { idRolSeleccionado = idRol });
+        }
+
+        [HttpPost]
+        public IActionResult RevocarPermiso(int idRol, int idPermiso)
+        {
+            try
+            {
+                // 1. Validaciones de entrada (Capa de seguridad extra)
+                if (idRol <= 0 || idPermiso <= 0)
+                {
+                    TempData["Error"] = "ID de Rol o Permiso no válidos para la operación.";
+                    return RedirectToAction("Index");
+                }
+
+                // 2. Llamada a tu Capa de Negocio
+                bool eliminado = _logicaRolPermisos.RevocarPermiso(idRol, idPermiso);
+
+                if (eliminado)
+                {
+                    TempData["Exito"] = "El permiso ha sido revocado correctamente.";
+                }
+                else
+                {
+                    // Esto sucede si el ExecuteNonQuery devolvió 0 (el permiso no estaba asignado)
+                    TempData["Error"] = "No se pudo revocar el permiso. Es posible que ya no estuviera asignado.";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Capturamos cualquier error de SQL o lógica
+                TempData["Error"] = "Error al revocar: " + ex.Message;
+            }
+
+            // 3. REDIRECCIÓN: Volvemos al Index manteniendo el Rol seleccionado 
+            // para que la vista recargue los permisos actuales.
+            return RedirectToAction("Index", new { idRolSeleccionado = idRol });
+        }
+
+        [HttpPost]
         public IActionResult Guardar(int idRol, List<int> permisosSeleccionados)
         {
             if (idRol <= 0)
