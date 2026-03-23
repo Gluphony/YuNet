@@ -47,11 +47,15 @@ namespace LogicaNegocio
             return _dataUsuario.InsertarUsuario(nombreLimpio, correoLimpio, clave, idRol);
         }
 
-        // EDITAR USUARIO
-        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado)
+        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado, int idUsuarioLogueado) // <-- 1. Recibimos el ID logueado
         {
+            // Validaciones de negocio (¡Excelentes!)
             if (idUsuario <= 0)
                 throw new ArgumentException("ID de usuario no válido.");
+
+            // Validación de seguridad para asegurarnos de que sí hay alguien logueado
+            if (idUsuarioLogueado <= 0)
+                throw new UnauthorizedAccessException("Error: No se pudo identificar la sesión del usuario actual.");
 
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ArgumentException("El nombre del usuario es obligatorio.");
@@ -69,7 +73,8 @@ namespace LogicaNegocio
             if (!correoLimpio.Contains("@"))
                 throw new ArgumentException("El formato del correo electrónico no es válido.");
 
-            return _dataUsuario.EditarUsuario(idUsuario, nombreLimpio, correoLimpio, idRol, estado);
+            // <-- 2. Le pasamos el ID a la Capa de Datos (DAL)
+            return _dataUsuario.EditarUsuario(idUsuario, nombreLimpio, correoLimpio, idRol, estado, idUsuarioLogueado);
         }
 
         // DESACTIVAR USUARIO

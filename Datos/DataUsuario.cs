@@ -72,7 +72,7 @@ namespace Datos
         }
 
         // 5. EDITAR USUARIO
-        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado)
+        public bool EditarUsuario(int idUsuario, string nombre, string correo, int idRol, bool estado, int idUsuarioLogueado) // <-- 1. Agregamos el parámetro aquí
         {
             bool respuesta = false;
             using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
@@ -88,13 +88,16 @@ namespace Datos
                     cmd.Parameters.AddWithValue("@Id_Rol", idRol);
                     cmd.Parameters.AddWithValue("@Estado", estado);
 
+                    // <-- 2. Le pasamos el "carnet" al SQL para que valide el Anti-Harakiri
+                    cmd.Parameters.AddWithValue("@Id_Usuario_Logueado", idUsuarioLogueado);
+
                     conexion.Open();
                     cmd.ExecuteNonQuery();
                     respuesta = true;
                 }
                 catch (SqlException sqlEx)
                 {
-                    // Atrapamos el RAISERROR de SQL Server
+                    // ¡Perfecto! Esto atrapa el RAISERROR de SQL Server y lo manda a la capa de arriba
                     throw new Exception(sqlEx.Message);
                 }
                 catch (Exception ex)

@@ -52,18 +52,38 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // El checkbox o select del formulario HTML suele devolver "true"/"false" o "1"/"0"
-                // Aquí lo convertimos a booleano de forma segura
+                // ==========================================
+                // 1. OBTENER EL CARNET (ID DEL USUARIO LOGUEADO)
+                // ==========================================
+                // Dependiendo de tu Login, descomenta la opción que uses:
+
+                // OPCIÓN A (Si usas Identity o Autenticación por Cookies/Claims):
+                // int idLogueado = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+
+                // OPCIÓN B (Si usas Variables de Sesión tradicionales):
+                // int idLogueado = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+                // -> Pon aquí tu variable real:
+                int idLogueado = 1; // (Borra este 1 y usa tu Opción A o B)
+
+                // ==========================================
+                // 2. CONVERSIÓN Y LLAMADA A LA LÓGICA
+                // ==========================================
                 bool boolEstado = (Estado == "1" || Estado == "true" || Estado == "True");
 
-                bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, boolEstado);
+                // ¡Aquí le pasamos el idLogueado al final!
+                bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, boolEstado, idLogueado);
+
                 if (respuesta)
                     TempData["Exito"] = "Usuario actualizado correctamente.";
             }
             catch (Exception ex)
             {
+                // Esto atrapará el RAISERROR de SQL ("No puedes desactivarte a ti mismo") 
+                // y lo mostrará en tu vista gracias al TempData.
                 TempData["Error"] = ex.Message;
             }
+
             return RedirectToAction("Index");
         }
 

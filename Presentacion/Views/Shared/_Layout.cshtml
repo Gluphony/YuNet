@@ -255,7 +255,9 @@
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="d-flex flex-column text-end me-3 d-none d-lg-flex" style="color: var(--text-main);">
                                 <span class="fw-bold" style="font-size: 0.9rem;">@(User.Identity.Name ?? "Usuario")</span>
-                                <span class="text-muted" style="font-size: 0.75rem;">Administrador</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">
+                                    @((User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value) ?? "Sin Rol")
+                                </span>
                             </div>
                             <div class="rounded-circle d-flex align-items-center justify-content-center user-circle shadow-sm">C</div>
                         </a>
