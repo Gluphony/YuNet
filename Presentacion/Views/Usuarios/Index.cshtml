@@ -48,13 +48,18 @@
                         {
                             foreach (DataRow fila in Model.Rows)
                             {
+                                bool esActivo = fila["Estado"] != DBNull.Value && Convert.ToBoolean(fila["Estado"]);
+
+                                // Evaluamos si la fila corresponde al usuario que tiene la sesión iniciada
+                                bool esUsuarioActual = ViewBag.IdUsuarioActual != null && fila["Id_Usuario"].ToString() == ViewBag.IdUsuarioActual.ToString();
+
                                 <tr>
                                     <td class="fw-bold text-secondary">#@fila["Id_Usuario"]</td>
                                     <td>@fila["Nombre"]</td>
                                     <td>@fila["Correo"]</td>
                                     <td><span class="badge bg-info text-dark">@fila["Nombre_Rol"]</span></td>
                                     <td>
-                                        @if (Convert.ToBoolean(fila["Estado"]))
+                                        @if (esActivo)
                                         {
                                             <span class="badge bg-success">Activo</span>
                                         }
@@ -69,15 +74,17 @@
                                                 data-nombre="@fila["Nombre"]"
                                                 data-correo="@fila["Correo"]"
                                                 data-idrol="@fila["Id_Rol"]"
-                                                data-estado="@(Convert.ToBoolean(fila["Estado"]) ? "1" : "0")"
+                                                data-estado="@(esActivo ? "1" : "0")"
+                                                data-esactual="@(esUsuarioActual ? "1" : "0")"
                                                 data-bs-toggle="modal" data-bs-target="#modalEditar">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
-                                        @if (Convert.ToBoolean(fila["Estado"]))
+                                        @if (esActivo && !esUsuarioActual)
                                         {
-                                            <form action="/Usuarios/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas desactivar este usuario?');">
-                                                <input type="hidden" name="idUsuario" value="@fila["Id_Usuario"]" />
+                                            <form action="@Url.Action("Desactivar", "Usuarios")" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas desactivar este usuario?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="Id_Usuario" value="@fila["Id_Usuario"]" />
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Desactivar">
                                                     <i class="bi bi-person-x"></i>
                                                 </button>
@@ -107,7 +114,8 @@
                 <h5 class="modal-title fw-bold"><i class="bi bi-person-plus me-2"></i>Crear Usuario</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/Usuarios/Crear" method="post">
+            <form action="@Url.Action("Crear", "Usuarios")" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre Completo</label>
@@ -148,7 +156,8 @@
                 <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square me-2"></i>Editar Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/Usuarios/Editar" method="post">
+            <form id="formEditar" action="@Url.Action("Editar", "Usuarios")" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <input type="hidden" id="editId" name="Id_Usuario" />
 
@@ -175,6 +184,9 @@
                             <option value="1">Activo</option>
                             <option value="0">Inactivo</option>
                         </select>
+                        <small id="mensajeEstadoBloqueado" class="text-danger d-none mt-1">
+                            No puedes cambiar tu propio estado de actividad.
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -190,15 +202,36 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const botonesEditar = document.querySelectorAll('.btn-editar');
+            const selectEstado = document.getElementById('editEstado');
+            const mensajeEstadoBloqueado = document.getElementById('mensajeEstadoBloqueado');
+            const formEditar = document.getElementById('formEditar');
 
+            // Cargar datos en el modal de edición
             botonesEditar.forEach(boton => {
                 boton.addEventListener('click', function () {
                     document.getElementById('editId').value = this.getAttribute('data-id');
                     document.getElementById('editNombre').value = this.getAttribute('data-nombre');
                     document.getElementById('editCorreo').value = this.getAttribute('data-correo');
                     document.getElementById('editRol').value = this.getAttribute('data-idrol');
-                    document.getElementById('editEstado').value = this.getAttribute('data-estado');
+                    selectEstado.value = this.getAttribute('data-estado');
+
+                    // Bloquear la opción de estado si el usuario se edita a sí mismo
+                    const esActual = this.getAttribute('data-esactual') === "1";
+
+                    if (esActual) {
+                        selectEstado.disabled = true;
+                        mensajeEstadoBloqueado.classList.remove('d-none'); // Mostramos el mensaje de advertencia
+                    } else {
+                        selectEstado.disabled = false;
+                        mensajeEstadoBloqueado.classList.add('d-none'); // Ocultamos el mensaje
+                    }
                 });
+            });
+
+            // Truco: Al enviar el formulario, desbloqueamos el campo Estado
+            // para que su valor viaje al servidor (los campos disabled son ignorados por defecto)
+            formEditar.addEventListener('submit', function () {
+                selectEstado.disabled = false;
             });
         });
     </script>
