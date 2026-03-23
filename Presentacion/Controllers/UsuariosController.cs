@@ -100,39 +100,34 @@ namespace Presentacion.Controllers
 
         // 3. EDITAR USUARIO
         [HttpPost]
-        [ValidateAntiForgeryToken] // Seguridad CSRF
-        public async Task<IActionResult> Editar(int Id_Usuario, string Nombre, string Correo, int Id_Rol, string Estado)
+        public IActionResult Editar(int Id_Usuario, string Nombre, string Correo, int Id_Rol, string Estado)
         {
             try
             {
-                // El checkbox o select del formulario HTML suele devolver "true"/"false" o "1"/"0"
-                // Aquí lo convertimos a booleano de forma segura
-                bool boolEstado = (Estado == "1" || Estado == "true" || Estado == "True");
-                int idActual = ObtenerIdUsuarioActual();
+                // ==========================================
+                // 1. OBTENER EL CARNET (ID DEL USUARIO LOGUEADO)
+                // ==========================================
+                // Dependiendo de tu Login, descomenta la opción que uses:
 
-                // REGLA 1: Evitar desactivar al último administrador
-                if (!boolEstado && EsElUltimoAdministradorActivo(Id_Usuario))
-                {
-                    TempData["Error"] = "Operación denegada: No puedes desactivar a este usuario porque es el único Administrador activo del sistema.";
-                    return RedirectToAction("Index");
-                }
+                // OPCIÓN A (Si usas Identity o Autenticación por Cookies/Claims):
+                // int idLogueado = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+
+                // OPCIÓN B (Si usas Variables de Sesión tradicionales):
+                // int idLogueado = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+                // -> Pon aquí tu variable real:
+                int idLogueado = 1; // (Borra este 1 y usa tu Opción A o B)
+
+                // ==========================================
+                // 2. CONVERSIÓN Y LLAMADA A LA LÓGICA
+                // ==========================================
+                bool boolEstado = (Estado == "1" || Estado == "true" || Estado == "True");
 
                 // ¡Aquí le pasamos el idLogueado al final!
                 bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, boolEstado, idLogueado);
 
-
                 if (respuesta)
-                {
-                    // REGLA 2: Si el usuario se desactivó a sí mismo por error (o alterando el HTML), lo sacamos de la app
-                    if (!boolEstado && Id_Usuario == idActual)
-                    {
-                        await HttpContext.SignOutAsync();
-                        // Redirigimos al Login (Ajusta "Login", "Auth" a los nombres reales de tu controlador de login)
-                        return RedirectToAction("Index", "Login");
-                    }
-
                     TempData["Exito"] = "Usuario actualizado correctamente.";
-                }
             }
             catch (Exception ex)
             {
