@@ -59,14 +59,19 @@
         position: absolute;
         top: 15px;
         right: 15px;
-        background: rgba(198, 195, 242, 0.15);
-        color: #C6C3F2;
-        padding: 5px 12px;
+        /* Colores por defecto del badge de advertencia */
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: bold;
         backdrop-filter: blur(5px);
-        border: 1px solid rgba(198, 195, 242, 0.2);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        /* LAS DOS LÍNEAS MÁGICAS: */
+        z-index: 10; /* Obliga a la etiqueta a estar siempre por encima de la foto */
+        white-space: nowrap; /* Evita que el texto se rompa y deforme la etiqueta */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* Una pequeña sombra para que resalte más */
     }
 
     .btn-tech {
@@ -162,8 +167,9 @@
                 <div class="tech-card">
                     @if (item.EXISTENCIAS <= 5)
                     {
-                        <span class="badge-premium" style="color: #ffc107; border-color: rgba(255, 193, 7, 0.3);">¡Últimas @item.EXISTENCIAS unidades!</span>
+                        <span class="badge-premium">¡Últimas @item.EXISTENCIAS unidades!</span>
                     }
+        
 
                     <div class="tech-img-box">
                         <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"

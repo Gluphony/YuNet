@@ -5,48 +5,162 @@
 }
 
 <style>
-    /* ADN de Diseño: Refinado */
-    .stat-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        transition: transform 0.2s;
+    /* ==========================================
+           1. VARIABLES GLOBALES (MODO CLARO)
+           ========================================== */
+    :root {
+        --bg-main: #F4F7FE;
+        --bg-card: #FFFFFF;
+        --text-main: #2B3674;
+        --text-muted: #707EAE;
+        --border-color: #E2E8F0;
+        /* Tema Neón y Acentos */
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.05);
+        --primary-color: #4318FF;
+        --primary-glow: rgba(67, 24, 255, 0.3);
+        --warning-color: #FFB547;
+        --danger-color: #EE5D50;
+        --danger-bg: rgba(238, 93, 80, 0.1);
+        --success-color: #05CD99;
+        --success-bg: rgba(5, 205, 153, 0.1);
     }
 
-    .border-left-info {
-        border-left: 5px solid #0dcaf0 !important;
+    /* ==========================================
+           1.5 VARIABLES MODO OSCURO
+           ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --border-color: #2D2D3A;
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.1);
+        --primary-color: #00D4FF;
+        --primary-glow: rgba(0, 212, 255, 0.3);
+        --warning-color: #FFB547;
+        --danger-color: #E83E8C;
+        --danger-bg: rgba(232, 62, 140, 0.1);
+        --success-color: #05CD99;
+        --success-bg: rgba(5, 205, 153, 0.1);
     }
 
-    /* Badge de Clave Estilo 'Developer' */
+    /* ==========================================
+           2. COMPONENTES BASE
+           ========================================== */
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    .tech-card {
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .tech-card {
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Borde superior de neón cyan para diferenciar de roles (que era azul primario) */
+    .tech-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--neon-blue-base), transparent);
+    }
+
+    /* ==========================================
+           3. TABLA Y BADGES
+           ========================================== */
+    .table {
+        color: var(--text-main);
+        margin-bottom: 0;
+    }
+
+        .table th {
+            background-color: transparent !important;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+        }
+
+        .table td {
+            background-color: transparent !important;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            padding: 1rem;
+            color: var(--text-main);
+        }
+
+    .table-hover tbody tr:hover td {
+        background-color: var(--neon-blue-tint) !important;
+    }
+
+    /* Badge Estilo 'Developer' adaptado al tema */
     .clave-badge {
         font-family: 'Fira Code', 'Cascadia Code', monospace;
-        background: #f1f4f9;
-        border: 1px solid #dce3f1;
-        color: #2c52da;
+        background-color: var(--neon-blue-tint);
+        color: var(--neon-blue-base);
+        border: 1px solid rgba(0, 212, 255, 0.2);
         padding: 5px 12px;
         border-radius: 8px;
         font-weight: 600;
         font-size: 0.8rem;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
     }
 
-    /* Mejora de Tabla */
-    .table thead th {
-        background-color: #f8f9fa;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        font-weight: 700;
-        color: #6c757d;
-        border-bottom: 2px solid #dee2e6;
+    .badge-soft-success {
+        background-color: var(--success-bg);
+        color: var(--success-color);
+        border: 1px solid rgba(5, 205, 153, 0.2);
     }
 
-    .tr-hover:hover {
-        background-color: rgba(13, 202, 240, 0.02) !important;
+    .badge-soft-danger {
+        background-color: var(--danger-bg);
+        color: var(--danger-color);
+        border: 1px solid rgba(238, 93, 80, 0.2);
     }
 
-    /* Botones de acción minimalistas */
+    /* ==========================================
+           4. BOTONES E INPUTS
+           ========================================== */
+    .btn-neon-primary {
+        background: transparent;
+        color: var(--primary-color) !important;
+        border: 1px solid var(--primary-color);
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon-primary:hover {
+            background: var(--primary-color);
+            color: #FFF !important;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+    [data-bs-theme="dark"] .btn-neon-primary:hover {
+        color: #000 !important;
+    }
+
     .btn-action {
         width: 35px;
         height: 35px;
@@ -57,112 +171,145 @@
         transition: all 0.2s;
     }
 
+    .custom-input {
+        background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 8px !important;
+        padding: 8px 15px 8px 40px; /* Espacio para el icono de búsqueda */
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--neon-blue-base) !important;
+            box-shadow: 0 0 10px var(--neon-blue-glow) !important;
+            outline: none;
+        }
+
     .search-container {
         position: relative;
     }
 
         .search-container i {
             position: absolute;
-            left: 12px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #adb5bd;
+            color: var(--text-muted);
+            z-index: 10;
         }
 
-    .search-input {
-        padding-left: 35px;
-        border-radius: 10px;
-        border: 1px solid #dee2e6;
+    /* Alertas */
+    .alert-custom {
+        border-radius: 12px;
+        border: 0;
+    }
+
+    .alert-custom-success {
+        background-color: var(--success-bg);
+        color: var(--success-color);
+        border-left: 5px solid var(--success-color);
     }
 </style>
 
-<div class="row align-items-center mb-4">
-    <div class="col-md-6">
-        <h3 class="fw-bold mb-0 text-dark">Gestión de Permisos</h3>
-        <p class="text-muted mb-0">Control de llaves de acceso al sistema</p>
-    </div>
-    <div class="col-md-6 text-md-end mt-3 mt-md-0">
-        <a href="@Url.Action("Create", "Permisos")" class="btn btn-dark px-4 shadow-sm border-0" style="border-radius: 10px;">
-            <i class="bi bi-shield-plus me-2"></i> Nuevo Permiso
+<div class="container-fluid container-xl mt-4 pb-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="color: var(--text-main);">
+                <i class="bi bi-key-fill" style="color: var(--neon-blue-base); text-shadow: 0 0 10px var(--neon-blue-glow);"></i>
+                Gestión de Permisos
+            </h4>
+            <p class="text-muted mb-0 small mt-1">Control de llaves de acceso al sistema</p>
+        </div>
+        <a href="@Url.Action("Create", "Permisos")" class="btn btn-neon-primary px-4 py-2">
+            <i class="bi bi-shield-plus me-1"></i> Nuevo Permiso
         </a>
     </div>
-</div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="border-radius: 12px; border-left: 5px solid #198754 !important;">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-            <div>
-                <strong>¡Excelente!</strong> @TempData["Success"]
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-custom alert-custom-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-5 me-3" style="text-shadow: 0 0 10px var(--success-color);"></i>
+                <div>
+                    <strong>¡Excelente!</strong> @TempData["Success"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="tech-card p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <h6 class="m-0 fw-bold text-uppercase d-flex align-items-center gap-2" style="color: var(--neon-blue-base); letter-spacing: 1px;">
+                <i class="bi bi-journal-code"></i> Diccionario de Accesos
+            </h6>
+
+            <div class="search-container">
+                <i class="bi bi-search"></i>
+                <input type="text" id="txtBuscador" class="form-control custom-input" placeholder="Buscar permiso..." style="width: 250px;">
             </div>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
 
-<div class="card stat-card border-left-info">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h6 class="m-0 fw-bold text-info text-uppercase">Diccionario de Accesos</h6>
-        
-        <div class="search-container">
-            <i class="bi bi-search"></i>
-            <input type="text" id="txtBuscador" class="form-control form-control-sm search-input" placeholder="Buscar permiso..." style="width: 250px;">
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="tablaPermisos">
-                <thead>
-                    <tr>
-                        <th class="ps-4">ID</th>
-                        <th>Clave del Sistema</th>
-                        <th>Descripción</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center pe-4">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr class="tr-hover">
-                            <td class="ps-4 text-muted fw-bold">#@item.ID_PERMISO</td>
-                            <td>
-                                <span class="clave-badge">
-                                    <i class="bi bi-code me-1"></i>@item.CLAVE_PERMISO
-                                </span>
-                            </td>
-                            <td class="text-dark small">@item.DESCRIPCION</td>
-                            <td class="text-center">
-                                @if (item.ESTADO)
-                                {
-                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">
-                                        Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3">
-                                        Inactivo
-                                    </span>
-                                }
-                            </td>
-                            <td class="text-center pe-4">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <a href="@Url.Action("Edit", "Permisos", new { id = item.ID_PERMISO })"
-                                           class="btn btn-outline-primary btn-action" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button class="btn btn-outline-danger btn-action"
-                                            onclick="confirmarDesactivar(@item.ID_PERMISO)" title="Desactivar">
-                                        <i class="bi bi-shield-lock"></i>
-                                    </button>
-                                </div>
-                            </td>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tablaPermisos">
+                    <thead>
+                        <tr>
+                            <th class="ps-4" style="width: 10%;">ID</th>
+                            <th style="width: 25%;">Clave del Sistema</th>
+                            <th style="width: 35%;">Descripción</th>
+                            <th class="text-center" style="width: 15%;">Estado</th>
+                            <th class="text-center pe-4" style="width: 15%;">Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold" style="color: var(--text-muted);">#@item.ID_PERMISO</td>
+                                <td>
+                                    <span class="clave-badge">
+                                        <i class="bi bi-code-slash me-1"></i>@item.CLAVE_PERMISO
+                                    </span>
+                                </td>
+                                <td style="color: var(--text-muted); font-size: 0.9rem;">@item.DESCRIPCION</td>
+                                <td class="text-center">
+                                    @if (item.ESTADO)
+                                    {
+                                        <span class="badge badge-soft-success px-3 py-1 rounded-pill">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-soft-danger px-3 py-1 rounded-pill">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="@Url.Action("Edit", "Permisos", new { id = item.ID_PERMISO })"
+                                           class="btn btn-outline-secondary border-0 btn-action" style="color: var(--warning-color);" title="Editar">
+                                            <i class="bi bi-pencil-square fs-5"></i>
+                                        </a>
+
+                                        @if (item.ESTADO)
+                                        {
+                                            <button class="btn btn-outline-secondary border-0 btn-action" style="color: var(--danger-color);"
+                                                    onclick="confirmarDesactivar(@item.ID_PERMISO)" title="Desactivar">
+                                                <i class="bi bi-shield-lock-fill fs-5"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="btn btn-action border-0 disabled" style="color: transparent;"><i class="bi bi-shield-lock-fill fs-5"></i></span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -170,44 +317,46 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Buscador dinámico por cualquier columna
         $(document).ready(function () {
-        $("#txtBuscador").on("keyup", function () {
-        var value = $(this).val().toLowerCase();
-        $("#tablaPermisos tbody tr").filter(function () {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-        });
-        });
+            // Buscador dinámico por cualquier columna
+            $("#txtBuscador").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#tablaPermisos tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
         });
 
         function confirmarDesactivar(id) {
-        Swal.fire({
-        title: '¿Bloquear permiso?',
-        text: "Los usuarios con esta clave perderán el acceso de inmediato.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#000',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, bloquear',
-        cancelButtonText: 'Cancelar',
-        borderRadius: '15px'
-        }).then((result) => {
-        if (result.isConfirmed) {
-        $.post('@Url.Action("Desactivar", "Permisos")', { id: id }, function (data) {
-        if (data.success) {
-        Swal.fire({
-        icon: 'success',
-        title: 'Actualizado',
-        text: data.message,
-        showConfirmButton: false,
-        timer: 1500
-        }).then(() => location.reload());
-        } else {
-        Swal.fire('Error', data.message, 'error');
-        }
-        });
-        }
-        })
+            Swal.fire({
+                title: '¿Bloquear permiso?',
+                text: "Los usuarios con esta clave perderán el acceso de inmediato.",
+                icon: 'warning',
+                showCancelButton: true,
+                // Colores adaptados para encajar mejor con el tema
+                confirmButtonColor: '#EE5D50', // Color Danger del tema
+                cancelButtonColor: '#707EAE',  // Color Muted del tema
+                confirmButtonText: '<i class="bi bi-shield-lock"></i> Sí, bloquear',
+                cancelButtonText: 'Cancelar',
+                borderRadius: '16px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("Desactivar", "Permisos")', { id: id }, function (data) {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Actualizado',
+                                text: data.message,
+                                showConfirmButton: false,
+                                timer: 1500,
+                                confirmButtonColor: '#05CD99'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    });
+                }
+            })
         }
     </script>
 }

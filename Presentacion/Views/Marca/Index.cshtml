@@ -1,117 +1,316 @@
 ﻿@model IEnumerable<Entidades.Marca>
 @{
-    ViewData["Title"] = "Gestión de Marcas";
+    ViewData["Title"] = "Gestión de Marcas - YuNet Store";
 }
 
-@* --- ALERTAS DE ÉXITO Y ERROR --- *@
-@if (TempData["MensajeExito"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["MensajeError"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+<style>
+    /* ==========================================
+               1. VARIABLES GLOBALES (MODO CLARO)
+               ========================================== */
+    :root {
+        --bg-main: #F4F7FE;
+        --bg-card: #FFFFFF;
+        --text-main: #2B3674;
+        --text-muted: #707EAE;
+        --border-color: #E2E8F0;
+        /* Tema Neón Oficial */
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.1);
+        /* Estados */
+        --success-base: #05CD99;
+        --success-glow: rgba(5, 205, 153, 0.2);
+        --danger-base: #EE5D50;
+        --danger-glow: rgba(238, 93, 80, 0.2);
+        --warning-base: #F6C000;
+        --warning-glow: rgba(246, 192, 0, 0.2);
+    }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Marcas</h2>
-        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona las marcas de tus productos</p>
-    </div>
-    @* --- BOTÓN QUE ABRE EL MODAL DE CREAR --- *@
-    <button type="button" class="btn border-0 shadow-sm d-flex align-items-center px-3 py-2" data-bs-toggle="modal" data-bs-target="#modalCrear" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-        <i class="bi bi-plus-lg me-2"></i>Nueva Marca
-    </button>
-</div>
+    /* ==========================================
+               1.5 VARIABLES MODO OSCURO
+               ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --border-color: #2D2D3A;
+        /* Tema Neón Brillante */
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.5);
+        --neon-blue-tint: rgba(0, 212, 255, 0.15);
+        /* Estados */
+        --success-base: #20C997;
+        --success-glow: rgba(32, 201, 151, 0.3);
+        --danger-base: #E83E8C;
+        --danger-glow: rgba(232, 62, 140, 0.3);
+        --warning-base: #FFC107;
+        --warning-glow: rgba(255, 193, 7, 0.3);
+    }
 
-<div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; transition: 0.3s;">
-    <div class="card-body p-4">
+    /* ==========================================
+               2. COMPONENTES BASE
+               ========================================== */
+    .custom-input {
+        background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
 
-        <div class="row mb-4">
-            <div class="col-md-6 col-lg-4">
-                <form asp-action="Filtrar" method="get" class="d-flex">
-                    <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                        <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted);">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" name="nombre" class="form-control border-0" placeholder="Buscar marca..." style="background-color: var(--bg-main); color: var(--text-main);">
-                        <button type="submit" class="btn border-0" style="background-color: #C6C3F2; color: #262628; font-weight: 600;">Buscar</button>
-                    </div>
-                </form>
-            </div>
-            <div class="col-auto">
-                <a asp-action="Index" class="btn btn-light border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);"><i class="bi bi-arrow-clockwise"></i></a>
-            </div>
+        .custom-input:focus {
+            border-color: var(--neon-blue-base) !important;
+            box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+            outline: none;
+        }
+
+        .custom-input::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.6;
+        }
+
+    .tech-card {
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .tech-card {
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+    }
+
+    .tech-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--neon-blue-base), transparent);
+    }
+
+    /* ==========================================
+               3. BOTONES NEÓN
+               ========================================== */
+    .btn-neon {
+        background: transparent;
+        color: var(--neon-blue-base) !important;
+        border: 1px solid var(--neon-blue-base);
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon:hover {
+            background: var(--neon-blue-base);
+            color: #FFF !important;
+            box-shadow: 0 0 20px var(--neon-blue-glow);
+            transform: translateY(-2px);
+        }
+
+    [data-bs-theme="dark"] .btn-neon:hover {
+        color: #000 !important;
+    }
+
+    /* Botones de acción (Tabla) */
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .btn-edit {
+        border: 1px solid var(--warning-base);
+        color: var(--warning-base);
+    }
+
+        .btn-edit:hover {
+            background: var(--warning-base);
+            color: #000;
+            box-shadow: 0 0 15px var(--warning-glow);
+        }
+
+    .btn-delete {
+        border: 1px solid var(--danger-base);
+        color: var(--danger-base);
+    }
+
+        .btn-delete:hover {
+            background: var(--danger-base);
+            color: #fff;
+            box-shadow: 0 0 15px var(--danger-glow);
+        }
+
+    /* ==========================================
+               4. TABLAS Y MODALES
+               ========================================== */
+    .table-tech > :not(caption) > * > * {
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main);
+    }
+
+    .table-tech tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .table-tech tbody tr:hover {
+            background-color: var(--neon-blue-tint) !important;
+            box-shadow: inset 3px 0 0 var(--neon-blue-base);
+        }
+
+    .modal-content-tech {
+        background-color: var(--bg-card);
+        border: 1px solid var(--neon-blue-glow);
+        border-radius: 16px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-bs-theme="dark"] .modal-content-tech {
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-close-dynamic {
+        filter: none;
+    }
+
+    [data-bs-theme="dark"] .btn-close-dynamic {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+</style>
+
+<div class="container-fluid container-xl mt-4 pb-5">
+
+    @* --- ALERTAS --- *@
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert" style="background-color: rgba(5, 205, 153, 0.1); color: var(--success-base); border: 1px solid var(--success-base); border-radius: 12px;">
+            <i class="bi bi-check-circle-fill me-3 fs-5" style="text-shadow: 0 0 10px var(--success-glow);"></i>
+            <div>@TempData["MensajeExito"]</div>
+            <button type="button" class="btn-close btn-close-dynamic" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert" style="background-color: rgba(238, 93, 80, 0.1); color: var(--danger-base); border: 1px solid var(--danger-base); border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-5" style="text-shadow: 0 0 10px var(--danger-glow);"></i>
+            <div>@TempData["MensajeError"]</div>
+            <button type="button" class="btn-close btn-close-dynamic" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @* --- ENCABEZADO --- *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 d-flex align-items-center gap-2 fw-bold" style="color: var(--text-main);">
+                <i class="bi bi-tags" style="color: var(--neon-blue-base); text-shadow: 0 0 10px var(--neon-blue-glow);"></i>
+                Marcas
+            </h2>
+            <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona las marcas de tus productos</p>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" style="color: var(--text-main);">
-                <thead style="border-bottom: 2px solid var(--border-color);">
-                    <tr>
-                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID</th>
-                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Nombre de Marca</th>
-                        <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado</th>
-                        <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody style="border-top: none;">
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <td class="py-3 fw-bold" style="color: var(--text-main);">@item.ID_MARCA</td>
-                                <td class="py-3" style="color: var(--text-main);">@item.NOMBRE</td>
-                                <td class="py-3">
-                                    @if (item.ESTADO)
-                                    {
-                                        <span class="badge rounded-pill" style="background-color: rgba(25, 135, 84, 0.1); color: #198754; border: 1px solid #198754; padding: 0.4em 0.8em;">Activo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge rounded-pill" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid #dc3545; padding: 0.4em 0.8em;">Inactivo</span>
-                                    }
-                                </td>
-                                <td class="py-3 text-end">
-                                    @* --- BOTÓN EDITAR SIEMPRE VISIBLE --- *@
-                                    <button type="button" onclick="cargarModalEditar('@item.ID_MARCA', '@item.NOMBRE', '@(item.ESTADO ? "true" : "false")')" class="btn btn-sm btn-light rounded shadow-sm me-2" data-bs-toggle="modal" data-bs-target="#modalEditar" title="Editar" style="width: 32px; height: 32px; background-color: #0d6efd; color: white; border-color: #0d6efd;">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
+        <button type="button" class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrear">
+            <i class="bi bi-plus-lg"></i> Nueva Marca
+        </button>
+    </div>
 
-                                    @* --- BOTÓN DESACTIVAR RÁPIDO (Solo si está activo) --- *@
-                                    @if (item.ESTADO)
-                                    {
-                                        <form asp-action="Desactivar" asp-route-id="@item.ID_MARCA" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar esta marca?');">
-                                            <button type="submit" class="btn btn-sm btn-light rounded shadow-sm" title="Desactivar" style="width: 32px; height: 32px; background-color: var(--bg-main); color: #dc3545; border-color: #dc3545;">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    }
+    @* --- TARJETA PRINCIPAL --- *@
+    <div class="tech-card mb-4">
+        <div class="card-body p-4 p-md-5">
+
+            @* Filtros *@
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-6 col-lg-5">
+                    <form asp-action="Filtrar" method="get" class="d-flex gap-2">
+                        <div class="input-group">
+                            <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted); border-radius: 8px 0 0 8px; border-top: 1px solid var(--border-color) !important; border-bottom: 1px solid var(--border-color) !important; border-left: 1px solid var(--border-color) !important;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="nombre" class="form-control custom-input border-start-0" placeholder="Buscar marca..." style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
+                        </div>
+                        <button type="submit" class="btn btn-neon px-3">Buscar</button>
+                    </form>
+                </div>
+                <div class="col-auto mt-3 mt-md-0">
+                    <a asp-action="Index" class="btn btn-outline-secondary border-0" style="background-color: var(--bg-main); color: var(--text-main);" title="Recargar">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </div>
+
+            @* Tabla *@
+            <div class="table-responsive">
+                <table class="table table-tech align-middle mb-0">
+                    <thead style="border-bottom: 2px solid var(--neon-blue-glow);">
+                        <tr>
+                            <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 1px;">ID</th>
+                            <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px;">Nombre de Marca</th>
+                            <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px;">Estado</th>
+                            <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="py-3 fw-bold" style="color: var(--neon-blue-base);">#@item.ID_MARCA</td>
+                                    <td class="py-3 fw-semibold">@item.NOMBRE</td>
+                                    <td class="py-3">
+                                        @if (item.ESTADO)
+                                        {
+                                            <span class="badge rounded-pill" style="background-color: rgba(32, 201, 151, 0.1); color: var(--success-base); border: 1px solid var(--success-base); box-shadow: 0 0 10px rgba(32, 201, 151, 0.2); padding: 0.5em 1em;">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill" style="background-color: rgba(232, 62, 140, 0.1); color: var(--danger-base); border: 1px solid var(--danger-base); box-shadow: 0 0 10px rgba(232, 62, 140, 0.2); padding: 0.5em 1em;">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td class="py-3 text-end">
+                                        <button type="button" onclick="cargarModalEditar('@item.ID_MARCA', '@item.NOMBRE', '@(item.ESTADO ? "true" : "false")')" class="btn-action btn-edit me-2" data-bs-toggle="modal" data-bs-target="#modalEditar" title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        @if (item.ESTADO)
+                                        {
+                                            <form asp-action="Desactivar" asp-route-id="@item.ID_MARCA" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar esta marca?');">
+                                                <button type="submit" class="btn-action btn-delete" title="Desactivar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="bi bi-tags fs-1 mb-3" style="color: var(--neon-blue-base); opacity: 0.5;"></i>
+                                        <h5 style="color: var(--text-main);">No hay marcas registradas</h5>
+                                        <p style="color: var(--text-muted);">Haz clic en "Nueva Marca" para comenzar.</p>
+                                    </div>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center">
-                                    <i class="bi bi-tags fs-1 mb-3" style="color: var(--text-muted);"></i>
-                                    <h5 style="color: var(--text-main);">No hay marcas registradas</h5>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 
+        </div>
     </div>
 </div>
 
@@ -122,22 +321,23 @@
 @* --- MODAL CREAR --- *@
 <div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border-color: var(--border-color);">
-            @* IMPORTANTE: Apunta a la acción 'Crear' *@
+        <div class="modal-content modal-content-tech">
             <form asp-action="Crear" method="post">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="modalCrearLabel" style="color: var(--text-main);">Nueva Marca</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(var(--bs-body-color-rgb));"></button>
+                <div class="modal-header border-0 pb-0 mt-2 mx-2">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalCrearLabel" style="color: var(--text-main);">
+                        <i class="bi bi-plus-circle-dotted" style="color: var(--neon-blue-base);"></i> Nueva Marca
+                    </h5>
+                    <button type="button" class="btn-close btn-close-dynamic" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body px-4 py-4">
                     <div class="mb-3">
-                        <label class="form-label text-muted">Nombre de la Marca</label>
-                        <input type="text" name="NOMBRE" class="form-control" required style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);" placeholder="Ej. Coca-Cola, Samsung...">
+                        <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--neon-blue-base); letter-spacing: 1px;">Nombre de la Marca</label>
+                        <input type="text" name="NOMBRE" class="form-control custom-input p-3" required placeholder="Ej. Asus, Samsung, Logitech...">
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn border-0 shadow-sm" style="background-color: #C6C3F2; color: #262628; font-weight: 600;">Guardar Marca</button>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-link text-decoration-none" style="color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-neon px-4 py-2">Guardar Marca</button>
                 </div>
             </form>
         </div>
@@ -147,33 +347,33 @@
 @* --- MODAL EDITAR --- *@
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border-color: var(--border-color);">
-            @* IMPORTANTE: Apunta a la acción 'Editar' *@
+        <div class="modal-content modal-content-tech" style="border-color: var(--warning-base);">
             <form asp-action="Editar" method="post">
-                <div class="modal-header" style="background-color: #ffc107; color: #000; border-bottom: none;">
-                    <h5 class="modal-title fw-bold" id="modalEditarLabel"><i class="bi bi-pencil-square me-2"></i>Editar Marca</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header border-0 pb-0 mt-2 mx-2">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalEditarLabel" style="color: var(--warning-base); text-shadow: 0 0 10px var(--warning-glow);">
+                        <i class="bi bi-pencil-square"></i> Editar Marca
+                    </h5>
+                    <button type="button" class="btn-close btn-close-dynamic" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body mt-2">
+                <div class="modal-body px-4 py-4">
                     <input type="hidden" id="editIdMarca" name="ID_MARCA" />
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: var(--text-main);">Nombre de la Marca</label>
-                        <input type="text" id="editNombreMarca" name="NOMBRE" class="form-control" required style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Nombre de la Marca</label>
+                        <input type="text" id="editNombreMarca" name="NOMBRE" class="form-control custom-input p-3" required>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: var(--text-main);">Estado</label>
-                        <select id="editEstadoMarca" name="ESTADO" class="form-select" style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Estado</label>
+                        <select id="editEstadoMarca" name="ESTADO" class="form-select custom-input p-3">
                             <option value="true">Activo</option>
                             <option value="false">Inactivo</option>
                         </select>
                     </div>
-
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #6c757d;">Cancelar</button>
-                    <button type="submit" class="btn btn-warning fw-bold" style="background-color: #ffc107; color: #000;">Actualizar</button>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-link text-decoration-none" style="color: var(--text-muted);" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn px-4 py-2" style="background-color: var(--warning-base); color: #000; font-weight: 600; border-radius: 8px; box-shadow: 0 0 15px var(--warning-glow);">Actualizar</button>
                 </div>
             </form>
         </div>
@@ -185,19 +385,8 @@
         function cargarModalEditar(id, nombre, estado) {
             document.getElementById('editIdMarca').value = id;
             document.getElementById('editNombreMarca').value = nombre;
-            document.getElementById('editEstadoMarca').value = estado;
+            // Configurar el select con true o false (cadena)
+            document.getElementById('editEstadoMarca').value = estado.toLowerCase();
         }
     </script>
 }
-
-<style>
-    .table-hover tbody tr:hover {
-        background-color: var(--bg-main) !important;
-        color: var(--text-main) !important;
-    }
-
-    .table > :not(caption) > * > * {
-        background-color: transparent !important;
-        border-bottom-color: var(--border-color);
-    }
-</style>

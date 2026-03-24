@@ -4,56 +4,180 @@
     ViewBag.Title = "Crear Nuevo Permiso";
 }
 
-<div class="container mt-4">
-    <div class="card shadow border-0">
-        <div class="card-header bg-dark text-white py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-shield-plus me-2"></i>Registrar Nuevo Permiso
-            </h5>
+<style>
+    /* ==========================================
+           1. VARIABLES GLOBALES (MODO CLARO)
+           ========================================== */
+    :root {
+        --bg-main: #F8F9FA;
+        --bg-card: #FFFFFF;
+        --text-main: #212529;
+        --text-muted: #6C757D;
+        --border-color: #DEE2E6;
+        --input-bg: #FFFFFF;
+        /* Paleta Corporativa */
+        --primary-color: #0D6EFD;
+        --primary-hover: #0B5ED7;
+        --primary-bg: #E7F1FF;
+        --danger-color: #DC3545;
+        --danger-bg: #F8D7DA;
+        --success-color: #198754;
+        --success-bg: #D1E7DD;
+    }
+
+    /* ==========================================
+           1.5 VARIABLES MODO OSCURO
+           ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
+        --bg-main: #121212;
+        --bg-card: #1E1E1E;
+        --text-main: #E0E0E0;
+        --text-muted: #A0A0A0;
+        --border-color: #333333;
+        --input-bg: #2B2B2B;
+        --primary-color: #3B82F6;
+        --primary-hover: #2563EB;
+        --primary-bg: rgba(59, 130, 246, 0.1);
+        --danger-color: #EF4444;
+        --danger-bg: rgba(239, 68, 68, 0.1);
+        --success-color: #10B981;
+        --success-bg: rgba(16, 185, 129, 0.1);
+    }
+
+    /* ==========================================
+           2. COMPONENTES BASE
+           ========================================== */
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    .admin-card {
+        background-color: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        position: relative;
+    }
+
+        /* Borde superior sutil indicando acción principal */
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+    /* ==========================================
+           3. INPUTS Y FORMULARIOS
+           ========================================== */
+    .form-control {
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 6px;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.25rem var(--primary-bg) !important;
+        }
+
+    .input-group-text {
+        background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-muted) !important;
+    }
+
+    /* ==========================================
+           4. BOTONES Y ALERTAS
+           ========================================== */
+    .btn-primary-custom {
+        background-color: var(--primary-color);
+        color: #FFFFFF !important;
+        border: none;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-hover);
+        }
+
+    .alert-custom-danger {
+        background-color: var(--danger-bg);
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container-fluid container-xl mt-4 pb-5">
+
+    <div class="admin-card p-4 p-md-5">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 border-bottom pb-4" style="border-color: var(--border-color) !important;">
+            <div>
+                <h5 class="mb-0 fw-bold d-flex align-items-center gap-2" style="color: var(--text-main);">
+                    <i class="bi bi-shield-plus text-primary"></i>
+                    Registrar Nuevo Permiso
+                </h5>
+                <p class="text-muted mb-0 small mt-1">Complete los datos para dar de alta una nueva regla de acceso en el sistema.</p>
+            </div>
         </div>
-        
-        <div class="card-body p-4">
+
+        <div class="card-body p-0">
             @using (Html.BeginForm("Create", "Permisos", FormMethod.Post, new { id = "formCreate" }))
             {
                 @Html.AntiForgeryToken()
 
                 <div class="form-horizontal">
-                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3 small" })
 
                     @if (ViewBag.Error != null)
                     {
-                        <div class="alert alert-danger shadow-sm">
-                            <i class="bi bi-exclamation-octagon me-2"></i> @ViewBag.Error
+                        <div class="alert alert-custom-danger d-flex align-items-center py-2 px-3 mb-4">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            <div class="small fw-bold">@ViewBag.Error</div>
                         </div>
                     }
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-secondary">Clave del Permiso</label>
+                    <div class="row g-4">
+                        @* Clave del Permiso *@
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-2" style="color: var(--text-main);">Clave del Sistema</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-                                @Html.EditorFor(model => model.CLAVE_PERMISO, new { htmlAttributes = new { @class = "form-control", placeholder = "EJ: MODULO_VENTAS", style = "text-transform:uppercase" } })
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                @Html.EditorFor(model => model.CLAVE_PERMISO, new { htmlAttributes = new { @class = "form-control fw-bold", placeholder = "EJ: MODULO_VENTAS", style = "text-transform:uppercase;" } })
                             </div>
-                            @Html.ValidationMessageFor(model => model.CLAVE_PERMISO, "", new { @class = "text-danger small" })
+                            @Html.ValidationMessageFor(model => model.CLAVE_PERMISO, "", new { @class = "text-danger small mt-1 d-block" })
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-secondary">Descripción</label>
+                        @* Descripción *@
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-2" style="color: var(--text-main);">Descripción del Alcance</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-chat-left-text"></i></span>
-                                @Html.EditorFor(model => model.DESCRIPCION, new { htmlAttributes = new { @class = "form-control", placeholder = "Describa el alcance de este permiso" } })
+                                <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+                                @Html.EditorFor(model => model.DESCRIPCION, new { htmlAttributes = new { @class = "form-control", placeholder = "Describa el objetivo de este permiso..." } })
                             </div>
-                            @Html.ValidationMessageFor(model => model.DESCRIPCION, "", new { @class = "text-danger small" })
+                            @Html.ValidationMessageFor(model => model.DESCRIPCION, "", new { @class = "text-danger small mt-1 d-block" })
                         </div>
                     </div>
 
-                    <hr class="my-4 text-muted" />
+                    <hr class="my-4" style="border-color: var(--border-color);" />
 
-                    <div class="d-flex justify-content-end align-items-center gap-3">
-                        <a href="@Url.Action("Index", "Permisos")" class="btn btn-outline-danger border-0 fw-bold px-4">
-                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                    @* Acciones *@
+                    <div class="d-flex flex-column flex-sm-row justify-content-end align-items-center gap-3">
+                        <a href="@Url.Action("Index", "Permisos")" class="btn btn-link text-decoration-none small" style="color: var(--text-muted);">
+                            Cancelar
                         </a>
-                        <button type="submit" class="btn btn-dark shadow px-5 fw-bold">
+                        <button type="submit" class="btn btn-primary-custom px-4 py-2 w-100 w-sm-auto">
                             <i class="bi bi-check2-circle me-1"></i> Guardar Permiso
                         </button>
                     </div>
@@ -66,9 +190,10 @@
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    
+
     <script>
         $(document).ready(function () {
+            // Forzar mayúsculas para la clave del permiso
             $('#CLAVE_PERMISO').on('input', function () {
                 this.value = this.value.toUpperCase();
             });

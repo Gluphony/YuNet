@@ -4,79 +4,224 @@
     ViewBag.Title = "Editar Permiso";
 }
 
-<div class="container mt-4">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-pencil-square me-2 text-info"></i>Configuración de Permiso
-            </h5>
-            <span class="badge bg-light text-dark fw-bold px-3 py-2 shadow-sm">
-                ID SISTEMA: #@Model.ID_PERMISO
+<style>
+    /* ==========================================
+           1. VARIABLES GLOBALES (MODO CLARO)
+           ========================================== */
+    :root {
+        --bg-main: #F8F9FA;
+        --bg-card: #FFFFFF;
+        --text-main: #212529;
+        --text-muted: #6C757D;
+        --border-color: #DEE2E6;
+        --input-bg: #FFFFFF;
+        /* Paleta Corporativa */
+        --primary-color: #0D6EFD;
+        --primary-hover: #0B5ED7;
+        --primary-bg: #E7F1FF;
+        --danger-color: #DC3545;
+        --danger-bg: #F8D7DA;
+        --success-color: #198754;
+        --success-bg: #D1E7DD;
+    }
+
+    /* ==========================================
+           1.5 VARIABLES MODO OSCURO
+           ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
+        --bg-main: #121212;
+        --bg-card: #1E1E1E;
+        --text-main: #E0E0E0;
+        --text-muted: #A0A0A0;
+        --border-color: #333333;
+        --input-bg: #2B2B2B;
+        --primary-color: #3B82F6;
+        --primary-hover: #2563EB;
+        --primary-bg: rgba(59, 130, 246, 0.1);
+        --danger-color: #EF4444;
+        --danger-bg: rgba(239, 68, 68, 0.1);
+        --success-color: #10B981;
+        --success-bg: rgba(16, 185, 129, 0.1);
+    }
+
+    /* ==========================================
+           2. COMPONENTES BASE
+           ========================================== */
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    .admin-card {
+        background-color: var(--bg-card);
+        border-radius: 8px; /* Menos redondeado, más formal */
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        position: relative;
+    }
+
+        /* Borde superior sutil indicando acción principal */
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+    /* ==========================================
+           3. INPUTS Y FORMULARIOS
+           ========================================== */
+    .form-control {
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 6px;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.25rem var(--primary-bg) !important;
+        }
+
+    .input-group-text {
+        background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-muted) !important;
+    }
+
+    .switch-container {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+    }
+
+    .id-badge {
+        font-family: 'Consolas', 'Courier New', monospace;
+        background-color: var(--bg-main);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* ==========================================
+           4. BOTONES Y ALERTAS
+           ========================================== */
+    .btn-primary-custom {
+        background-color: var(--primary-color);
+        color: #FFFFFF !important;
+        border: none;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-hover);
+        }
+
+    .alert-custom-danger {
+        background-color: var(--danger-bg);
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+        border-radius: 6px;
+    }
+
+    .state-active {
+        color: var(--success-color) !important;
+    }
+
+    .state-inactive {
+        color: var(--danger-color) !important;
+    }
+</style>
+
+<div class="container-fluid container-xl mt-4 pb-5">
+
+    <div class="admin-card p-4 p-md-5">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 border-bottom pb-4" style="border-color: var(--border-color) !important;">
+            <div>
+                <h5 class="mb-0 fw-bold d-flex align-items-center gap-2" style="color: var(--text-main);">
+                    <i class="bi bi-shield-lock text-primary"></i>
+                    Configuración de Permiso
+                </h5>
+                <p class="text-muted mb-0 small mt-1">Modifique los detalles y el estado de la regla de acceso.</p>
+            </div>
+            <span class="id-badge">
+                ID: @Model.ID_PERMISO
             </span>
         </div>
 
-        <div class="card-body p-4">
+        <div class="card-body p-0">
             @using (Html.BeginForm("Edit", "Permisos", FormMethod.Post, new { id = "formEdit" }))
             {
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(model => model.ID_PERMISO)
 
                 <div class="form-horizontal">
-                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3 small" })
 
                     @if (ViewBag.Error != null)
                     {
-                        <div class="alert alert-danger d-flex align-items-center shadow-sm">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <div>@ViewBag.Error</div>
+                        <div class="alert alert-custom-danger d-flex align-items-center py-2 px-3 mb-4">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            <div class="small fw-bold">@ViewBag.Error</div>
                         </div>
                     }
 
                     <div class="row g-4">
-                        @* Clave del Permiso - Bloqueada o Informativa *@
+                        @* Clave del Permiso *@
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">Clave del Permiso (Sistema)</label>
+                            <label class="form-label small fw-bold mb-2" style="color: var(--text-main);">Clave del Sistema</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light text-primary"><i class="bi bi-code-slash"></i></span>
-                                @Html.EditorFor(model => model.CLAVE_PERMISO, new { htmlAttributes = new { @class = "form-control fw-bold", style = "text-transform:uppercase; letter-spacing: 1px;", placeholder = "EJ: ADM_USERS" } })
+                                <span class="input-group-text"><i class="bi bi-code-slash"></i></span>
+                                @Html.EditorFor(model => model.CLAVE_PERMISO, new { htmlAttributes = new { @class = "form-control fw-bold", style = "text-transform:uppercase;", placeholder = "EJ: ADM_USERS" } })
                             </div>
-                            @Html.ValidationMessageFor(model => model.CLAVE_PERMISO, "", new { @class = "text-danger small" })
+                            @Html.ValidationMessageFor(model => model.CLAVE_PERMISO, "", new { @class = "text-danger small mt-1 d-block" })
                         </div>
 
                         @* Estado con Toggle Dinámico *@
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-secondary">Estado Operativo</label>
-                            <div class="p-2 border rounded bg-light d-flex align-items-center justify-content-between">
-                                <span id="statusText" class="fw-bold @(Model.ESTADO ? "text-success" : "text-danger") ms-2">
+                            <label class="form-label small fw-bold mb-2" style="color: var(--text-main);">Estado Operativo</label>
+                            <div class="p-2 switch-container d-flex align-items-center justify-content-between h-auto" style="min-height: 38px;">
+                                <span id="statusText" class="fw-bold ms-2 small @(Model.ESTADO ? "state-active" : "state-inactive")">
                                     <i class="bi @(Model.ESTADO ? "bi-check-circle-fill" : "bi-x-circle-fill") me-1"></i>
-                                    @(Model.ESTADO ? "PERMISO ACTIVO" : "PERMISO INACTIVO")
+                                    @(Model.ESTADO ? "Activo" : "Inactivo")
                                 </span>
-                                <div class="form-check form-switch mb-0">
-                                    @Html.CheckBoxFor(model => model.ESTADO, new { @class = "form-check-input", role = "switch", id = "switchEstado", style = "width: 3em; height: 1.5em; cursor: pointer;" })
+                                <div class="form-check form-switch mb-0 pe-2">
+                                    @Html.CheckBoxFor(model => model.ESTADO, new { @class = "form-check-input shadow-none", role = "switch", id = "switchEstado", style = "cursor: pointer;" })
                                 </div>
                             </div>
                         </div>
 
                         @* Descripción *@
                         <div class="col-md-12">
-                            <label class="form-label fw-bold text-secondary">Descripción del Alcance</label>
+                            <label class="form-label small fw-bold mb-2" style="color: var(--text-main);">Descripción del Alcance</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
-                                @Html.TextAreaFor(model => model.DESCRIPCION, new { @class = "form-control", rows = "3", placeholder = "Indique las funciones de este permiso..." })
+                                <span class="input-group-text align-items-start pt-2"><i class="bi bi-card-text"></i></span>
+                                @Html.TextAreaFor(model => model.DESCRIPCION, new { @class = "form-control", rows = "3", placeholder = "Describa la función de este permiso..." })
                             </div>
-                            @Html.ValidationMessageFor(model => model.DESCRIPCION, "", new { @class = "text-danger small" })
+                            @Html.ValidationMessageFor(model => model.DESCRIPCION, "", new { @class = "text-danger small mt-1 d-block" })
                         </div>
                     </div>
 
-                    <hr class="my-4" />
+                    <hr class="my-4" style="border-color: var(--border-color);" />
 
                     @* Acciones *@
-                    <div class="d-flex justify-content-end align-items-center gap-3">
-                        <a href="@Url.Action("Index", "Permisos")" class="btn btn-link text-decoration-none text-muted fw-bold">
-                            <i class="bi bi-arrow-left"></i> Descartar Cambios
+                    <div class="d-flex flex-column flex-sm-row justify-content-end align-items-center gap-3">
+                        <a href="@Url.Action("Index", "Permisos")" class="btn btn-link text-decoration-none small" style="color: var(--text-muted);">
+                            Cancelar
                         </a>
-                        <button type="submit" class="btn btn-primary px-5 shadow fw-bold">
-                            <i class="bi bi-cloud-arrow-up me-1"></i> Actualizar Permiso
+                        <button type="submit" class="btn btn-primary-custom px-4 py-2 w-100 w-sm-auto">
+                            Guardar Cambios
                         </button>
                     </div>
                 </div>
@@ -88,27 +233,27 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
-    
+
     <script>
         $(document).ready(function () {
-        // Transformar a mayúsculas en tiempo real
-        $('#CLAVE_PERMISO').on('input', function () {
-        this.value = this.value.toUpperCase();
-        });
+            // Transformar a mayúsculas
+            $('#CLAVE_PERMISO').on('input', function () {
+                this.value = this.value.toUpperCase();
+            });
 
-        // Feedback visual dinámico del switch de estado
-        $('#switchEstado').change(function() {
-        const isChecked = $(this).is(':checked');
-        const statusBox = $('#statusText');
-                
-        if(isChecked) {
-        statusBox.removeClass('text-danger').addClass('text-success')
-        .html('<i class="bi bi-check-circle-fill me-1"></i> PERMISO ACTIVO');
-        } else {
-        statusBox.removeClass('text-success').addClass('text-danger')
-        .html('<i class="bi bi-x-circle-fill me-1"></i> PERMISO INACTIVO');
-        }
-        });
+            // Feedback del switch sin efectos exagerados
+            $('#switchEstado').change(function() {
+                const isChecked = $(this).is(':checked');
+                const statusBox = $('#statusText');
+
+                if(isChecked) {
+                    statusBox.removeClass('state-inactive').addClass('state-active')
+                             .html('<i class="bi bi-check-circle-fill me-1"></i> Activo');
+                } else {
+                    statusBox.removeClass('state-active').addClass('state-inactive')
+                             .html('<i class="bi bi-x-circle-fill me-1"></i> Inactivo');
+                }
+            });
         });
     </script>
 }

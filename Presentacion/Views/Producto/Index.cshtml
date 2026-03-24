@@ -6,21 +6,41 @@
 
 <style>
     /* ==========================================
-           1. VARIABLES GLOBALES Y NEÓN (Desde el Home)
-           ========================================== */
+               1. VARIABLES GLOBALES (MODO CLARO)
+               ========================================== */
     :root {
+        --bg-main: #F4F7FE;
+        --bg-card: #FFFFFF;
+        --text-main: #2B3674;
+        --text-muted: #707EAE;
+        --border-color: #E2E8F0;
+        /* Variables Neón Oficiales */
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.05);
+        --success-color: #05CD99;
+        --success-glow: rgba(5, 205, 153, 0.2);
+        --danger-color: #EE5D50;
+        --danger-glow: rgba(238, 93, 80, 0.2);
+    }
+
+    /* ==========================================
+               1.5 VARIABLES MODO OSCURO
+               ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
         --text-main: #FFFFFF;
         --text-muted: #8A8A98;
         --border-color: #2D2D3A;
-        /* Variables Neón de tu Home */
+        /* Variables Neón Brillantes */
         --neon-blue-base: #00D4FF;
-        --neon-blue-glow: rgba(0, 212, 255, 0.4);
-        --neon-blue-tint: rgba(0, 212, 255, 0.05); /* Ligeramente más suave para la tabla */
-
-        --success-color: #00FF7F;
+        --neon-blue-glow: rgba(0, 212, 255, 0.5);
+        --neon-blue-tint: rgba(0, 212, 255, 0.15);
+        --success-color: #20C997;
+        --success-glow: rgba(32, 201, 151, 0.3);
         --danger-color: #E83E8C;
+        --danger-glow: rgba(232, 62, 140, 0.3);
     }
 
     body {
@@ -29,8 +49,8 @@
     }
 
     /* ==========================================
-           2. BOTONES ESTILO NEÓN
-           ========================================== */
+               2. BOTONES ESTILO NEÓN
+               ========================================== */
     .btn-neon {
         background: transparent;
         color: var(--neon-blue-base) !important;
@@ -47,27 +67,35 @@
 
         .btn-neon:hover {
             background: var(--neon-blue-base);
-            color: #000 !important; /* Texto negro para contraste al hacer hover */
+            color: #FFF !important;
             box-shadow: 0 0 20px var(--neon-blue-glow);
             transform: translateY(-2px);
         }
 
-    /* ==========================================
-           3. TABLA CON EFECTOS NEÓN
-           ========================================== */
-    .yunet-table-container {
-        background-color: var(--bg-card);
-        border-radius: 16px; /* Mismo radio que las cards del home */
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    [data-bs-theme="dark"] .btn-neon:hover {
+        color: #000 !important;
     }
 
-        .yunet-table-container:hover {
-            border-color: rgba(0, 212, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
-        }
+    /* ==========================================
+               3. TABLA CON EFECTOS NEÓN
+               ========================================== */
+    .yunet-table-container {
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .yunet-table-container {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .yunet-table-container:hover {
+        border-color: rgba(0, 212, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+    }
 
     .yunet-table {
         width: 100%;
@@ -76,7 +104,7 @@
     }
 
         .yunet-table thead tr {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -94,10 +122,8 @@
             transition: all 0.3s ease;
         }
 
-            /* Hover de fila con el "tint" neón de tu home */
             .yunet-table tbody tr:hover {
                 background-color: var(--neon-blue-tint);
-                /* Borde lateral izquierdo sutil en hover */
                 box-shadow: inset 3px 0 0 var(--neon-blue-base);
             }
 
@@ -107,16 +133,16 @@
         }
 
     /* ==========================================
-           4. ELEMENTOS INTERNOS (Imágenes, Badges, Botones)
-           ========================================== */
+               4. ELEMENTOS INTERNOS (Imágenes, Badges, Botones)
+               ========================================== */
     .product-img {
         width: 50px;
         height: 50px;
         object-fit: cover;
         border-radius: 10px;
         border: 1px solid var(--border-color);
-        background-color: #000;
-        transition: transform 0.3s ease;
+        background-color: var(--bg-main);
+        transition: transform 0.3s ease, border-color 0.3s ease;
     }
 
     .yunet-table tbody tr:hover .product-img {
@@ -137,12 +163,13 @@
     .badge-active {
         color: var(--success-color);
         border-color: var(--success-color);
-        box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
+        box-shadow: 0 0 10px var(--success-glow);
     }
 
     .badge-inactive {
         color: var(--danger-color);
         border-color: var(--danger-color);
+        box-shadow: 0 0 10px var(--danger-glow);
     }
 
     .action-btn {
@@ -161,10 +188,10 @@
         }
 
     /* ==========================================
-           5. INPUTS DEL MODAL (Estilo Neón)
-           ========================================== */
+               5. INPUTS DEL MODAL (Estilo Dinámico)
+               ========================================== */
     .custom-input {
-        background-color: rgba(0, 0, 0, 0.3) !important;
+        background-color: var(--bg-main) !important;
         border: 1px solid var(--border-color) !important;
         color: var(--text-main) !important;
         border-radius: 8px !important;
@@ -179,15 +206,24 @@
         }
 
         .custom-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+            color: var(--text-muted) !important;
+            opacity: 0.6;
         }
+
+    .btn-close-dynamic {
+        filter: none;
+    }
+
+    [data-bs-theme="dark"] .btn-close-dynamic {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
 </style>
 
 <div class="container-fluid container-xl mt-4 px-4 pb-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="h3 fw-bold mb-1 text-white">
+            <h2 class="h3 fw-bold mb-1" style="color: var(--text-main);">
                 <i class="bi bi-box-seam me-2" style="color: var(--neon-blue-base); text-shadow: 0 0 10px var(--neon-blue-glow);"></i>
                 Gestión de Inventario
             </h2>
@@ -200,10 +236,10 @@
 
     @if (TempData["MensajeExito"] != null)
     {
-        <div class="alert alert-success d-flex align-items-center mb-4" role="alert" style="background-color: rgba(0, 255, 127, 0.1); border: 1px solid var(--success-color); color: var(--success-color); border-radius: 12px;">
-            <i class="bi bi-check-circle-fill me-3 fs-5" style="text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);"></i>
+        <div class="alert alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert" style="background-color: var(--bg-card); border: 1px solid var(--success-color); color: var(--success-color); border-radius: 12px; border-left: 5px solid var(--success-color);">
+            <i class="bi bi-check-circle-fill me-3 fs-5" style="text-shadow: 0 0 10px var(--success-glow);"></i>
             <div>@TempData["MensajeExito"]</div>
-            <button type="button" class="btn-close btn-close-white ms-auto opacity-50" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close btn-close-dynamic ms-auto opacity-50" data-bs-dismiss="alert"></button>
         </div>
     }
 
@@ -231,18 +267,18 @@
                                          class="product-img" onerror="this.src='/images/no-image.png'" alt="Imagen Producto" />
                                 </td>
                                 <td>
-                                    <span class="d-block text-white fw-bold" style="font-size: 0.95rem;">@item.MODELO</span>
+                                    <span class="d-block fw-bold" style="font-size: 0.95rem; color: var(--text-main);">@item.MODELO</span>
                                     <span class="small" style="color: var(--text-muted);">
                                         ID Marca: <span style="color: var(--neon-blue-base);">@item.ID_MARCA</span>
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="fw-bold fs-5" style="color: var(--neon-blue-base); text-shadow: 0 0 8px rgba(0,212,255,0.2);">
+                                    <span class="fw-bold fs-5" style="color: var(--neon-blue-base); text-shadow: 0 0 8px var(--neon-blue-glow);">
                                         $@item.PRECIO.ToString("N2")
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="text-white fw-medium">@item.EXISTENCIAS</span> <span class="small" style="color: var(--text-muted);">uds</span>
+                                    <span class="fw-medium" style="color: var(--text-main);">@item.EXISTENCIAS</span> <span class="small" style="color: var(--text-muted);">uds</span>
                                 </td>
                                 <td>
                                     <span class="badge badge-status @(item.ESTADO ? "badge-active" : "badge-inactive")">
@@ -279,17 +315,18 @@
     </div>
 </div>
 
+@* MODAL CONFIGURAR PRODUCTO *@
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.8);">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.2);">
 
-            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3 relative overflow-hidden">
+            <div class="modal-header px-4 py-3 relative overflow-hidden" style="border-bottom: 1px solid var(--border-color);">
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue-base), transparent);"></div>
 
-                <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" style="color: var(--text-main);">
                     <i class="bi bi-gear" style="color: var(--neon-blue-base);"></i> Configurar Producto
                 </h5>
-                <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-dynamic opacity-50" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <form asp-action="Editar" method="post" enctype="multipart/form-data">
@@ -324,8 +361,8 @@
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Precio</label>
                             <div class="input-group">
-                                <span class="input-group-text border-0" style="background-color: rgba(0, 212, 255, 0.1); color: var(--neon-blue-base); border-radius: 8px 0 0 8px;">$</span>
-                                <input type="number" step="0.01" class="form-control custom-input fw-bold" id="edit_Precio" name="PRECIO" style="border-radius: 0 8px 8px 0 !important; color: var(--neon-blue-base) !important;" required />
+                                <span class="input-group-text border-0" style="background-color: var(--neon-blue-tint); border: 1px solid var(--border-color) !important; border-right: none !important; color: var(--neon-blue-base); border-radius: 8px 0 0 8px;">$</span>
+                                <input type="number" step="0.01" class="form-control custom-input fw-bold" id="edit_Precio" name="PRECIO" style="border-radius: 0 8px 8px 0 !important; border-left: none !important; color: var(--neon-blue-base) !important;" required />
                             </div>
                         </div>
 
@@ -354,8 +391,8 @@
                     </div>
                 </div>
 
-                <div class="modal-footer border-top border-secondary border-opacity-25 px-4 py-3">
-                    <button type="button" class="btn text-muted fw-bold me-2" data-bs-dismiss="modal">CANCELAR</button>
+                <div class="modal-footer px-4 py-3" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn fw-bold me-2" style="color: var(--text-muted);" data-bs-dismiss="modal">CANCELAR</button>
                     <button type="submit" class="btn-neon"><i class="bi bi-save"></i> GUARDAR</button>
                 </div>
             </form>
