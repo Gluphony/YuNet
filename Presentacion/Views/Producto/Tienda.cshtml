@@ -7,8 +7,8 @@
 
 <style>
     /* ==========================================
-           1. GRID FLUIDO (Catálogo a pantalla completa)
-           ========================================== */
+               1. GRID FLUIDO (Catálogo a pantalla completa)
+               ========================================== */
     .grilla-fluida {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Tarjetas un poco más grandes para la tienda */
@@ -158,7 +158,6 @@
             if (item.ESTADO && item.EXISTENCIAS > 0)
             {
                 string modeloJs = item.MODELO.Replace("'", "\\'");
-                string precioJs = item.PRECIO.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
 
                 <div class="tech-card">
                     @if (item.EXISTENCIAS <= 5)
@@ -184,7 +183,7 @@
                                 $@item.PRECIO.ToString("N2")
                             </span>
 
-                            <button class="btn btn-tech" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs', @precioJs)">
+                            <button class="btn btn-tech" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs')">
                                 <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
                             </button>
                         </div>
@@ -199,39 +198,88 @@
 
 @section Scripts {
     <script>
-        function agregarAlCarrito(id, modelo, precio) {
-            // Aquí puedes hacer una petición fetch (AJAX) a tu CarritoController real.
-            // Por ahora, simulamos visualmente que se agregó para darle feedback al cliente.
+        function agregarAlCarrito(idProducto, modelo) {
+            // 1. Petición real al Controlador (AJAX / Fetch)
+            fetch('/Carrito/Agregar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: idProducto }) // Pasamos el ID del producto
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 2. Mostramos tu notificación visual (Toast)
+                    mostrarNotificacion(`¡<strong>${modelo}</strong> agregado a tu carrito!`);
 
-            mostrarNotificacion(`¡<strong>${modelo}</strong> agregado a tu carrito!`);
+                    // 3. Efecto visual divertido en el nav
+                    let iconoNav = document.querySelector('.bi-cart3');
+                    if(iconoNav) {
+                        iconoNav.classList.add('bi-cart-fill');
+                        iconoNav.classList.remove('bi-cart3');
+                        iconoNav.style.color = '#20C997';
+                        setTimeout(() => {
+                            iconoNav.classList.remove('bi-cart-fill');
+                            iconoNav.classList.add('bi-cart3');
+                            iconoNav.style.color = '';
+                        }, 1000);
+                    }
 
-            // Efecto visual divertido: hacer vibrar el carrito en la barra de navegación superior (si tienes el ID)
-            let iconoNav = document.querySelector('.bi-cart3');
-            if(iconoNav) {
-                iconoNav.classList.add('bi-cart-fill');
-                iconoNav.classList.remove('bi-cart3');
-                iconoNav.style.color = '#20C997';
-                setTimeout(() => {
-                    iconoNav.classList.remove('bi-cart-fill');
-                    iconoNav.classList.add('bi-cart3');
-                    iconoNav.style.color = '';
-                }, 1000);
-            }
+                    // 4. Recargamos el HTML del carrito y lo abrimos
+                    actualizarYAbrirOffcanvas();
+
+                } else {
+                    // Si algo falla en tu lógica (ej. no hay stock o error de validación)
+                    mostrarNotificacion(`Error: ${data.message}`, true);
+                }
+            })
+            .catch(error => {
+                console.error("Error en la petición:", error);
+                mostrarNotificacion("Ocurrió un error al conectar con el servidor.", true);
+            });
         }
 
-        function mostrarNotificacion(mensaje) {
+        // Función para traer el HTML actualizado del carrito y mostrar el panel
+        function actualizarYAbrirOffcanvas() {
+            // AJUSTE: Asegúrate de que esta URL sea la correcta hacia tu controlador
+            fetch('/Carrito/ObtenerResumen')
+                .then(response => response.text())
+                .then(html => {
+                    // Inyecta el HTML en el contenedor del layout
+                    let contenedor = document.getElementById('contenedorCarrito');
+                    if(contenedor) {
+                        contenedor.innerHTML = html;
+                    }
+
+                    // Abrimos el Offcanvas de Bootstrap 5
+                    let offcanvasElement = document.getElementById('offcanvasCarrito');
+                    if(offcanvasElement) {
+                        let bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+                        bsOffcanvas.show();
+                    }
+                })
+                .catch(error => console.error("Error actualizando el offcanvas:", error));
+        }
+
+        function mostrarNotificacion(mensaje, esError = false) {
             const container = document.getElementById("toastContainer");
             const toast = document.createElement("div");
-            toast.className = "yunet-toast";
 
-            toast.innerHTML = `<i class="bi bi-check-circle-fill me-3 fs-4" style="color: #20C997;"></i> <span style="font-size: 0.95rem;">${mensaje}</span>`;
+            // Cambiamos el color e icono dependiendo si es un éxito o un error
+            let color = esError ? "#E83E8C" : "#20C997";
+            let icono = esError ? "bi-x-circle-fill" : "bi-check-circle-fill";
+
+            toast.className = "yunet-toast";
+            toast.style.borderLeftColor = color;
+            toast.innerHTML = `<i class="bi ${icono} me-3 fs-4" style="color: ${color};"></i> <span style="font-size: 0.95rem;">${mensaje}</span>`;
 
             container.appendChild(toast);
 
-            // Pequeño delay para la animación
+            // Animación de entrada
             setTimeout(() => toast.classList.add("show"), 10);
 
-            // Ocultar y destruir después de 3.5 segundos
+            // Animación de salida y destrucción del elemento
             setTimeout(() => {
                 toast.classList.remove("show");
                 setTimeout(() => toast.remove(), 400);

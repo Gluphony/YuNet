@@ -154,7 +154,6 @@
             cursor: pointer;
         }
 
-        /* Clase extra para el usuario no logueado */
         .user-circle-guest {
             background: var(--text-muted) !important;
         }
@@ -202,6 +201,41 @@
             .footer-link:hover {
                 color: var(--tech-accent);
                 transform: translateX(5px);
+            }
+
+        /* ==========================================
+                   5. ANIMACIONES DE DROPDOWN Y PERFIL
+                   ========================================== */
+        .dropdown-menu.show {
+            animation: dropDownAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-origin: top;
+        }
+
+        @@keyframes dropDownAnim {
+            0%
+
+        {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        }
+
+        .user-profile-btn {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+            .user-profile-btn:hover {
+                opacity: 0.85;
+            }
+
+            .user-profile-btn:active {
+                transform: scale(0.96);
             }
     </style>
 </head>
@@ -252,32 +286,48 @@
                             </li>
                         }
 
-            <div class="sidebar-heading mt-4 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Administración</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseSeguridad">
-                    <i class="bi bi-gear me-3"></i><span>Ajustes</span>
-                </a>
-                <div id="collapseSeguridad" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-people me-2 text-muted"></i>Usuarios</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Rol")"><i class="bi bi-shield-lock me-2 text-muted"></i>Perfiles</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Permisos")"><i class="bi bi-key me-2 text-muted"></i>Permisos</a>
-                    </div>
-                </div>
-            </li>
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
+                                    Operaciones
+                                </a>
+                                <ul class="dropdown-menu border-0 mt-2">
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Carrito")"><i class="bi bi-cart3 me-2" style="color: var(--tech-primary);"></i> Punto de Venta</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Pedido")"><i class="bi bi-receipt me-2" style="color: var(--tech-primary);"></i> Historial</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Devolucion")"><i class="bi bi-arrow-return-left me-2" style="color: var(--tech-primary);"></i> Devoluciones</a></li>
+                                </ul>
+                            </li>
+                        }
 
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
+                        {
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
                                     Inventario
                                 </a>
                                 <ul class="dropdown-menu border-0 mt-2">
-                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Producto")"><i class="bi bi-phone me-2" style="color: var(--tech-accent);"></i> Productos</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Producto")"><i class="bi bi-phone me-2" style="color: var(--tech-accent);"></i> Gestión Productos</a></li>
                                     <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Marca")"><i class="bi bi-award me-2" style="color: var(--tech-accent);"></i> Marcas</a></li>
 
                                     @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor"))
                                     {
                                         <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Categoria")"><i class="bi bi-tags me-2" style="color: var(--tech-accent);"></i> Categorías</a></li>
                                     }
+                                </ul>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear me-1"></i> Ajustes
+                                </a>
+                                <ul class="dropdown-menu border-0 mt-2">
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-people me-2" style="color: var(--tech-accent);"></i> Usuarios</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Rol")"><i class="bi bi-shield-lock me-2" style="color: var(--tech-accent);"></i> Perfiles</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Permisos")"><i class="bi bi-key me-2" style="color: var(--tech-accent);"></i> Permisos</a></li>
                                 </ul>
                             </li>
                         }
@@ -299,7 +349,7 @@
                 }
 
                 <div class="dropdown">
-                    <div class="d-flex align-items-center gap-2 click-anim" role="button" data-bs-toggle="dropdown">
+                    <div class="d-flex align-items-center gap-2 user-profile-btn" role="button" data-bs-toggle="dropdown">
                         <div class="d-none d-md-block text-end">
                             <div class="fw-bold lh-1" style="font-size: 0.95rem;">@userName</div>
                             <small style="color: var(--tech-accent); font-size: 0.75rem; font-weight: bold;">@userRole</small>
@@ -410,5 +460,6 @@
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

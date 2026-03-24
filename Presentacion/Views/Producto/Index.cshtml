@@ -1,41 +1,82 @@
 ﻿@model IEnumerable<Entidades.Producto>
 
 @{
-    ViewData["Title"] = "Catálogo de Productos";
+    ViewData["Title"] = "YuNet Store - Catálogo";
 }
 
 <style>
+    /* ==========================================
+           1. VARIABLES GLOBALES Y NEÓN (Desde el Home)
+           ========================================== */
     :root {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
         --text-main: #FFFFFF;
         --text-muted: #8A8A98;
-        --accent-purple: #C6C3F2;
         --border-color: #2D2D3A;
-        --success-color: #20C997;
+        /* Variables Neón de tu Home */
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.05); /* Ligeramente más suave para la tabla */
+
+        --success-color: #00FF7F;
         --danger-color: #E83E8C;
     }
 
-    .yunet-container {
+    body {
+        background-color: var(--bg-main);
         color: var(--text-main);
-        font-family: system-ui, -apple-system, sans-serif;
     }
 
+    /* ==========================================
+           2. BOTONES ESTILO NEÓN
+           ========================================== */
+    .btn-neon {
+        background: transparent;
+        color: var(--neon-blue-base) !important;
+        border: 1px solid var(--neon-blue-base);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 10px 20px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon:hover {
+            background: var(--neon-blue-base);
+            color: #000 !important; /* Texto negro para contraste al hacer hover */
+            box-shadow: 0 0 20px var(--neon-blue-glow);
+            transform: translateY(-2px);
+        }
+
+    /* ==========================================
+           3. TABLA CON EFECTOS NEÓN
+           ========================================== */
     .yunet-table-container {
         background-color: var(--bg-card);
-        border-radius: 12px;
+        border-radius: 16px; /* Mismo radio que las cards del home */
         overflow: hidden;
         border: 1px solid var(--border-color);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.4s ease, box-shadow 0.4s ease;
     }
 
+        .yunet-table-container:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+        }
+
     .yunet-table {
-        color: var(--text-muted);
-        border-collapse: collapse;
         width: 100%;
+        border-collapse: collapse;
+        color: var(--text-muted);
     }
 
         .yunet-table thead tr {
-            background-color: transparent;
+            background-color: rgba(0, 0, 0, 0.2);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -44,18 +85,20 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.8rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             padding: 1rem 1.5rem;
-            text-align: left;
         }
 
         .yunet-table tbody tr {
             border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
         }
 
+            /* Hover de fila con el "tint" neón de tu home */
             .yunet-table tbody tr:hover {
-                background-color: rgba(255, 255, 255, 0.02);
+                background-color: var(--neon-blue-tint);
+                /* Borde lateral izquierdo sutil en hover */
+                box-shadow: inset 3px 0 0 var(--neon-blue-base);
             }
 
         .yunet-table td {
@@ -63,141 +106,118 @@
             vertical-align: middle;
         }
 
+    /* ==========================================
+           4. ELEMENTOS INTERNOS (Imágenes, Badges, Botones)
+           ========================================== */
     .product-img {
-        width: 48px;
-        height: 48px;
+        width: 50px;
+        height: 50px;
         object-fit: cover;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid var(--border-color);
-        background-color: var(--bg-main);
+        background-color: #000;
+        transition: transform 0.3s ease;
     }
 
-    .product-model {
-        color: var(--text-main);
-        font-weight: 600;
-        margin-bottom: 2px;
-        display: block;
+    .yunet-table tbody tr:hover .product-img {
+        border-color: var(--neon-blue-base);
+        transform: scale(1.05);
     }
 
-    .product-desc {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 250px;
-        display: block;
-    }
-
-    .yunet-badge {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 4px 8px;
+    .badge-status {
+        padding: 0.4em 0.8em;
         border-radius: 6px;
-        text-transform: uppercase;
+        font-weight: 600;
+        font-size: 0.75rem;
         letter-spacing: 0.5px;
+        background: transparent;
+        border: 1px solid;
     }
 
-    .badge-success {
-        background-color: rgba(32, 201, 151, 0.1);
+    .badge-active {
         color: var(--success-color);
+        border-color: var(--success-color);
+        box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
     }
 
-    .badge-danger {
-        background-color: rgba(232, 62, 140, 0.1);
+    .badge-inactive {
         color: var(--danger-color);
+        border-color: var(--danger-color);
     }
 
     .action-btn {
         background: transparent;
         border: none;
         color: var(--text-muted);
-        padding: 6px;
-        border-radius: 6px;
+        padding: 8px;
+        border-radius: 8px;
         transition: all 0.2s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
 
         .action-btn:hover {
-            background-color: rgba(198, 195, 242, 0.1);
-            color: var(--accent-purple);
+            background-color: var(--neon-blue-tint);
+            color: var(--neon-blue-base);
+            box-shadow: 0 0 15px var(--neon-blue-glow);
         }
 
-    .action-btn-danger:hover {
-        background-color: rgba(232, 62, 140, 0.1);
-        color: var(--danger-color);
+    /* ==========================================
+           5. INPUTS DEL MODAL (Estilo Neón)
+           ========================================== */
+    .custom-input {
+        background-color: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 8px !important;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
     }
 
-    .btn-create {
-        background-color: var(--accent-purple);
-        color: #13131A;
-        font-weight: 700;
-        border-radius: 8px;
-        padding: 10px 20px;
-        border: none;
-        transition: opacity 0.2s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-        .btn-create:hover {
-            opacity: 0.9;
-            color: #13131A;
+        .custom-input:focus {
+            border-color: var(--neon-blue-base) !important;
+            box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+            outline: none;
         }
 
-    .yunet-alert {
-        border-radius: 8px;
-        border: none;
-        color: white;
-        padding: 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        font-weight: 500;
-    }
+        .custom-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
 </style>
 
-<div class="container-fluid yunet-container mt-4 px-4">
+<div class="container-fluid container-xl mt-4 px-4 pb-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2">
-        <h2 class="h3 fw-bold mb-0">Catálogo de Productos</h2>
-        <a asp-action="Create" class="btn-create shadow-sm">
-            <i class="bi bi-plus-lg"></i> Nuevo Producto
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 fw-bold mb-1 text-white">
+                <i class="bi bi-box-seam me-2" style="color: var(--neon-blue-base); text-shadow: 0 0 10px var(--neon-blue-glow);"></i>
+                Gestión de Inventario
+            </h2>
+            <p class="mb-0 small" style="color: var(--text-muted);">Administra tu catálogo de <span style="color: var(--neon-blue-base);">YuNet Store</span></p>
+        </div>
+        <a asp-action="Create" class="btn-neon">
+            <i class="bi bi-plus-lg"></i> Agregar Producto
         </a>
     </div>
 
     @if (TempData["MensajeExito"] != null)
     {
-        <div class="yunet-alert shadow" style="background-color: var(--success-color);">
-            <span><i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]</span>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.7;"></button>
-        </div>
-    }
-    @if (TempData["MensajeError"] != null)
-    {
-        <div class="yunet-alert shadow" style="background-color: var(--danger-color);">
-            <span><i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]</span>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1); opacity: 0.7;"></button>
+        <div class="alert alert-success d-flex align-items-center mb-4" role="alert" style="background-color: rgba(0, 255, 127, 0.1); border: 1px solid var(--success-color); color: var(--success-color); border-radius: 12px;">
+            <i class="bi bi-check-circle-fill me-3 fs-5" style="text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);"></i>
+            <div>@TempData["MensajeExito"]</div>
+            <button type="button" class="btn-close btn-close-white ms-auto opacity-50" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="yunet-table-container shadow-lg">
+    <div class="yunet-table-container">
         <div class="table-responsive">
             <table class="yunet-table mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 80px;">Imagen</th>
-                        <th>Modelo / Nombre</th>
+                        <th style="width: 80px;">Img</th>
+                        <th>Producto</th>
                         <th>Precio</th>
-                        <th style="width: 100px;">Stock</th>
+                        <th>Stock</th>
                         <th>Estado</th>
-                        <th style="width: 120px; text-align: center;">Acciones</th>
+                        <th style="width: 100px; text-align: center;">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -208,54 +228,38 @@
                             <tr>
                                 <td>
                                     <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"
-                                         alt="Producto"
-                                         class="product-img" onerror="this.src='/images/no-image.png'" />
+                                         class="product-img" onerror="this.src='/images/no-image.png'" alt="Imagen Producto" />
                                 </td>
                                 <td>
-                                    <span class="product-model">@item.MODELO</span>
-                                    <span class="product-desc" title="@item.DESCRIPCION">@item.DESCRIPCION</span>
-                                </td>
-                                <td class="fw-bold" style="color: var(--accent-purple); font-size: 1.1rem;">
-                                    $@item.PRECIO.ToString("N2")
-                                </td>
-                                <td class="fw-semibold">
-                                    @item.EXISTENCIAS
+                                    <span class="d-block text-white fw-bold" style="font-size: 0.95rem;">@item.MODELO</span>
+                                    <span class="small" style="color: var(--text-muted);">
+                                        ID Marca: <span style="color: var(--neon-blue-base);">@item.ID_MARCA</span>
+                                    </span>
                                 </td>
                                 <td>
-                                    @if (item.ESTADO)
-                                    {
-                                        <span class="yunet-badge badge-success">Activo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="yunet-badge badge-danger">Inactivo</span>
-                                    }
+                                    <span class="fw-bold fs-5" style="color: var(--neon-blue-base); text-shadow: 0 0 8px rgba(0,212,255,0.2);">
+                                        $@item.PRECIO.ToString("N2")
+                                    </span>
                                 </td>
-                                <td style="text-align: center;">
-
-                                    <button type="button" class="action-btn" title="Editar"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEditar"
-                                            data-id="@item.ID_PRODUCTO"
-                                            data-marca="@item.ID_MARCA"
-                                            data-categoria="@item.ID_CATEGORIA"
-                                            data-modelo="@item.MODELO"
-                                            data-desc="@item.DESCRIPCION"
-                                            data-caracteristicas="@item.CARACTERISTICAS"
-                                            data-precio="@item.PRECIO"
-                                            data-existencias="@item.EXISTENCIAS"
+                                <td>
+                                    <span class="text-white fw-medium">@item.EXISTENCIAS</span> <span class="small" style="color: var(--text-muted);">uds</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-status @(item.ESTADO ? "badge-active" : "badge-inactive")">
+                                        <i class="bi @(item.ESTADO ? "bi-check-circle-fill" : "bi-x-circle-fill") me-1"></i>
+                                        @(item.ESTADO ? "Activo" : "Inactivo")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="action-btn" title="Editar Producto"
+                                            data-bs-toggle="modal" data-bs-target="#modalEditar"
+                                            data-id="@item.ID_PRODUCTO" data-marca="@item.ID_MARCA"
+                                            data-categoria="@item.ID_CATEGORIA" data-modelo="@item.MODELO"
+                                            data-caracteristicas="@item.CARACTERISTICAS" data-desc="@item.DESCRIPCION"
+                                            data-precio="@item.PRECIO" data-existencias="@item.EXISTENCIAS"
                                             data-estado="@(item.ESTADO ? "true" : "false")">
-                                        <i class="bi bi-pencil-square" style="font-size: 1.1rem;"></i>
+                                        <i class="bi bi-pencil-square fs-5"></i>
                                     </button>
-
-                                    @if (item.ESTADO)
-                                    {
-                                        <form asp-action="Desactivar" asp-route-id="@item.ID_PRODUCTO" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que desea desactivar este producto?');">
-                                            <button type="submit" class="action-btn action-btn-danger ms-1" title="Desactivar">
-                                                <i class="bi bi-trash3" style="font-size: 1.1rem;"></i>
-                                            </button>
-                                        </form>
-                                    }
                                 </td>
                             </tr>
                         }
@@ -264,8 +268,8 @@
                     {
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="bi bi-box-seam display-6 mb-3 d-block" style="opacity: 0.3;"></i>
-                                No hay productos registrados en el sistema.
+                                <i class="bi bi-cpu fs-1 d-block mb-3" style="color: var(--neon-blue-base); opacity: 0.5;"></i>
+                                Aún no hay productos en el ecosistema.
                             </td>
                         </tr>
                     }
@@ -275,12 +279,17 @@
     </div>
 </div>
 
-<div class="modal fade yunet-container" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title fw-bold">Editar Producto</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.8);">
+
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3 relative overflow-hidden">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue-base), transparent);"></div>
+
+                <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+                    <i class="bi bi-gear" style="color: var(--neon-blue-base);"></i> Configurar Producto
+                </h5>
+                <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <form asp-action="Editar" method="post" enctype="multipart/form-data">
@@ -289,61 +298,65 @@
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Modelo / Nombre</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="edit_Modelo" name="MODELO" maxlength="100" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Nueva Imagen</label>
-                            <input type="file" class="form-control bg-dark text-white border-secondary" name="archivoImagen" accept="image/*" />
-                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Opcional: Deja vacío para conservar la actual.</small>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--neon-blue-base); letter-spacing: 1px;">Modelo</label>
+                            <input type="text" class="form-control custom-input" id="edit_Modelo" name="MODELO" required />
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Marca</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="edit_Marca" name="ID_MARCA" asp-items="ViewBag.Marcas" required>
-                                <option value="">Seleccione...</option>
-                            </select>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--neon-blue-base); letter-spacing: 1px;">Imagen</label>
+                            <input type="file" class="form-control custom-input" name="archivoImagen" accept="image/*" />
                         </div>
+
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Categoría</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias" required>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">ID Marca</label>
+                            <select class="form-select custom-input" id="edit_Marca" name="ID_MARCA" asp-items="ViewBag.Marcas" required>
                                 <option value="">Seleccione...</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label text-muted fw-semibold">Precio ($)</label>
-                            <input type="number" step="0.01" min="0.01" class="form-control bg-dark text-white border-secondary fw-bold text-success" id="edit_Precio" name="PRECIO" required />
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">ID Categoría</label>
+                            <select class="form-select custom-input" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias">
+                                <option value="">Seleccione...</option>
+                            </select>
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label text-muted fw-semibold">Existencias</label>
-                            <input type="number" min="0" step="1" class="form-control bg-dark text-white border-secondary" id="edit_Existencias" name="EXISTENCIAS" required />
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Precio</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-0" style="background-color: rgba(0, 212, 255, 0.1); color: var(--neon-blue-base); border-radius: 8px 0 0 8px;">$</span>
+                                <input type="number" step="0.01" class="form-control custom-input fw-bold" id="edit_Precio" name="PRECIO" style="border-radius: 0 8px 8px 0 !important; color: var(--neon-blue-base) !important;" required />
+                            </div>
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label text-muted fw-semibold">Estado</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="edit_Estado" name="ESTADO" required>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Stock</label>
+                            <input type="number" class="form-control custom-input" id="edit_Existencias" name="EXISTENCIAS" required />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Estado</label>
+                            <select class="form-select custom-input" id="edit_Estado" name="ESTADO">
                                 <option value="true">Activo</option>
                                 <option value="false">Inactivo</option>
                             </select>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label text-muted fw-semibold">Características Breves</label>
-                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Caracteristicas" name="CARACTERISTICAS" rows="2" maxlength="200" required></textarea>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Características</label>
+                            <textarea class="form-control custom-input" id="edit_Caracteristicas" name="CARACTERISTICAS" rows="2"></textarea>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label text-muted fw-semibold">Descripción Detallada</label>
-                            <textarea class="form-control bg-dark text-white border-secondary" id="edit_Descripcion" name="DESCRIPCION" rows="3" maxlength="500"></textarea>
-                            <div class="text-end mt-1">
-                                <small class="text-muted" style="font-size: 0.75rem;">Máximo 500 caracteres.</small>
-                            </div>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Descripción</label>
+                            <textarea class="form-control custom-input" id="edit_Descripcion" name="DESCRIPCION" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-dark" style="border-top: 1px solid var(--border-color);">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn-create" style="border:none;">Guardar Cambios</button>
+
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4 py-3">
+                    <button type="button" class="btn text-muted fw-bold me-2" data-bs-dismiss="modal">CANCELAR</button>
+                    <button type="submit" class="btn-neon"><i class="bi bi-save"></i> GUARDAR</button>
                 </div>
             </form>
         </div>
@@ -358,27 +371,19 @@
                 modalEditar.addEventListener('show.bs.modal', function (event) {
                     var button = event.relatedTarget;
 
-                    var id = button.getAttribute('data-id');
-                    var estado = button.getAttribute('data-estado');
-
-                    console.log("Editando ID: " + id);
-                    console.log("Estado que llega: " + estado);
-
-                    document.getElementById('edit_IdProducto').value = id;
+                    document.getElementById('edit_IdProducto').value = button.getAttribute('data-id');
+                    document.getElementById('edit_Modelo').value = button.getAttribute('data-modelo');
                     document.getElementById('edit_Marca').value = button.getAttribute('data-marca');
                     document.getElementById('edit_Categoria').value = button.getAttribute('data-categoria');
-                    document.getElementById('edit_Modelo').value = button.getAttribute('data-modelo');
-                    document.getElementById('edit_Descripcion').value = button.getAttribute('data-desc');
-                    document.getElementById('edit_Caracteristicas').value = button.getAttribute('data-caracteristicas');
-
-                    // Aseguramos que el estado se marque correctamente en el select
-                    if (estado) {
-                        document.getElementById('edit_Estado').value = estado.toLowerCase();
-                    }
-
-                    var precioFormateado = button.getAttribute('data-precio').replace(',', '.');
-                    document.getElementById('edit_Precio').value = precioFormateado;
                     document.getElementById('edit_Existencias').value = button.getAttribute('data-existencias');
+                    document.getElementById('edit_Caracteristicas').value = button.getAttribute('data-caracteristicas');
+                    document.getElementById('edit_Descripcion').value = button.getAttribute('data-desc');
+                    document.getElementById('edit_Estado').value = button.getAttribute('data-estado');
+
+                    var precioStr = button.getAttribute('data-precio');
+                    if (precioStr) {
+                        document.getElementById('edit_Precio').value = precioStr.replace(',', '.');
+                    }
                 });
             }
         });

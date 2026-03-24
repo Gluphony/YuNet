@@ -4,66 +4,151 @@
     ViewData["Title"] = "Registrar Devolución";
 }
 
+<style>
+    :root {
+        --neon-blue: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.3);
+        --neon-yellow: #FFCC00;
+        --neon-yellow-glow: rgba(255, 204, 0, 0.2);
+    }
+
+    /* Card de Formulario */
+    .form-card-dev {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color);
+        border-top: 4px solid var(--neon-blue) !important;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+    }
+
+    /* Inputs Estilizados */
+    .custom-field {
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-field:focus {
+            border-color: var(--neon-blue) !important;
+            box-shadow: 0 0 15px var(--neon-blue-glow) !important;
+            outline: none;
+        }
+
+    /* Switch Neón */
+    .form-check-input:checked {
+        background-color: var(--neon-blue);
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 10px var(--neon-blue-glow);
+    }
+
+    /* Sección de Advertencia */
+    .stock-panel {
+        background-color: rgba(255, 204, 0, 0.05);
+        border: 1px dashed rgba(255, 204, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .stock-panel.active {
+            border-style: solid;
+            border-color: var(--neon-yellow);
+            box-shadow: 0 0 15px var(--neon-yellow-glow);
+        }
+
+    /* Botón Final */
+    .btn-submit-dev {
+        background: var(--neon-blue);
+        color: #000 !important;
+        font-weight: 800;
+        letter-spacing: 1px;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px var(--neon-blue-glow);
+    }
+
+        .btn-submit-dev:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--neon-blue-glow);
+        }
+
+    .btn-cancel-dev {
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-cancel-dev:hover {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+            background: var(--neon-blue-tint);
+        }
+</style>
+
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
+                    <div class="premium-label mb-1" style="color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Procesamiento de Retorno</div>
                     <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Nueva Devolución</h2>
                     <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Complete el formulario para procesar el retorno del equipo.</p>
                 </div>
-                <a href="@Url.Action("Index", "Devolucion")" class="btn btn-outline-secondary border-0 shadow-sm px-3">
-                    <i class="bi bi-arrow-left me-2"></i> Cancelar
+                <a href="@Url.Action("Index", "Devolucion")" class="btn btn-cancel-dev px-4">
+                    <i class="bi bi-x-lg me-2"></i> Cancelar
                 </a>
             </div>
 
             @if (ViewBag.Error != null)
             {
-                <div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px;">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> @ViewBag.Error
+                <div class="alert shadow-lg border-0 mb-4 d-flex align-items-center" style="background-color: rgba(255, 51, 102, 0.1); color: #ff3366; border: 1px solid #ff3366; border-radius: 12px;">
+                    <i class="bi bi-exclamation-octagon-fill fs-5 me-3"></i>
+                    <div>@ViewBag.Error</div>
                 </div>
             }
 
             <form asp-action="Create" method="post">
                 @Html.AntiForgeryToken()
 
-                <div class="card border-0 shadow-sm mb-4" style="background-color: var(--bg-card); border-radius: 12px; border-left: 0.25rem solid #C6C3F2 !important;">
-                    <div class="card-body p-4">
+                <div class="card form-card-dev shadow-lg">
+                    <div class="card-body p-4 p-md-5">
 
-                        <h6 class="text-uppercase fw-bold mb-4" style="color: #C6C3F2; font-size: 0.8rem; letter-spacing: 1px;">
-                            <i class="bi bi-search me-2"></i>Vinculación de Venta
-                        </h6>
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="icon-box me-3" style="color: var(--neon-blue);"><i class="bi bi-search fs-5"></i></div>
+                            <h6 class="text-uppercase fw-bold mb-0" style="color: var(--neon-blue); font-size: 0.85rem; letter-spacing: 1px;">Vinculación de Venta</h6>
+                        </div>
 
-                        <div class="row g-3 mb-4">
+                        <div class="row g-4 mb-5">
                             <div class="col-md-6">
-                                <label asp-for="ID_DETALLE_DEVOLUCION" class="form-label small fw-bold" style="color: var(--text-muted);">ID Detalle de Venta</label>
-                                <input asp-for="ID_DETALLE_DEVOLUCION" type="number" class="form-control border-0 shadow-sm py-2"
-                                       style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Ej: 1024" required />
-                                <div class="form-text small">Indique el ID único del producto en la factura.</div>
+                                <label asp-for="ID_DETALLE_DEVOLUCION" class="form-label small fw-bold" style="color: var(--text-main);">ID Detalle de Venta</label>
+                                <input asp-for="ID_DETALLE_DEVOLUCION" type="number" class="form-control custom-field" placeholder="Ej: 1024" required />
+                                <div class="form-text small opacity-50">Localice el ID en el desglose de la factura.</div>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="ID_USUARIO_AUTORIZA" class="form-label small fw-bold" style="color: var(--text-muted);">ID Usuario que Autoriza</label>
-                                <input asp-for="ID_USUARIO_AUTORIZA" type="number" class="form-control border-0 shadow-sm py-2"
-                                       style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Su ID de usuario" required />
+                                <label asp-for="ID_USUARIO_AUTORIZA" class="form-label small fw-bold" style="color: var(--text-main);">ID Usuario que Autoriza</label>
+                                <input asp-for="ID_USUARIO_AUTORIZA" type="number" class="form-control custom-field" placeholder="Su código de empleado" required />
                             </div>
                         </div>
 
-                        <h6 class="text-uppercase fw-bold mb-4" style="color: #C6C3F2; font-size: 0.8rem; letter-spacing: 1px;">
-                            <i class="bi bi-clipboard-check me-2"></i>Condiciones y Acción
-                        </h6>
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="icon-box me-3" style="color: var(--neon-blue);"><i class="bi bi-clipboard-check fs-5"></i></div>
+                            <h6 class="text-uppercase fw-bold mb-0" style="color: var(--neon-blue); font-size: 0.85rem; letter-spacing: 1px;">Condiciones y Acción</h6>
+                        </div>
 
-                        <div class="row g-3">
-                            <div class="col-12 mb-3">
-                                <label asp-for="MOTIVO_CLIENTE" class="form-label small fw-bold" style="color: var(--text-muted);">Motivo del Cliente</label>
-                                <textarea asp-for="MOTIVO_CLIENTE" class="form-control border-0 shadow-sm" rows="3"
-                                          style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Describa la razón detallada de la devolución..." required></textarea>
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label asp-for="MOTIVO_CLIENTE" class="form-label small fw-bold" style="color: var(--text-main);">Motivo del Cliente</label>
+                                <textarea asp-for="MOTIVO_CLIENTE" class="form-control custom-field" rows="3" placeholder="Describa la razón detallada de la devolución..." required></textarea>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="ESTADO_DISPOSITIVO_RECIBIDO" class="form-label small fw-bold" style="color: var(--text-muted);">Estado del Equipo</label>
-                                <select asp-for="ESTADO_DISPOSITIVO_RECIBIDO" class="form-select border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);">
+                            <div class="col-md-6">
+                                <label asp-for="ESTADO_DISPOSITIVO_RECIBIDO" class="form-label small fw-bold" style="color: var(--text-main);">Estado del Equipo</label>
+                                <select asp-for="ESTADO_DISPOSITIVO_RECIBIDO" class="form-select custom-field">
                                     <option value="Nuevo/Sellado">Nuevo / Sellado</option>
                                     <option value="Abierto/Completo">Abierto / Accesorios Completos</option>
                                     <option value="Uso Leve">Signos de uso leve</option>
@@ -72,9 +157,9 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="ACCION_TOMADA" class="form-label small fw-bold" style="color: var(--text-muted);">Acción Tomada</label>
-                                <select asp-for="ACCION_TOMADA" class="form-select border-0 shadow-sm" style="background-color: var(--bg-main); color: var(--text-main);">
+                            <div class="col-md-6">
+                                <label asp-for="ACCION_TOMADA" class="form-label small fw-bold" style="color: var(--text-main);">Acción Tomada</label>
+                                <select asp-for="ACCION_TOMADA" class="form-select custom-field">
                                     <option value="Cambio Fisico">Cambio Físico</option>
                                     <option value="Nota de Credito">Nota de Crédito</option>
                                     <option value="Reembolso">Reembolso</option>
@@ -82,25 +167,30 @@
                                 </select>
                             </div>
 
-                            <div class="col-12 mt-3">
-                                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background-color: var(--bg-main);">
-                                    <div>
-                                        <h6 class="mb-1" style="color: var(--text-main); font-size: 0.9rem;">Regresar a Inventario</h6>
-                                        <p class="mb-0 text-muted small">¿El equipo está apto para volver a venderse?</p>
+                            <div class="col-12 mt-4">
+                                <div id="panelStock" class="stock-panel p-4 rounded-3 d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3 fs-3" id="stockIcon" style="color: var(--text-muted);">
+                                            <i class="bi bi-box-arrow-in-down"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold" style="color: var(--text-main);">Regresar a Inventario</h6>
+                                            <p class="mb-0 text-muted small">¿El equipo está apto para volver a venderse?</p>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-switch fs-4">
+                                    <div class="form-check form-switch fs-3">
                                         <input asp-for="REGRESAR_INVENTARIO" class="form-check-input" type="checkbox" role="switch" id="checkStock">
                                     </div>
                                 </div>
-                                <div id="stockWarning" class="form-text text-warning d-none mt-2 small">
-                                    <i class="bi bi-info-circle"></i> Esto activará el Trigger para sumar existencias y liberar el IMEI automáticamente.
+                                <div id="stockWarning" class="alert mt-3 d-none" style="background: rgba(255, 204, 0, 0.1); border: 1px solid var(--neon-yellow); color: var(--neon-yellow); border-radius: 8px; font-size: 0.85rem;">
+                                    <i class="bi bi-cpu-fill me-2"></i> <strong>SISTEMA:</strong> Se ejecutará el Trigger automático para sumar existencias y liberar el IMEI.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-5">
-                            <button type="submit" class="btn w-100 py-2 shadow-sm border-0" style="background-color: #C6C3F2; color: #262628; font-weight: 700; border-radius: 8px;">
-                                <i class="bi bi-check-lg me-2"></i> REGISTRAR DEVOLUCIÓN
+                        <div class="mt-5 pt-3">
+                            <button type="submit" class="btn btn-submit-dev w-100 py-3">
+                                <i class="bi bi-shield-check me-2"></i> EJECUTAR REGISTRO DE DEVOLUCIÓN
                             </button>
                         </div>
 
@@ -113,11 +203,20 @@
 
 @section Scripts {
     <script>
-        // Pequeño script para avisar al usuario sobre el stock
         document.getElementById('checkStock').addEventListener('change', function() {
             const warning = document.getElementById('stockWarning');
-            if(this.checked) warning.classList.remove('d-none');
-            else warning.classList.add('d-none');
+            const panel = document.getElementById('panelStock');
+            const icon = document.getElementById('stockIcon');
+
+            if(this.checked) {
+                warning.classList.remove('d-none');
+                panel.classList.add('active');
+                icon.style.color = "var(--neon-yellow)";
+            } else {
+                warning.classList.add('d-none');
+                panel.classList.remove('active');
+                icon.style.color = "var(--text-muted)";
+            }
         });
     </script>
 }

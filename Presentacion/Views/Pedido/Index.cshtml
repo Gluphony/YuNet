@@ -4,147 +4,311 @@
     ViewData["Title"] = "Gestión de Pedidos";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Gestión de Pedidos</h2>
-        <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Listado detallado de pedidos registrados en YuNet</p>
-    </div>
-    @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
-    {
-        <a href="/Pedido/Create" class="btn border-0 shadow-sm px-4" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px; transition: 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-            <i class="bi bi-cart-plus me-2"></i> Nuevo Pedido
-        </a>
+<style>
+    /* ==========================================
+           VARIABLES NEÓN (Heredadas del Home)
+           ========================================== */
+    :root {
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.1);
+        --neon-green: #00FF7F;
+        --neon-red: #ff3366;
+        --neon-yellow: #ffcc00;
     }
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm form-card mb-4" style="background-color: var(--bg-card); border-radius: 12px; border-left: 0.25rem solid #C6C3F2 !important; transition: 0.3s;">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: transparent; border-bottom: 1px solid var(--border-color);">
-                <h6 class="m-0 fw-bold" style="color: #C6C3F2;"><i class="bi bi-receipt me-2"></i>Listado General</h6>
+    /* ==========================================
+           ESTILOS DE LA VISTA DE PEDIDOS
+           ========================================== */
+    .order-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
+        color: var(--text-main);
+    }
 
-                <div class="dropdown no-arrow">
-                    <button class="btn btn-sm border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color) !important; font-weight: 500; border-radius: 6px;">
-                        <i class="bi bi-funnel me-1"></i> Filtrar
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background-color: var(--bg-card); border: 1px solid var(--border-color) !important;">
-                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Todos</a></li>
-                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Pendientes</a></li>
-                        <li><a class="dropdown-item" href="#" style="color: var(--text-main);">Completados</a></li>
-                    </ul>
+        .order-card:hover {
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 10px 30px var(--neon-blue-glow);
+        }
+
+    .order-card-header {
+        background-color: transparent;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    /* Botón Neón (Igual al Home) */
+    .btn-neon {
+        background: transparent;
+        color: var(--neon-blue-base) !important;
+        border: 1px solid var(--neon-blue-base);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-radius: 50px; /* Estilo pill del home */
+    }
+
+        .btn-neon:hover {
+            background: var(--neon-blue-base);
+            color: #000 !important;
+            box-shadow: 0 0 20px var(--neon-blue-glow);
+            transform: translateY(-2px);
+        }
+
+    /* Tabla Adaptable */
+    .table-orders {
+        margin-bottom: 0;
+        color: var(--text-main);
+    }
+
+        .table-orders th {
+            background-color: var(--neon-blue-tint);
+            color: var(--neon-blue-base);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 1.2rem;
+        }
+
+        .table-orders td {
+            background-color: transparent;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem;
+            vertical-align: middle;
+            transition: background-color 0.2s;
+        }
+
+        .table-orders tbody tr:hover td {
+            background-color: var(--neon-blue-tint);
+        }
+
+        .table-orders tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    /* Botones de Acción de la Tabla estilo Icon-Circle */
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-main);
+        transition: all 0.3s ease;
+        color: var(--text-main);
+    }
+
+        .action-btn.view:hover {
+            color: var(--neon-blue-base);
+            border-color: var(--neon-blue-base);
+            background-color: var(--neon-blue-tint);
+            box-shadow: 0 0 15px var(--neon-blue-glow);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .action-btn.complete:hover {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background-color: rgba(0, 255, 127, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+    /* Badges de Estado Neón */
+    .status-badge {
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 0.5em 1.2em;
+        border-radius: 8px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+        .status-badge.completado {
+            color: var(--neon-green);
+            background-color: rgba(0, 255, 127, 0.1);
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .status-badge.pendiente {
+            color: var(--neon-yellow);
+            background-color: rgba(255, 204, 0, 0.1);
+            border: 1px solid var(--neon-yellow);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+        }
+
+        .status-badge.cancelado {
+            color: var(--neon-red);
+            background-color: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+        }
+
+        .status-badge.desconocido {
+            color: var(--neon-blue-base);
+            background-color: var(--neon-blue-tint);
+            border: 1px solid var(--neon-blue-base);
+            box-shadow: 0 0 10px var(--neon-blue-glow);
+        }
+
+    /* Dropdown adaptado */
+    .dropdown-menu-neon {
+        background-color: var(--bg-card);
+        border: 1px solid var(--neon-blue-base) !important;
+        box-shadow: 0 5px 20px var(--neon-blue-glow);
+    }
+
+        .dropdown-menu-neon .dropdown-item {
+            color: var(--text-main);
+        }
+
+            .dropdown-menu-neon .dropdown-item:hover {
+                background-color: var(--neon-blue-tint);
+                color: var(--neon-blue-base);
+            }
+</style>
+
+<div class="container-fluid container-xl py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <div class="premium-label mb-1" style="color: var(--neon-blue-base); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Dashboard</div>
+            <h2 class="h3 mb-1 fw-bold" style="color: var(--text-main);">Gestión de Pedidos</h2>
+            <p class="mb-0" style="color: var(--text-muted);">Administra y da seguimiento a todas las órdenes de YuNet</p>
+        </div>
+        @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
+        {
+            <a href="/Pedido/Create" class="btn btn-neon px-4 py-2">
+                <i class="bi bi-plus-lg me-2"></i> Nuevo Pedido
+            </a>
+        }
+    </div>
+
+    <div id="notificacionPedido" style="display: none;"></div>
+
+    <div class="order-card">
+        <div class="order-card-header d-flex justify-content-between align-items-center">
+            <h5 class="m-0 fw-bold d-flex align-items-center" style="color: var(--neon-blue-base);">
+                <div class="icon-circle me-3" style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem;">
+                    <i class="bi bi-receipt"></i>
                 </div>
+                Listado General
+            </h5>
+
+            <div class="dropdown">
+                <button class="btn btn-sm d-flex align-items-center" type="button" data-bs-toggle="dropdown" style="background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.5rem 1rem;">
+                    <i class="bi bi-funnel me-2" style="color: var(--neon-blue-base);"></i> Filtrar <i class="bi bi-chevron-down ms-2" style="font-size: 0.7rem;"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg dropdown-menu-neon mt-2">
+                    <li><a class="dropdown-item" href="#">Todos los pedidos</a></li>
+                    <li><hr class="dropdown-divider" style="border-color: rgba(0, 212, 255, 0.2);"></li>
+                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-yellow);"><i class="bi bi-clock-history me-2"></i>Pendientes</a></li>
+                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-green);"><i class="bi bi-check2-circle me-2"></i>Completados</a></li>
+                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-red);"><i class="bi bi-x-circle me-2"></i>Cancelados</a></li>
+                </ul>
             </div>
+        </div>
 
-            <div class="card-body p-4">
-                <div id="notificacionPedido" style="display: none;"></div>
-
-                @if (Model != null && Model.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="dataTable" style="color: var(--text-main);">
-                            <thead style="border-bottom: 2px solid var(--border-color);">
+        <div class="card-body p-0">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-orders align-middle" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Usuario / Cliente</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th class="text-center">Estado</th>
+                                <th class="pe-4 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
                                 <tr>
-                                    <th scope="col" class="pb-3 text-uppercase border-0 rounded-start" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">ID</th>
-                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Usuario</th>
-                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Fecha</th>
-                                    <th scope="col" class="pb-3 text-uppercase border-0" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Total</th>
-                                    <th scope="col" class="pb-3 text-uppercase border-0 text-center" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Estado</th>
-                                    <th scope="col" class="pb-3 text-uppercase border-0 text-center rounded-end" style="font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody style="border-top: none;">
-                                @foreach (var item in Model)
-                                {
-                                    <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;">
-                                        <td class="py-3 fw-bold" style="color: var(--text-main);">#@item.ID_PEDIDO</td>
-                                        <td class="py-3" style="color: var(--text-muted);">
-                                            <i class="bi bi-person-badge me-1"></i> @item.ID_USUARIO
-                                        </td>
-                                        <td class="py-3" style="color: var(--text-muted);">@item.FECHA_PEDIDO.ToString("dd/MM/yyyy")</td>
-                                        <td class="py-3 fw-bold" style="color: #C6C3F2; white-space: nowrap;">
-                                            $@item.TOTAL.ToString("N2")
-                                        </td>
-                                        <td class="py-3 text-center">
-                                            @{
-                                                string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
-                                                string bgBadge = estadoStr == "COMPLETADO" ? "rgba(25, 135, 84, 0.15)" :
-                                                estadoStr == "PENDIENTE" ? "rgba(255, 193, 7, 0.15)" :
-                                                estadoStr == "CANCELADO" ? "rgba(220, 53, 69, 0.15)" : "rgba(13, 202, 240, 0.15)";
-                                                string colorBadge = estadoStr == "COMPLETADO" ? "#20c997" :
-                                                estadoStr == "PENDIENTE" ? "#ffc107" :
-                                                estadoStr == "CANCELADO" ? "#ff6b6b" : "#0dcaf0";
-                                            }
-                                            <span class="badge rounded-pill" style="background-color: @bgBadge; color: @colorBadge; border: 1px solid @(colorBadge)50; padding: 0.4em 0.8em; font-weight: 500;">
-                                                @item.ESTADO
-                                            </span>
-                                        </td>
-                                        <td class="py-3 text-center">
-                                            <div class="btn-group shadow-sm" role="group" style="border-radius: 6px;">
-                                                <a href="/Pedido/Details/@item.ID_PEDIDO" class="btn btn-sm" style="background-color: var(--bg-main); color: #0dcaf0; border: 1px solid var(--border-color) !important;" title="Ver Detalles">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                @if (User.IsInRole("Administrador"))
-                                                {
-                                                    @if (estadoStr != "COMPLETADO")
-                                                    {
-                                                        <button class="btn btn-sm" style="background-color: var(--bg-main); color: #20c997; border: 1px solid var(--border-color) !important; border-left: none !important;" onclick="cambiarEstado(@item.ID_PEDIDO, 'Completado')" title="Marcar como Completado">
-                                                            <i class="bi bi-check2-all"></i>
-                                                        </button>
-                                                    }
-                                                }
+                                    <td class="ps-4 fw-bold" style="color: var(--neon-blue-base);">
+                                        #@item.ID_PEDIDO
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="icon-circle me-3" style="width: 32px; height: 32px; font-size: 1rem;">
+                                                <i class="bi bi-person"></i>
                                             </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="bi bi-inbox" style="font-size: 4rem; color: var(--border-color);"></i>
+                                            <span style="color: var(--text-main); font-weight: 500;">@item.ID_USUARIO</span>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">
+                                        @item.FECHA_PEDIDO.ToString("dd MMM, yyyy")
+                                    </td>
+                                    <td class="fw-bold" style="letter-spacing: 0.5px; color: var(--text-main);">
+                                        C$ @item.TOTAL.ToString("N2")
+                                    </td>
+                                    <td class="text-center">
+                                        @{
+                                            string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
+                                            string claseBadge = estadoStr == "COMPLETADO" ? "completado" :
+                                            estadoStr == "PENDIENTE" ? "pendiente" :
+                                            estadoStr == "CANCELADO" ? "cancelado" : "desconocido";
+                                        }
+                                        <span class="status-badge @claseBadge">
+                                            @item.ESTADO
+                                        </span>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="/Pedido/Details/@item.ID_PEDIDO" class="action-btn view" title="Ver Detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            @if (User.IsInRole("Administrador") && estadoStr != "COMPLETADO" && estadoStr != "CANCELADO")
+                                            {
+                                                <button class="action-btn complete" onclick="cambiarEstado(@item.ID_PEDIDO, 'Completado')" title="Marcar como Completado">
+                                                    <i class="bi bi-check2-all"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <div class="icon-circle mx-auto" style="width: 100px; height: 100px; font-size: 3rem;">
+                            <i class="bi bi-inbox"></i>
                         </div>
-                        <h5 style="color: var(--text-main); font-weight: 600;">No hay pedidos registrados</h5>
-                        <p style="color: var(--text-muted);">Aún no se ha generado ningún pedido en el sistema.</p>
-                        @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
-                        {
-                            <a href="/Pedido/Create" class="btn mt-2 px-4" style="background-color: #C6C3F2; color: #262628; font-weight: 600; border-radius: 8px;">
-                                Crear mi primer pedido
-                            </a>
-                        }
                     </div>
-                }
-            </div>
+                    <h5 class="fw-bold" style="color: var(--text-main);">No hay pedidos registrados</h5>
+                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Aún no se ha generado ningún pedido en el sistema. Los pedidos aparecerán aquí una vez que los clientes realicen sus compras.</p>
+
+                    @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
+                    {
+                        <a href="/Pedido/Create" class="btn btn-neon mt-4 px-4 py-2">
+                            Crear mi primer pedido
+                        </a>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
 
-<style>
-    .form-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1.5rem 0 rgba(0, 0, 0, 0.08) !important;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: var(--bg-main) !important;
-    }
-
-    .table > :not(caption) > * > * {
-        background-color: transparent !important;
-        border-bottom-color: var(--border-color);
-    }
-
-    .dropdown-item:hover {
-        background-color: var(--bg-main);
-    }
-</style>
-
 @section Scripts {
     <script>
         function cambiarEstado(idPedido, nuevoEstado) {
-            if(confirm(`¿Desea marcar el pedido #${idPedido} como ${nuevoEstado}?`)) {
+            if(confirm(`¿Estás seguro de marcar el pedido #${idPedido} como ${nuevoEstado}?`)) {
 
                 const params = new URLSearchParams();
                 params.append('id', idPedido);
@@ -159,15 +323,23 @@
                     const divNotif = document.getElementById('notificacionPedido');
 
                     if (data.success) {
-                        divNotif.innerHTML = `<div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; border-radius: 8px;"><i class="bi bi-check-circle-fill me-2"></i>Estado actualizado correctamente.</div>`;
+                        divNotif.innerHTML = `
+                            <div class="alert shadow-lg alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid var(--neon-green); border-left: 4px solid var(--neon-green); color: var(--text-main); box-shadow: 0 0 15px rgba(0, 255, 127, 0.2);">
+                                <i class="bi bi-check-circle-fill me-2 fs-5 align-middle" style="color: var(--neon-green);"></i>
+                                <span class="align-middle">Estado del pedido <strong style="color: var(--neon-blue-base);">#${idPedido}</strong> actualizado a ${nuevoEstado}.</span>
+                            </div>`;
                         divNotif.style.display = 'block';
-                        setTimeout(() => { location.reload(); }, 1000);
+
+                        setTimeout(() => { location.reload(); }, 1500);
                     } else {
-                        divNotif.innerHTML = `<div class="alert shadow-sm border-0 mb-4" style="background-color: rgba(220, 53, 69, 0.15); color: #ff6b6b; border-radius: 8px;"><i class="bi bi-x-circle-fill me-2"></i>${data.message || 'Error al actualizar.'}</div>`;
+                        divNotif.innerHTML = `
+                            <div class="alert shadow-lg alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid var(--neon-red); border-left: 4px solid var(--neon-red); color: var(--text-main); box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle" style="color: var(--neon-red);"></i>
+                                <span class="align-middle">${data.message || 'Error al actualizar el estado del pedido.'}</span>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                            </div>`;
                         divNotif.style.display = 'block';
                     }
-
-                    setTimeout(() => { divNotif.style.display = 'none'; }, 4000);
                 })
                 .catch(error => {
                     alert("Error de conexión al intentar actualizar el estado.");

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Entidades;
 using LogicaNegocio;
@@ -115,5 +116,84 @@ namespace Presentacion.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public IActionResult Agregar([FromBody] JsonElement data)
+        {
+            try
+            {
+                // Esto arregla el error rosado
+                int idProducto = data.GetProperty("id").GetInt32();
+
+                int idUsuario = ObtenerIdUsuarioLogueado();
+                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
+
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, 1);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Este método devuelve el HTML parcial de los items para el Offcanvas
+        [HttpGet]
+        public IActionResult ObtenerResumen()
+        {
+            int idUsuario = ObtenerIdUsuarioLogueado();
+            var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
+
+            LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+            var detalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
+
+            // Retorna la vista parcial que creamos antes
+            return PartialView("_CarritoResumen", detalles);
+        }
+
+        // Este método devuelve el numerito del Badge y el Total para el Navbar
+        [HttpGet]
+        public JsonResult ObtenerInfoBasica()
+        {
+            int idUsuario = ObtenerIdUsuarioLogueado();
+            var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
+
+            LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+            var detalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
+
+            int cantidadTotal = 0;
+            if (detalles != null)
+            {
+                foreach (var d in detalles) cantidadTotal += d.CANTIDAD;
+            }
+
+            return Json(new
+            {
+                count = cantidadTotal,
+                total = miCarrito.TOTAL
+            });
+        }
+        [HttpPost]
+        [Route("DetalleCarrito/EliminarSimple/{id}")]
+        public IActionResult EliminarSimple(int id)
+        {
+            try
+            {
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                logicaDetalle.Eliminar(id);
+
+                // (Opcional) Si tu BD no recalcula el total automáticamente, 
+                // deberías llamar aquí a tu método para actualizar el total del carrito.
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
     }
 }
