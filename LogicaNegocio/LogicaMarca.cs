@@ -59,13 +59,17 @@ namespace LogicaNegocio
         public bool Desactivar(int idMarca)
         {
             if (idMarca <= 0)
-                throw new ArgumentException("El ID de la marca a desactivar no es válido.");
+                throw new ArgumentException("El ID de la marca no es válido.");
 
-            // Nota: Podrías agregar una validación que llame a otra clase para revisar 
-            // si hay productos asociados a esta marca ANTES de desactivarla.
-            // Ej: if (LogicaProducto.ContarPorMarca(idMarca) > 0) throw ...
-
-            return _datosMarca.Desactivar(idMarca);
+            try
+            {
+                return _datosMarca.Desactivar(idMarca);
+            }
+            catch (Exception ex)
+            {
+                // Aquí atrapamos el RAISERROR del SQL y lo mandamos hacia arriba (al Controller)
+                throw new Exception(ex.Message);
+            }
         }
 
         // 5. FILTRAR POR NOMBRE

@@ -109,29 +109,28 @@ namespace CapaDatos
         // 4. DESACTIVAR MARCA
         public bool Desactivar(int idMarca)
         {
-            bool respuesta = false;
-
             try
             {
                 using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
                 {
                     SqlCommand cmd = new SqlCommand("Catalogo.Sp_DesactivarMarca", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.Parameters.AddWithValue("@Id_Marca", idMarca);
 
                     conexion.Open();
-                    int filasAfectadas = cmd.ExecuteNonQuery();
 
-                    if (filasAfectadas > 0) respuesta = true;
+                    // Si el SP falla (RAISERROR), saltará directamente al catch.
+                    // Si no falla, la ejecución sigue a la siguiente línea.
+                    cmd.ExecuteNonQuery();
+
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al desactivar la marca: " + ex.Message);
+                // Lanzamos el mensaje puro de SQL para que el Controller lo atrape
+                throw new Exception(ex.Message);
             }
-
-            return respuesta;
         }
 
         // 5. FILTRAR POR NOMBRE

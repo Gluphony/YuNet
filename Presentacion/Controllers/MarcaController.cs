@@ -110,7 +110,8 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = ex.Message;
+                // Esto asegura que si el error viene de SQL, solo mostramos el texto amigable
+                TempData["MensajeError"] = "Atención: " + ex.Message;
             }
 
             return RedirectToAction("Index");
