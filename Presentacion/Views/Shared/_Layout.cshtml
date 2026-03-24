@@ -1,29 +1,42 @@
 ﻿<!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - YuNet</title>
+    <title>@ViewData["Title"] - YuNet Store</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
+        /* ==========================================
+                   1. PALETA DE COLORES "TECH E-COMMERCE"
+                   ========================================== */
         :root {
-            --bg-main: #f4f6f9;
-            --bg-card: #ffffff;
-            --text-main: #262628;
-            --text-muted: #6c757d;
-            --border-color: #e3e6f0;
+            --bg-main: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --header-bg: #FFFFFF;
+            --hover-bg: #F8FAFC;
+            --tech-primary: #2563EB;
+            --tech-accent: #06B6D4;
+            --tech-glow: rgba(37, 99, 235, 0.2);
         }
 
         [data-theme="dark"] {
-            --bg-main: #18181b;
-            --bg-card: #27272a;
-            --text-main: #e4e4e7;
-            --text-muted: #a1a1aa;
-            --border-color: #3f3f46;
+            --bg-main: #0B0F19;
+            --bg-card: #151E2E;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --header-bg: #0F172A;
+            --hover-bg: #1E293B;
+            --tech-primary: #3B82F6;
+            --tech-accent: #22D3EE;
+            --tech-glow: rgba(34, 211, 238, 0.2);
         }
 
         html, body {
@@ -31,265 +44,310 @@
             margin: 0;
             background-color: var(--bg-main) !important;
             color: var(--text-main);
-        }
-
-        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .card, .bg-white {
-            background-color: var(--bg-card) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-main);
-            transition: 0.3s;
-        }
-
-        .topbar {
-            background-color: var(--bg-card) !important;
-            transition: 0.3s;
-        }
-
-        .text-dark {
-            color: var(--text-main) !important;
         }
 
         .text-muted {
             color: var(--text-muted) !important;
         }
 
-        #wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        #content-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        /* FIX: SIDEBAR FIJO (STICKY) */
-        .sidebar {
-            background-color: #262628 !important;
-            min-width: 250px;
-            max-width: 250px;
-            transition: all 0.3s ease;
-            height: 100vh; /* Ocupa el 100% de la pantalla */
-            position: sticky; /* Se queda pegado */
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto; /* Scroll interno si es necesario */
-            scrollbar-width: none; /* Oculta scrollbar en Firefox */
-        }
-
-            .sidebar::-webkit-scrollbar {
-                display: none;
-            }
-            /* Oculta scrollbar en Chrome/Edge */
-
-            .sidebar.toggled {
-                min-width: 85px !important;
-                max-width: 85px !important;
-                text-align: center;
-            }
-
-                .sidebar.toggled .nav-item span,
-                .sidebar.toggled .sidebar-brand-text,
-                .sidebar.toggled .sidebar-heading {
-                    display: none !important;
-                }
-
-                .sidebar.toggled .collapse,
-                .sidebar.toggled .collapsing,
-                .sidebar.toggled .collapse.show {
-                    display: none !important;
-                    height: 0 !important;
-                    transition: none !important;
-                }
-
-                .sidebar.toggled .nav-link[data-bs-toggle="collapse"] {
-                    pointer-events: none;
-                }
-
-            .sidebar .nav-link {
-                color: #a1a1a5 !important;
-                transition: 0.2s;
-            }
-
-                .sidebar .nav-link i {
-                    color: #a1a1a5 !important;
-                    transition: 0.2s;
-                    font-size: 1.1rem;
-                }
-
-                .sidebar .nav-link:hover, .sidebar .nav-item.active .nav-link {
-                    color: #C6C3F2 !important;
-                    background-color: rgba(198, 195, 242, 0.05);
-                    border-right: 3px solid #C6C3F2;
-                }
-
-                    .sidebar .nav-link:hover i, .sidebar .nav-item.active .nav-link i {
-                        color: #C6C3F2 !important;
-                    }
-
-        .collapse-inner a:hover {
-            background-color: var(--bg-main);
-            color: #C6C3F2 !important;
-        }
-
-        .topbar {
-            height: 4.375rem;
+        /* ==========================================
+                   2. HEADER RETRÁCTIL Y ANIMACIONES
+                   ========================================== */
+        .yunet-header {
+            background-color: var(--header-bg) !important;
             border-bottom: 1px solid var(--border-color);
+            padding: 0.7rem 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1040;
         }
+
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-toggle-tab {
+            position: fixed;
+            top: 75px;
+            right: 30px;
+            background: var(--tech-primary);
+            color: white;
+            border: none;
+            border-radius: 0 0 8px 8px;
+            padding: 2px 15px 5px 15px;
+            cursor: pointer;
+            z-index: 1039;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 10px var(--tech-glow);
+        }
+
+        .header-hidden ~ .header-toggle-tab {
+            top: 0;
+            background: var(--tech-accent);
+        }
+
+        .click-anim {
+            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .click-anim:active {
+                transform: scale(0.92) !important;
+            }
+
+        /* ==========================================
+                   3. ESTILOS DE NAVEGACIÓN
+                   ========================================== */
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-main) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link-btn {
+            color: var(--text-main) !important;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem !important;
+            border-radius: 20px;
+            margin: 0 0.2rem;
+        }
+
+            .nav-link-btn:hover, .nav-item.show .nav-link-btn {
+                background-color: var(--hover-bg);
+                color: var(--tech-accent) !important;
+                box-shadow: 0 0 15px var(--tech-glow);
+                transform: translateY(-2px);
+            }
+
+        .header-search {
+            background-color: var(--hover-bg);
+            border-radius: 24px;
+            padding: 0.6rem 1.2rem;
+            border: 1px solid transparent;
+            color: var(--text-main);
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+            .header-search:focus {
+                outline: none;
+                border-color: var(--tech-primary);
+                box-shadow: 0 0 0 4px var(--tech-glow);
+                background-color: var(--bg-card);
+            }
 
         .user-circle {
-            background-color: #C6C3F2;
-            color: #262628;
-            width: 36px;
-            height: 36px;
-            font-weight: 800;
-        }
-
-        .btn-theme-toggle {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%);
+            color: white;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s;
+            font-size: 1.1rem;
+            cursor: pointer;
         }
 
-            .btn-theme-toggle:hover {
-                background-color: var(--border-color);
+        /* Clase extra para el usuario no logueado */
+        .user-circle-guest {
+            background: var(--text-muted) !important;
+        }
+
+        .dropdown-menu {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .dropdown-item {
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            transition: 0.2s;
+        }
+
+            .dropdown-item:hover {
+                background-color: var(--hover-bg);
+                color: var(--tech-primary);
+            }
+
+        #main-content {
+            margin-top: 90px;
+            min-height: calc(100vh - 150px);
+            transition: margin-top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .header-hidden ~ #main-content {
+            margin-top: 20px;
+        }
+
+        /* ==========================================
+                   4. FOOTER
+                   ========================================== */
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+            .footer-link:hover {
+                color: var(--tech-accent);
+                transform: translateX(5px);
             }
     </style>
 </head>
 <body>
-    <div id="wrapper">
-        <ul class="navbar-nav sidebar accordion py-3" id="accordionSidebar">
-            <li class="nav-item mb-4 mt-2">
-                <a class="sidebar-brand d-flex align-items-center justify-content-center text-decoration-none" href="@Url.Action("Index", "Home")">
-                    <div class="sidebar-brand-icon"><i class="bi bi-boxes" style="color: #C6C3F2; font-size: 1.8rem;"></i></div>
-                    <div class="sidebar-brand-text mx-3 text-white fw-bold fs-5">YuNet <sup style="color: #C6C3F2;">POS</sup></div>
-                </a>
-            </li>
 
-            <li class="nav-item">
-                <a class="nav-link px-4 py-3" href="@Url.Action("Index", "Home")"><i class="bi bi-grid-1x2-fill me-3"></i><span>Dashboard</span></a>
-            </li>
+    <nav id="yunetHeader" class="navbar navbar-expand-lg fixed-top yunet-header">
+        <div class="container-fluid">
+            <a class="navbar-brand click-anim" href="@Url.Action("Index", "Home")">
+                <i class="bi bi-cpu" style="color: var(--tech-primary); font-size: 1.8rem;"></i>
+                <span style="letter-spacing: -0.5px;">YuNet <sup style="color: var(--tech-accent); font-size: 0.7rem;">STORE</sup></span>
+            </a>
 
-            <div class="sidebar-heading mt-3 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Operaciones</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseVentas">
-                    <i class="bi bi-cart3 me-3"></i><span>Ventas</span>
-                </a>
-                <div id="collapseVentas" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Carrito" asp-action="Index">
-                            <i class="bi bi-cart-plus me-2 text-muted"></i>Punto de Venta
+            <button class="navbar-toggler border-0 click-anim" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <i class="bi bi-grid-3x3-gap-fill fs-2" style="color: var(--tech-primary);"></i>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarMain">
+                <form class="d-none d-lg-flex mx-auto position-relative click-anim" style="flex: 1; max-width: 450px;">
+                    <i class="bi bi-search position-absolute" style="top: 50%; left: 15px; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" class="header-search ps-5" placeholder="Buscar iPhone, Samsung, accesorios...">
+                </form>
+
+                <ul class="navbar-nav mb-2 mb-lg-0 align-items-center gap-1">
+
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Index", "Home")">
+                            <i class="bi bi-house-door me-1 d-lg-none"></i> Inicio
                         </a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Pedido" asp-action="Index">
-                            <i class="bi bi-receipt me-2 text-muted"></i>Pedidos
-                        </a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" asp-controller="Devolucion" asp-action="Index">
-                            <i class="bi bi-arrow-return-left me-2 text-muted"></i>Devoluciones
-                        </a>
-                    </div>
-                </div>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseInventario">
-                    <i class="bi bi-box-seam me-3"></i><span>Inventario</span>
-                </a>
-                <div id="collapseInventario" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Producto")"><i class="bi bi-phone me-2 text-muted"></i>Catálogo</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Categoria")"><i class="bi bi-tags me-2 text-muted"></i>Categorías</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Marca")"><i class="bi bi-award me-2 text-muted"></i>Marcas</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Inventario")"><i class="bi bi-clipboard-data me-2 text-muted"></i>Existencias</a>
-                    </div>
-                </div>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link px-4 py-2" href="@Url.Action("Index", "Proveedor")"><i class="bi bi-truck me-3"></i><span>Proveedores</span></a>
-            </li>
-
-            <div class="sidebar-heading mt-4 mb-2 px-4" style="font-size: 0.7rem; color: #6c6c70; letter-spacing: 1px; text-transform: uppercase;">Administración</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed px-4 py-2" href="#" data-bs-toggle="collapse" data-bs-target="#collapseSeguridad">
-                    <i class="bi bi-gear me-3"></i><span>Ajustes</span>
-                </a>
-                <div id="collapseSeguridad" class="collapse" data-bs-parent="#accordionSidebar">
-                    <div class="py-2 collapse-inner rounded shadow-sm mx-3 mb-2 mt-1" style="background-color: var(--bg-card);">
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-people me-2 text-muted"></i>Usuarios</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Rol")"><i class="bi bi-shield-lock me-2 text-muted"></i>Perfiles</a>
-                        <a class="collapse-item text-decoration-none d-block px-4 py-2" style="color: var(--text-main);" href="@Url.Action("Index", "Permisos")"><i class="bi bi-key me-2 text-muted"></i>Permisos</a>
-                    </div>
-                </div>
-            </li>
-
-            <div class="text-center mt-auto mb-4 d-none d-md-inline pt-5">
-                <button class="rounded-circle border-0 d-flex align-items-center justify-content-center mx-auto" id="sidebarToggle" style="background-color: rgba(255,255,255,0.1); width: 40px; height: 40px; color: #C6C3F2; transition: 0.3s;">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-            </div>
-        </ul>
-
-        <div id="content-wrapper">
-            <nav class="navbar navbar-expand topbar mb-4 shadow-sm px-4">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item me-4">
-                        <button id="themeToggleBtn" class="btn-theme-toggle" title="Cambiar tema">
-                            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
-                        </button>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-                            @{
-                                // Obtenemos el nombre, rol y la inicial dinámicamente
-                                string userName = User.Identity?.Name ?? "Usuario";
-                                string userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Sin Rol";
-                                string inicial = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "U";
-                            }
+                    @if (!User.Identity.IsAuthenticated || User.IsInRole("Usuario"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Index", "Producto")">
+                                <i class="bi bi-shop me-1 d-lg-none"></i> Tienda
+                            </a>
+                        </li>
+                    }
 
-                            <div class="d-flex flex-column text-end me-3 d-none d-lg-flex" style="color: var(--text-main);">
-                                <span class="fw-bold" style="font-size: 0.9rem;">@userName</span>
-                                <span class="text-muted" style="font-size: 0.75rem;">@userRole</span>
-                            </div>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center user-circle shadow-sm">@inicial</div>
-                        </a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Usuario"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Index", "Carrito")">
+                                    <i class="bi bi-cart3 me-1 d-lg-none"></i> Mi Carrito
+                                </a>
+                            </li>
+                        }
 
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown" style="background-color: var(--bg-card);">
-                            <li><a class="dropdown-item py-2" style="color: var(--text-main);" href="#"><i class="bi bi-person me-2 text-muted"></i> Mi Perfil</a></li>
-                            <li><hr class="dropdown-divider border-secondary"></li>
-                            <li><a class="dropdown-item py-2 text-danger" href="@Url.Action("Salir", "Home")"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a></li>
-                        </ul>
-                    </li>
+                        @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
+                                    Operaciones
+                                </a>
+                                <ul class="dropdown-menu border-0 mt-2">
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Carrito")"><i class="bi bi-cart3 me-2" style="color: var(--tech-primary);"></i> Punto de Venta</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Pedido")"><i class="bi bi-receipt me-2" style="color: var(--tech-primary);"></i> Historial Pedidos</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Devolucion")"><i class="bi bi-arrow-return-left me-2" style="color: var(--tech-primary);"></i> Devoluciones</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
+                                    Inventario
+                                </a>
+                                <ul class="dropdown-menu border-0 mt-2">
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Producto")"><i class="bi bi-phone me-2" style="color: var(--tech-accent);"></i> Productos</a></li>
+                                    <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Marca")"><i class="bi bi-award me-2" style="color: var(--tech-accent);"></i> Marcas</a></li>
+
+                                    @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor"))
+                                    {
+                                        <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Categoria")"><i class="bi bi-tags me-2" style="color: var(--tech-accent);"></i> Categorías</a></li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
                 </ul>
-            </nav>
-
-            <div class="container-fluid px-4 pb-4">
-                @RenderBody()
             </div>
 
-            <footer class="sticky-footer mt-auto py-3 shadow-sm border-top" style="background-color: var(--bg-card); border-color: var(--border-color) !important;">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto text-muted" style="font-size: 0.85rem;">
-                        <span>&copy; 2026 - YuNet Sistema de Inventario y POS</span>
+            <div class="d-flex align-items-center gap-3 ms-lg-3 mt-3 mt-lg-0">
+                <button id="themeToggleBtn" class="btn btn-link text-decoration-none click-anim" style="color: var(--text-muted); font-size: 1.2rem;">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+
+                @{
+                    bool isLogged = User.Identity?.IsAuthenticated ?? false;
+                    string userName = isLogged ? (User.Identity.Name ?? "Usuario") : "Invitado";
+                    string userRole = isLogged ? (User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Rol") : "Sesión no iniciada";
+                    string inicial = isLogged && !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "?";
+                    string circleClass = isLogged ? "user-circle shadow" : "user-circle user-circle-guest shadow";
+                }
+
+                <div class="dropdown">
+                    <div class="d-flex align-items-center gap-2 click-anim" role="button" data-bs-toggle="dropdown">
+                        <div class="d-none d-md-block text-end">
+                            <div class="fw-bold lh-1" style="font-size: 0.95rem;">@userName</div>
+                            <small style="color: var(--tech-accent); font-size: 0.75rem; font-weight: bold;">@userRole</small>
+                        </div>
+                        <div class="@circleClass">@inicial</div>
                     </div>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 mt-3">
+                        @if (isLogged)
+                        {
+                            <li><a class="dropdown-item py-2 click-anim" href="#"><i class="bi bi-person me-2 text-muted"></i> Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item py-2 text-danger fw-bold click-anim" href="@Url.Action("Salir", "Home")"><i class="bi bi-power me-2"></i> Salir</a></li>
+                        }
+                        else
+                        {
+                            <li><a class="dropdown-item py-2 text-primary fw-bold click-anim" href="@Url.Action("Index", "Login")"><i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión</a></li>
+                        }
+                    </ul>
                 </div>
-            </footer>
+
+            </div>
         </div>
+    </nav>
+
+    <button id="toggleHeaderBtn" class="header-toggle-tab click-anim" title="Ocultar/Mostrar Menú">
+        <i class="bi bi-chevron-up" id="toggleHeaderIcon"></i>
+    </button>
+
+    <div id="main-content">
+        @RenderBody()
     </div>
+
+    <footer class="py-5 mt-5 border-top" style="border-color: var(--border-color) !important; background-color: var(--bg-card);">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="fw-bold mb-3 d-flex align-items-center" style="color: var(--text-main);">
+                        <i class="bi bi-cpu me-2" style="color: var(--tech-primary);"></i>YuNet Store
+                    </h4>
+                    <p class="text-muted pe-lg-4">La tienda de tecnología líder en el mercado. Descubre lo último en innovación, calidad y servicio.</p>
+                </div>
+            </div>
+            <hr class="mb-4" style="border-color: var(--border-color);">
+            <div class="text-center">
+                <h6 class="fw-bold mb-1" style="color: var(--tech-primary);">YuNet Store POS</h6>
+                <small class="text-muted">&copy; @DateTime.Now.Year - Sistema de Gestión de Ventas Inteligente</small>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -297,32 +355,12 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const sidebarToggle = document.querySelector('#sidebarToggle');
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', event => {
-                    event.preventDefault();
-                    const sidebar = document.querySelector('.sidebar');
-                    sidebar.classList.toggle('toggled');
-
-                    if (sidebar.classList.contains('toggled')) {
-                        let openMenus = document.querySelectorAll('.sidebar .collapse.show');
-                        openMenus.forEach(menu => {
-                            let bsCollapse = bootstrap.Collapse.getInstance(menu);
-                            if(bsCollapse) bsCollapse.hide();
-                        });
-                    }
-
-                    const icon = sidebarToggle.querySelector('i');
-                    icon.classList.toggle('bi-chevron-left');
-                    icon.classList.toggle('bi-chevron-right');
-                });
-            }
-
+            // Lógica del Cambio de Tema
             const themeToggleBtn = document.getElementById('themeToggleBtn');
             const themeIcon = document.getElementById('themeIcon');
             const htmlEl = document.documentElement;
 
-            const savedTheme = localStorage.getItem('yunet_theme') || 'light';
+            const savedTheme = localStorage.getItem('yunet_theme') || 'dark';
             htmlEl.setAttribute('data-theme', savedTheme);
             updateIcon(savedTheme);
 
@@ -337,12 +375,37 @@
             function updateIcon(theme) {
                 if(theme === 'dark') {
                     themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-                    themeIcon.style.color = '#C6C3F2';
+                    themeIcon.style.color = 'var(--tech-accent)';
                 } else {
                     themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
-                    themeIcon.style.color = '';
+                    themeIcon.style.color = 'var(--text-muted)';
                 }
             }
+
+            // Lógica del Header Retráctil
+            const header = document.getElementById('yunetHeader');
+            const toggleHeaderBtn = document.getElementById('toggleHeaderBtn');
+            const toggleHeaderIcon = document.getElementById('toggleHeaderIcon');
+
+            let headerIsHidden = localStorage.getItem('yunet_header_hidden') === 'true';
+
+            if (headerIsHidden) {
+                header.classList.add('header-hidden');
+                toggleHeaderIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+            }
+
+            toggleHeaderBtn.addEventListener('click', () => {
+                header.classList.toggle('header-hidden');
+                headerIsHidden = header.classList.contains('header-hidden');
+
+                if (headerIsHidden) {
+                    toggleHeaderIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+                } else {
+                    toggleHeaderIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+                }
+
+                localStorage.setItem('yunet_header_hidden', headerIsHidden);
+            });
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

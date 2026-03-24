@@ -17,11 +17,14 @@ namespace Presentacion.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // Si ya está logueado, directo al Dashboard
-            if (User.Identity.IsAuthenticated)
+            // 💡 MEJORA: Prevenir NullReferenceException
+            // Verificamos primero si User e Identity no son nulos antes de preguntar si está autenticado
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
+                // Si ya está logueado, lo devolvemos a la tienda/home, NO al login de nuevo
                 return RedirectToAction("Index", "Home");
             }
+
             return View();
         }
 
@@ -36,13 +39,12 @@ namespace Presentacion.Controllers
                 {
                     DataRow fila = dtUsuario.Rows[0];
 
-                    // Mapeo de datos desde el DataTable (Asegúrate que estos nombres coincidan con tu SQL)
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.NameIdentifier, fila["Id_Usuario"].ToString()),
                         new Claim(ClaimTypes.Name, fila["Nombre"].ToString()),
                         new Claim(ClaimTypes.Email, fila["Correo"].ToString()),
-                        new Claim(ClaimTypes.Role, fila["Nombre_Rol"].ToString()) // IMPORTANTE: Este es el que lee el Layout
+                        new Claim(ClaimTypes.Role, fila["Nombre_Rol"].ToString())
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -50,7 +52,7 @@ namespace Presentacion.Controllers
                     {
                         AllowRefresh = true,
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) // La sesión dura 8 horas
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
                     };
 
                     await HttpContext.SignInAsync(
@@ -59,11 +61,7 @@ namespace Presentacion.Controllers
                         authProperties
                     );
 
-                    // ====================================================
-                    // REDIRECCIÓN UNIFICADA (YuNet Dashboard)
-                    // ====================================================
-                    // Todos van al Home, y el Home mostrará las tarjetas 
-                    // correspondientes a su rol automáticamente.
+                    // Login exitoso -> Lo mandamos al Home
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -79,10 +77,17 @@ namespace Presentacion.Controllers
             }
         }
 
+        // 💡 MEJORA: El método Salir() debe ser accesible por GET o POST, 
+        // normalmente se usa GET desde un enlace en el Layout.
+        [HttpGet]
         public async Task<IActionResult> Salir()
         {
+            // Cerramos la sesión eliminando la cookie
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Login");
+
+            // 💡 MEJORA DE EXPERIENCIA: Al salir, lo mandamos a la tienda como visitante, 
+            // no lo forzamos a ver la pantalla de Login otra vez (opcional, pero recomendado).
+            return RedirectToAction("Index", "Home");
         }
     }
 }
