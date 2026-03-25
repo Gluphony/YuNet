@@ -1,268 +1,180 @@
 ﻿@model Entidades.Carrito
 
 @{
-    ViewData["Title"] = "Mi Carrito de Compras";
+    ViewData["Title"] = User.IsInRole("Administrador") ? "Crear Pedido Manual" : "Mi Carrito";
     var detalles = ViewBag.ListaDetalles as List<Entidades.DetalleCarrito> ?? new List<Entidades.DetalleCarrito>();
+
+    // OJO AQUÍ: Necesitamos que tu controlador envíe los productos disponibles
+    var productosDisponibles = ViewBag.ProductosDisponibles as List<Entidades.Producto> ?? new List<Entidades.Producto>();
 }
 
 <style>
-    /* ==========================================
-               ESTILOS ESPECÍFICOS DEL CARRITO TECH
-               ========================================== */
-    .cart-card {
+    .admin-panel {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        overflow: hidden;
-    }
-
-    [data-theme="dark"] .cart-card {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-
-    .cart-card-header {
-        background-color: var(--hover-bg);
-        border-bottom: 1px solid var(--border-color);
-        padding: 1.2rem 1.5rem;
-    }
-
-    /* Tabla Adaptable al Tema */
-    .table-cart {
-        margin-bottom: 0;
-        color: var(--text-main);
-    }
-
-        .table-cart th {
-            background-color: var(--hover-bg);
-            color: var(--text-muted);
-            border-bottom: 2px solid var(--border-color);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            padding: 1rem;
-        }
-
-        .table-cart td {
-            background-color: var(--bg-card);
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.2rem 1rem;
-            vertical-align: middle;
-            transition: background-color 0.2s;
-        }
-
-        .table-cart tr:hover td {
-            background-color: var(--hover-bg);
-        }
-
-        .table-cart tr:last-child td {
-            border-bottom: none;
-        }
-
-    /* Botones y Badges Personalizados */
-    .btn-tech-outline {
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
-        background: transparent;
-    }
-
-        .btn-tech-outline:hover {
-            border-color: var(--tech-primary);
-            color: var(--tech-primary);
-            background-color: var(--hover-bg);
-        }
-
-    .btn-checkout {
-        background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%);
-        color: white;
-        border: none;
         border-radius: 12px;
-        transition: transform 0.2s, box-shadow 0.2s;
+        padding: 1.5rem;
     }
 
-        .btn-checkout:hover {
-            box-shadow: 0 8px 25px var(--tech-glow);
-            color: white;
+    .table-dark-custom {
+        color: var(--text-main);
+    }
+
+        .table-dark-custom th {
+            color: var(--neon-blue-base);
+            border-bottom: 2px solid var(--border-color);
         }
 
-    .price-text {
-        color: var(--tech-primary);
-        font-weight: 700;
+        .table-dark-custom td {
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+    .btn-agregar {
+        background-color: var(--neon-blue-tint);
+        color: var(--neon-blue-base);
+        border: 1px solid var(--neon-blue-base);
     }
+
+        .btn-agregar:hover {
+            background-color: var(--neon-blue-base);
+            color: #000;
+        }
 </style>
 
-<div class="container-fluid py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h3 class="fw-bold mb-1" style="color: var(--text-main);">Carrito de Compras</h3>
-            <p class="mb-0" style="color: var(--text-muted);">
-                Orden #<span class="fw-bold" style="color: var(--tech-accent);">@Model.ID_CARRITO</span>
-                creada el @Model.FECHA_CREACION.ToString("dd/MM/yyyy")
-            </p>
-        </div>
-        <a href="@Url.Action("Index", "Producto")" class="btn btn-tech-outline rounded-pill px-4 py-2 click-anim shadow-sm">
-            <i class="bi bi-arrow-left me-2"></i> Seguir Comprando
-        </a>
-    </div>
+<div class="container-fluid py-4" style="color: var(--text-main);">
 
-    @if (TempData["MensajeExito"] != null)
+    @if (User.IsInRole("Administrador"))
     {
-        <div class="alert border-0 border-start border-4 border-success shadow-sm alert-dismissible fade show" style="background-color: var(--bg-card); color: var(--text-main);">
-            <i class="bi bi-check-circle-fill text-success me-2 fs-5 align-middle"></i>
-            <span class="align-middle">@TempData["MensajeExito"]</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: var(--bs-btn-close-color);"></button>
-        </div>
-    }
-    @if (TempData["MensajeError"] != null)
-    {
-        <div class="alert border-0 border-start border-4 border-danger shadow-sm alert-dismissible fade show" style="background-color: var(--bg-card); color: var(--text-main);">
-            <i class="bi bi-exclamation-triangle-fill text-danger me-2 fs-5 align-middle"></i>
-            <span class="align-middle">@TempData["MensajeError"]</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: var(--bs-btn-close-color);"></button>
-        </div>
-    }
+        <h2 class="h3 fw-bold mb-4" style="color: var(--neon-blue-base);">
+            <i class="bi bi-person-lines-fill me-2"></i> Crear Pedido para Cliente
+        </h2>
 
-    <div class="row g-4">
-        <div class="col-xl-8 col-lg-7">
-            <div class="cart-card h-100">
-                <div class="cart-card-header d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 fw-bold" style="color: var(--text-main);">
-                        <i class="bi bi-box-seam me-2" style="color: var(--tech-primary);"></i>Artículos Seleccionados
-                    </h6>
+        <div class="row g-4">
+            <div class="col-lg-7">
+
+                <div class="admin-panel mb-4 shadow-sm">
+                    <h5 class="fw-bold mb-3">1. Seleccionar Cliente</h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="selectClienteAdmin" style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
+                            <option value="">-- Buscar y seleccionar cliente --</option>
+                            <option value="1">Carlos (ID: 1)</option>
+                            <option value="2">María (ID: 2)</option>
+                        </select>
+                        <button class="btn btn-outline-info">Fijar Cliente</button>
+                    </div>
+                </div>
+
+                <div class="admin-panel shadow-sm">
+                    <h5 class="fw-bold mb-3">2. Agregar Productos</h5>
+
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-dark-custom">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Stock</th>
+                                    <th>Precio</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (productosDisponibles.Any())
+                                {
+                                    foreach (var prod in productosDisponibles)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@prod.NOMBRE</td>
+                                            <td>@prod.STOCK</td>
+                                            <td>C$ @prod.PRECIO.ToString("N2")</td>
+                                            <td class="text-end">
+                                                <form action="/Carrito/AgregarAdmin" method="post" class="d-flex justify-content-end gap-2">
+                                                    <input type="hidden" name="idProducto" value="@prod.ID_PRODUCTO" />
+                                                    <input type="number" name="cantidad" value="1" min="1" max="@prod.STOCK" class="form-control form-control-sm" style="width: 70px; background-color: var(--bg-main); color: white;">
+                                                    <button type="submit" class="btn btn-sm btn-agregar click-anim">Agregar</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            <i class="bi bi-box-seam fs-3 d-block mb-2"></i>
+                                            El catálogo está vacío. El controlador debe enviar ViewBag.ProductosDisponibles.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="admin-panel shadow-sm h-100 d-flex flex-column">
+                    <h5 class="fw-bold mb-3" style="color: var(--neon-green);">
+                        <i class="bi bi-cart-check me-2"></i> Pedido Actual
+                    </h5>
+
+                    <div class="flex-grow-1">
+                        @if (detalles.Count > 0)
+                        {
+                            <ul class="list-group list-group-flush mb-3">
+                                @foreach (var item in detalles)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; border-color: var(--border-color); color: var(--text-main);">
+                                        <div>
+                                            <div class="fw-bold">@item.NOMBRE_PRODUCTO</div>
+                                            <small class="text-muted">@item.CANTIDAD x C$ @item.PRECIO_UNITARIO</small>
+                                        </div>
+                                        <span class="fw-bold text-info">C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))</span>
+                                        <form action="/DetalleCarrito/Eliminar" method="post">
+                                            <input type="hidden" name="idDetalle" value="@item.ID_DETALLE" />
+                                            <button class="btn btn-sm text-danger"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5 text-muted">
+                                Aún no has agregado productos al pedido de este cliente.
+                            </div>
+                        }
+                    </div>
+
+                    <hr style="border-color: var(--border-color);" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fs-5">Total a Cobrar:</span>
+                        <span class="fs-3 fw-bold" style="color: var(--neon-blue-base);">C$ @Model.TOTAL.ToString("N2")</span>
+                    </div>
 
                     @if (detalles.Count > 0)
                     {
-                        <form action="/Carrito/Vaciar" method="post" class="m-0">
-                            <input type="hidden" name="idCarrito" value="@Model.ID_CARRITO" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 click-anim" onclick="return confirm('¿Estás seguro de vaciar todo el carrito?');">
-                                <i class="bi bi-trash3 me-1"></i> Vaciar
+                        <form action="/Carrito/ProcesarCompraAdmin" method="post">
+                            <input type="hidden" name="idClienteReal" id="idClienteRealHidden" value="" required />
+                            <select name="idMetodoPago" class="form-select mb-3" style="background-color: var(--bg-main); color: var(--text-main);">
+                                <option value="1">Efectivo</option>
+                                <option value="2">Transferencia</option>
+                            </select>
+                            <button type="submit" class="btn w-100 py-3 fw-bold fs-5" style="background-color: var(--neon-blue-base); color: black;">
+                                Generar Pedido
                             </button>
                         </form>
                     }
                 </div>
-
-                <div class="table-responsive">
-                    <table class="table table-cart align-middle">
-                        <thead>
-                            <tr>
-                                <th class="ps-4 border-0">Producto</th>
-                                <th class="border-0 text-center">Precio</th>
-                                <th class="border-0 text-center">Cant.</th>
-                                <th class="border-0 text-center">Subtotal</th>
-                                <th class="pe-4 border-0 text-end">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (detalles.Count > 0)
-                            {
-                                foreach (var item in detalles)
-                                {
-                                    decimal subtotal = item.CANTIDAD * item.PRECIO_UNITARIO;
-
-                                    <tr>
-                                        <td class="ps-4">
-                                            <div class="fw-bold" style="font-size: 1.05rem;">@item.NOMBRE_PRODUCTO</div>
-                                        </td>
-                                        <td class="text-center" style="color: var(--text-muted);">
-                                            C$ @item.PRECIO_UNITARIO.ToString("N2")
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge rounded-pill" style="background-color: var(--hover-bg); color: var(--text-main); border: 1px solid var(--border-color); font-size: 0.9rem; padding: 0.4em 0.8em;">
-                                                @item.CANTIDAD
-                                            </span>
-                                        </td>
-                                        <td class="text-center price-text">
-                                            C$ @subtotal.ToString("N2")
-                                        </td>
-                                        <td class="pe-4 text-end">
-                                            <form action="/DetalleCarrito/Eliminar" method="post" class="d-inline">
-                                                <input type="hidden" name="idDetalle" value="@item.ID_DETALLE" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle click-anim" style="width: 32px; height: 32px; padding: 0;" title="Quitar producto">
-                                                    <i class="bi bi-x-lg"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center py-5">
-                                        <div style="color: var(--text-muted);">
-                                            <i class="bi bi-cart-x fs-1 d-block mb-3" style="opacity: 0.5;"></i>
-                                            <h5 class="fw-bold">Tu carrito está vacío</h5>
-                                            <p class="mb-0">¡Explora nuestra tienda y añade productos increíbles!</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
-
-        <div class="col-xl-4 col-lg-5">
-            <div class="cart-card h-100 d-flex flex-column">
-                <div class="cart-card-header">
-                    <h6 class="m-0 fw-bold" style="color: var(--text-main);">
-                        <i class="bi bi-receipt me-2" style="color: var(--tech-accent);"></i>Resumen de Orden
-                    </h6>
-                </div>
-
-                <div class="card-body p-4 d-flex flex-column flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span style="color: var(--text-muted);">Estado Actual:</span>
-                        <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(6, 182, 212, 0.1); color: var(--tech-accent); border: 1px solid var(--tech-accent);">
-                            @(string.IsNullOrEmpty(Model.ESTADO) ? "PENDIENTE" : Model.ESTADO)
-                        </span>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span style="color: var(--text-muted);">Total Artículos:</span>
-                        <span class="fw-bold" style="color: var(--text-main);">@detalles.Sum(d => d.CANTIDAD)</span>
-                    </div>
-
-                    <hr style="border-color: var(--border-color); opacity: 1;" />
-
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fs-5 fw-bold" style="color: var(--text-main);">Total a Pagar:</span>
-                        <span class="fs-4 price-text">C$ @Model.TOTAL.ToString("N2")</span>
-                    </div>
-
-                    <div class="mt-auto pt-3">
-                        @if (detalles.Count > 0)
-                        {
-                            <form action="/Carrito/ProcesarCompra" method="post">
-
-                                <div class="mb-4">
-                                    <label class="form-label" style="color: var(--text-muted); font-size: 0.9rem;">Método de Pago:</label>
-                                    <select name="idMetodoPago" class="form-select border-0 shadow-sm" style="background-color: var(--hover-bg); color: var(--text-main); cursor: pointer;" required>
-                                        <option value="" disabled selected>Selecciona tu pago...</option>
-                                        <option value="1">Efectivo (Pago al entregar)</option>
-                                        <option value="2">Transferencia Bancaria</option>
-                                        <option value="3">Tarjeta de Crédito / Débito</option>
-                                    </select>
-                                </div>
-
-                                <button type="submit" class="btn btn-checkout w-100 py-3 fw-bold fs-5 click-anim">
-                                    <i class="bi bi-credit-card-fill me-2"></i> Confirmar y Pagar
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <button class="btn w-100 py-3 fw-bold fs-5" style="background-color: var(--hover-bg); color: var(--text-muted); border: 1px dashed var(--border-color);" disabled>
-                                <i class="bi bi-cart-x me-2"></i> Carrito Vacío
-                            </button>
-                        }
-                    </div>
-                </div>
-            </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <h3>Vista del Cliente</h3>
+            <p>Aquí se mantiene tu diseño original del carrito para usuarios normales.</p>
         </div>
-    </div>
+    }
 </div>
