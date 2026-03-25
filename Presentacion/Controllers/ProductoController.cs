@@ -134,7 +134,9 @@ namespace Presentacion.Controllers
                     return RedirectToAction("Index");
                 }
 
-                CargarListasDesplegables();
+                // ✅ CORRECCIÓN: Le pasamos tanto la Categoría como la Marca actual
+                CargarListasDesplegables(productoAEditar.ID_CATEGORIA, productoAEditar.ID_MARCA);
+
                 return View(productoAEditar);
             }
             catch (Exception ex)
@@ -196,23 +198,31 @@ namespace Presentacion.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // Agregamos un parámetro opcional idCategoriaActual para saber qué producto estamos editando
         // --- MÉTODOS AUXILIARES ---
 
-        private void CargarListasDesplegables()
+        // Ahora recibe tanto la categoría como la marca actual (si las hay)
+        private void CargarListasDesplegables(int? idCategoriaActual = null, int? idMarcaActual = null)
         {
             try
             {
-                // 1. Cargar Marcas
+                // 1. Cargar Marcas (AHORA CON FILTRO)
                 List<SelectListItem> listaMarcas = new List<SelectListItem>();
                 var marcas = _logicaMarca.Listar();
 
                 foreach (var marca in marcas)
                 {
-                    listaMarcas.Add(new SelectListItem
+                    // Mostramos la marca SÓLO si está ACTIVA 
+                    // O si es la marca actual del producto que estamos editando
+                    if (marca.ESTADO == true || (idMarcaActual.HasValue && marca.ID_MARCA == idMarcaActual.Value))
                     {
-                        Value = marca.ID_MARCA.ToString(),
-                        Text = marca.NOMBRE
-                    });
+                        listaMarcas.Add(new SelectListItem
+                        {
+                            Value = marca.ID_MARCA.ToString(),
+                            Text = marca.NOMBRE
+                        });
+                    }
                 }
                 ViewBag.Marcas = listaMarcas;
 
@@ -222,11 +232,14 @@ namespace Presentacion.Controllers
 
                 foreach (var cat in categorias)
                 {
-                    listaCategorias.Add(new SelectListItem
+                    if (cat.ESTADO == true || (idCategoriaActual.HasValue && cat.ID_CATEGORIA == idCategoriaActual.Value))
                     {
-                        Value = cat.ID_CATEGORIA.ToString(),
-                        Text = cat.NOMBRE_CATEGORIA
-                    });
+                        listaCategorias.Add(new SelectListItem
+                        {
+                            Value = cat.ID_CATEGORIA.ToString(),
+                            Text = cat.NOMBRE_CATEGORIA
+                        });
+                    }
                 }
                 ViewBag.Categorias = listaCategorias;
             }

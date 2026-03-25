@@ -17,6 +17,7 @@ namespace Entidades
 
         // --- PROPIEDADES PARA MOSTRAR TEXTOS EN LA VISTA ---
         public string? CLIENTE { get; set; }
+
         public string? METODO_PAGO_NOMBRE { get; set; }
 
         // --- NUEVA PROPIEDAD: LISTA DE PRODUCTOS DEL PEDIDO ---

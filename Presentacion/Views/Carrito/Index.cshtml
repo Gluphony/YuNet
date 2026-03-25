@@ -2,15 +2,13 @@
 
 @{
     ViewData["Title"] = "Mi Carrito de Compras";
-
-    // Extraemos la lista que mandaste por el ViewBag en tu controlador
     var detalles = ViewBag.ListaDetalles as List<Entidades.DetalleCarrito> ?? new List<Entidades.DetalleCarrito>();
 }
 
 <style>
     /* ==========================================
-           ESTILOS ESPECÍFICOS DEL CARRITO TECH
-           ========================================== */
+               ESTILOS ESPECÍFICOS DEL CARRITO TECH
+               ========================================== */
     .cart-card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -239,11 +237,20 @@
                     <div class="mt-auto pt-3">
                         @if (detalles.Count > 0)
                         {
-                            <form action="/Carrito/CambiarEstado" method="post">
-                                <input type="hidden" name="idCarrito" value="@Model.ID_CARRITO" />
-                                <input type="hidden" name="nuevoEstado" value="COMPLETADO" />
+                            <form action="/Carrito/ProcesarCompra" method="post">
+
+                                <div class="mb-4">
+                                    <label class="form-label" style="color: var(--text-muted); font-size: 0.9rem;">Método de Pago:</label>
+                                    <select name="idMetodoPago" class="form-select border-0 shadow-sm" style="background-color: var(--hover-bg); color: var(--text-main); cursor: pointer;" required>
+                                        <option value="" disabled selected>Selecciona tu pago...</option>
+                                        <option value="1">Efectivo (Pago al entregar)</option>
+                                        <option value="2">Transferencia Bancaria</option>
+                                        <option value="3">Tarjeta de Crédito / Débito</option>
+                                    </select>
+                                </div>
+
                                 <button type="submit" class="btn btn-checkout w-100 py-3 fw-bold fs-5 click-anim">
-                                    <i class="bi bi-credit-card-fill me-2"></i> Procesar Compra
+                                    <i class="bi bi-credit-card-fill me-2"></i> Confirmar y Pagar
                                 </button>
                             </form>
                         }

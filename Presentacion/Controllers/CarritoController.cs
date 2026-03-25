@@ -1,10 +1,14 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Data;
+using System.Linq;
+using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration; // Nuevo: Para leer la configuración (cadena de conexión)
+using Microsoft.Data.SqlClient; // Nuevo: Para ejecutar los SPs con ADO.NET (usa System.Data.SqlClient si tu versión es antigua)
 using Entidades;
 using LogicaNegocio;
-using System;
-using System.Security.Claims; // Importante para leer los datos del usuario logueado
 
 namespace Presentacion.Controllers
 {
@@ -12,13 +16,19 @@ namespace Presentacion.Controllers
     public class CarritoController : Controller
     {
         private readonly LogicaCarrito _logicaCarrito = new LogicaCarrito();
+        private readonly string _cadenaConexion;
+
+        // Constructor modificado para inyectar IConfiguration y obtener la cadena de conexión
+        public CarritoController(IConfiguration config)
+        {
+            // OJO: Asegúrate de que "DefaultConnection" sea el nombre exacto de tu conexión en appsettings.json
+            _cadenaConexion = config.GetConnectionString("CadenaSQL");
+        }
 
         // --- MÉTODO AUXILIAR: Extraer el ID del usuario de las "Cookies/Claims" de sesión ---
         private int ObtenerIdUsuarioLogueado()
         {
-            // Busca el ClaimTypes.NameIdentifier (o el nombre que le hayas dado al guardar el ID en tu Login)
             var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (int.TryParse(claimId, out int idUsuario))
             {
                 return idUsuario;
@@ -34,12 +44,8 @@ namespace Presentacion.Controllers
             try
             {
                 int idUsuario = ObtenerIdUsuarioLogueado();
+                if (idUsuario <= 0) return RedirectToAction("Index", "Login");
 
-                // Si por alguna razón expiró la sesión o no hay ID válido, pa' fuera
-                if (idUsuario <= 0)
-                    return RedirectToAction("Index", "Login");
-
-                // Obtenemos su carrito pendiente o le creamos uno nuevo mágicamente
                 var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 ViewBag.ListaDetalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
@@ -68,12 +74,11 @@ namespace Presentacion.Controllers
             {
                 TempData["MensajeError"] = "No se pudo vaciar el carrito: " + ex.Message;
             }
-
-            return RedirectToAction("Index"); // Recargamos la página del carrito
+            return RedirectToAction("Index");
         }
 
         // ==========================================
-        // 3. CAMBIAR ESTADO (Ej. Pagar o Cancelar)
+        // 3. CAMBIAR ESTADO
         // ==========================================
         [HttpPost]
         public IActionResult CambiarEstado(int idCarrito, string nuevoEstado)
@@ -93,12 +98,11 @@ namespace Presentacion.Controllers
             {
                 TempData["MensajeError"] = ex.Message;
             }
-
             return RedirectToAction("Index");
         }
 
         // ==========================================
-        // 4. ACTUALIZAR TOTAL (Ideal para peticiones AJAX)
+        // 4. ACTUALIZAR TOTAL (AJAX)
         // ==========================================
         [HttpPost]
         public IActionResult ActualizarTotal(int idCarrito, decimal nuevoTotal)
@@ -106,9 +110,6 @@ namespace Presentacion.Controllers
             try
             {
                 _logicaCarrito.ActualizarTotal(idCarrito, nuevoTotal);
-
-                // Devolvemos un JSON en lugar de recargar toda la página.
-                // Así cuando sumes un producto, el total se actualiza en vivo.
                 return Json(new { success = true, message = "Total actualizado correctamente." });
             }
             catch (Exception ex)
@@ -117,17 +118,18 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // AGREGAR PRODUCTO AL CARRITO (AJAX)
+        // ==========================================
         [HttpPost]
         public IActionResult Agregar([FromBody] JsonElement data)
         {
             try
             {
-                // Esto arregla el error rosado
                 int idProducto = data.GetProperty("id").GetInt32();
-
                 int idUsuario = ObtenerIdUsuarioLogueado();
-                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
 
+                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, 1);
 
@@ -139,7 +141,9 @@ namespace Presentacion.Controllers
             }
         }
 
-        // Este método devuelve el HTML parcial de los items para el Offcanvas
+        // ==========================================
+        // OBTENER RESUMEN PARA OFFCANVAS
+        // ==========================================
         [HttpGet]
         public IActionResult ObtenerResumen()
         {
@@ -149,11 +153,12 @@ namespace Presentacion.Controllers
             LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
             var detalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
 
-            // Retorna la vista parcial que creamos antes
             return PartialView("_CarritoResumen", detalles);
         }
 
-        // Este método devuelve el numerito del Badge y el Total para el Navbar
+        // ==========================================
+        // OBTENER INFO BÁSICA (BADGE Y TOTAL)
+        // ==========================================
         [HttpGet]
         public JsonResult ObtenerInfoBasica()
         {
@@ -175,6 +180,10 @@ namespace Presentacion.Controllers
                 total = miCarrito.TOTAL
             });
         }
+
+        // ==========================================
+        // ELIMINAR ITEM (AJAX)
+        // ==========================================
         [HttpPost]
         [Route("DetalleCarrito/EliminarSimple/{id}")]
         public IActionResult EliminarSimple(int id)
@@ -183,10 +192,6 @@ namespace Presentacion.Controllers
             {
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 logicaDetalle.Eliminar(id);
-
-                // (Opcional) Si tu BD no recalcula el total automáticamente, 
-                // deberías llamar aquí a tu método para actualizar el total del carrito.
-
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -195,5 +200,110 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // 5. PROCESAR COMPRA (NUEVO CHECKOUT)
+        // ==========================================
+        [HttpPost]
+        public IActionResult ProcesarCompra(int? idMetodoPago)
+        {
+            int idUsuario = ObtenerIdUsuarioLogueado();
+            if (idUsuario <= 0) return RedirectToAction("Index", "Login");
+
+            int nuevoIdPedido = 0;
+            var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
+
+            try
+            {
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                var detallesCarrito = logicaDetalle.Listar(miCarrito.ID_CARRITO);
+
+                if (detallesCarrito == null || !detallesCarrito.Any())
+                {
+                    TempData["MensajeError"] = "Tu carrito está vacío. Agrega productos antes de pagar.";
+                    return RedirectToAction("Index");
+                }
+
+                using (SqlConnection con = new SqlConnection(_cadenaConexion))
+                {
+                    con.Open();
+                    // Usamos transacciones para que, si falta stock de un producto, todo se cancele limpiamente
+                    using (SqlTransaction transaccion = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            // A. Crear el Encabezado del Pedido
+                            using (SqlCommand cmd = new SqlCommand("Venta.Sp_CrearPedido", con, transaccion))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+                                cmd.Parameters.AddWithValue("@Id_Metodo_Pago", (object)idMetodoPago ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Total", miCarrito.TOTAL);
+                                cmd.Parameters.AddWithValue("@Estado", "PENDIENTE"); // Estado inicial
+
+                                // Ejecutamos y capturamos el ID del nuevo pedido
+                                nuevoIdPedido = Convert.ToInt32(cmd.ExecuteScalar());
+                            }
+
+                            // B. Insertar los Detalles (Ciclo por cada producto)
+                            foreach (var item in detallesCarrito)
+                            {
+                                using (SqlCommand cmdDetalle = new SqlCommand("Venta.Sp_InsertarDetallePedido", con, transaccion))
+                                {
+                                    cmdDetalle.CommandType = CommandType.StoredProcedure;
+                                    cmdDetalle.Parameters.AddWithValue("@Id_Pedido", nuevoIdPedido);
+                                    cmdDetalle.Parameters.AddWithValue("@Id_Producto", item.ID_PRODUCTO);
+                                    cmdDetalle.Parameters.AddWithValue("@Imei_Vendido", DBNull.Value); // Se asignará en almacén
+                                    cmdDetalle.Parameters.AddWithValue("@Cantidad", item.CANTIDAD);
+                                    cmdDetalle.Parameters.AddWithValue("@Precio_Unitario", item.PRECIO_UNITARIO);
+                                    cmdDetalle.Parameters.AddWithValue("@Id_Usuario", idUsuario); // Para Kárdex
+
+                                    cmdDetalle.ExecuteNonQuery();
+                                }
+                            }
+
+                            // C. Confirmar la transacción si todo fue un éxito
+                            transaccion.Commit();
+                        }
+                        catch (SqlException sqlEx)
+                        {
+                            // Atrapa los RAISERROR del SP (ej. Stock insuficiente)
+                            transaccion.Rollback();
+                            TempData["MensajeError"] = "Error al procesar el pedido: " + sqlEx.Message;
+                            return RedirectToAction("Index");
+                        }
+                        catch (Exception)
+                        {
+                            transaccion.Rollback();
+                            TempData["MensajeError"] = "Ocurrió un error inesperado al guardar el pedido.";
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+
+                // Si llegamos hasta aquí, el pago/pedido fue un éxito. Vaciamos el carrito.
+                _logicaCarrito.VaciarCarrito(miCarrito.ID_CARRITO);
+
+                TempData["MensajeExito"] = $"¡Tu pedido #{nuevoIdPedido} ha sido generado exitosamente!";
+
+                // Redirigimos a la pantalla de éxito
+                return RedirectToAction("Confirmacion", new { idPedido = nuevoIdPedido });
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error crítico al procesar la compra: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ==========================================
+        // 6. VISTA DE CONFIRMACIÓN DE PEDIDO
+        // ==========================================
+        [HttpGet]
+        public IActionResult Confirmacion(int idPedido)
+        {
+            // Le pasamos el ID a la vista para que pueda mostrar el número de orden
+            ViewBag.IdPedido = idPedido;
+            return View();
+        }
     }
 }

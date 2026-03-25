@@ -95,9 +95,14 @@ namespace LogicaNegocio
             return _datosPedidos.ObtenerPorId(idPedido);
         }
         // Dentro de tu clase LogicaPedido:
-        public List<dynamic> ObtenerDetallesPorPedido(int idPedido)
+        // 8. OBTENER DETALLES POR PEDIDO
+        public List<DetallePedido> ObtenerDetallesPorPedido(int idPedido)
         {
-            // Llama al método que creamos en DatosPedidos
+            // Validamos que el ID tenga lógica
+            if (idPedido <= 0)
+                throw new ArgumentException("El ID del pedido no es válido para buscar detalles.");
+
+            // Llama al método de la capa de datos que ahora devuelve List<DetallePedido>
             return _datosPedidos.ObtenerDetallesPorPedido(idPedido);
         }
     }

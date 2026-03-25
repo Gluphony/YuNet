@@ -6,8 +6,8 @@
 
 <style>
     /* ==========================================
-           VARIABLES NEÓN (Heredadas del Home)
-           ========================================== */
+                           VARIABLES NEÓN (Heredadas del Home)
+                           ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -15,11 +15,12 @@
         --neon-green: #00FF7F;
         --neon-red: #ff3366;
         --neon-yellow: #ffcc00;
+        --neon-purple: #C6C3F2; /* Agregado para el ticket */
     }
 
     /* ==========================================
-           ESTILOS DE LA VISTA DE PEDIDOS
-           ========================================== */
+                           ESTILOS DE LA VISTA DE PEDIDOS
+                           ========================================== */
     .order-card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -39,23 +40,6 @@
         border-bottom: 1px solid var(--border-color);
         padding: 1.5rem;
     }
-
-    /* Botón Neón (Igual al Home) */
-    .btn-neon {
-        background: transparent;
-        color: var(--neon-blue-base) !important;
-        border: 1px solid var(--neon-blue-base);
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border-radius: 50px; /* Estilo pill del home */
-    }
-
-        .btn-neon:hover {
-            background: var(--neon-blue-base);
-            color: #000 !important;
-            box-shadow: 0 0 20px var(--neon-blue-glow);
-            transform: translateY(-2px);
-        }
 
     /* Tabla Adaptable */
     .table-orders {
@@ -121,6 +105,15 @@
             transform: scale(1.1) rotate(5deg);
         }
 
+        /* NUEVO ESTILO: Botón de Ticket */
+        .action-btn.ticket:hover {
+            color: var(--neon-purple);
+            border-color: var(--neon-purple);
+            background-color: rgba(198, 195, 242, 0.1);
+            box-shadow: 0 0 15px rgba(198, 195, 242, 0.4);
+            transform: scale(1.1) rotate(-5deg);
+        }
+
     /* Badges de Estado Neón */
     .status-badge {
         font-weight: 700;
@@ -181,14 +174,8 @@
         <div>
             <div class="premium-label mb-1" style="color: var(--neon-blue-base); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Dashboard</div>
             <h2 class="h3 mb-1 fw-bold" style="color: var(--text-main);">Gestión de Pedidos</h2>
-            <p class="mb-0" style="color: var(--text-muted);">Administra y da seguimiento a todas las órdenes de YuNet</p>
+            <p class="mb-0" style="color: var(--text-muted);">Administra y da seguimiento a todas las órdenes generadas por los clientes en YuNet</p>
         </div>
-        @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
-        {
-            <a href="/Pedido/Create" class="btn btn-neon px-4 py-2">
-                <i class="bi bi-plus-lg me-2"></i> Nuevo Pedido
-            </a>
-        }
     </div>
 
     <div id="notificacionPedido" style="display: none;"></div>
@@ -243,7 +230,7 @@
                                             <div class="icon-circle me-3" style="width: 32px; height: 32px; font-size: 1rem;">
                                                 <i class="bi bi-person"></i>
                                             </div>
-                                            <span style="color: var(--text-main); font-weight: 500;">@item.ID_USUARIO</span>
+                                            <span style="color: var(--text-main); font-weight: 500;">@item.CLIENTE</span>
                                         </div>
                                     </td>
                                     <td style="color: var(--text-muted);">
@@ -268,6 +255,11 @@
                                             <a href="/Pedido/Details/@item.ID_PEDIDO" class="action-btn view" title="Ver Detalles">
                                                 <i class="bi bi-eye"></i>
                                             </a>
+
+                                            <a href="@Url.Action("Ticket", "Pedido", new { id = item.ID_PEDIDO })" class="action-btn ticket" title="Ver e Imprimir Ticket">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+
                                             @if (User.IsInRole("Administrador") && estadoStr != "COMPLETADO" && estadoStr != "CANCELADO")
                                             {
                                                 <button class="action-btn complete" onclick="cambiarEstado(@item.ID_PEDIDO, 'Completado')" title="Marcar como Completado">
@@ -290,15 +282,8 @@
                             <i class="bi bi-inbox"></i>
                         </div>
                     </div>
-                    <h5 class="fw-bold" style="color: var(--text-main);">No hay pedidos registrados</h5>
-                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Aún no se ha generado ningún pedido en el sistema. Los pedidos aparecerán aquí una vez que los clientes realicen sus compras.</p>
-
-                    @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
-                    {
-                        <a href="/Pedido/Create" class="btn btn-neon mt-4 px-4 py-2">
-                            Crear mi primer pedido
-                        </a>
-                    }
+                    <h5 class="fw-bold" style="color: var(--text-main);">Panel en espera</h5>
+                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Aún no hay pedidos para procesar. Las órdenes aparecerán aquí de forma automática una vez que los clientes finalicen sus compras en la tienda.</p>
                 </div>
             }
         </div>
@@ -310,15 +295,27 @@
         function cambiarEstado(idPedido, nuevoEstado) {
             if(confirm(`¿Estás seguro de marcar el pedido #${idPedido} como ${nuevoEstado}?`)) {
 
-                const params = new URLSearchParams();
-                params.append('id', idPedido);
-                params.append('nuevoEstado', nuevoEstado);
+                // Usamos URLSearchParams para asegurar el formato application/x-www-form-urlencoded
+                const formData = new URLSearchParams();
+                // OJO AQUÍ: Asegúrate de que los nombres coincidan exactamente con
+                // los parámetros de tu acción ActualizarEstado en el PedidoController
+                formData.append('idPedido', idPedido);
+                formData.append('nuevoEstado', nuevoEstado);
 
                 fetch('/Pedido/ActualizarEstado', {
                     method: 'POST',
-                    body: params
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
                 })
-                .then(response => response.json())
+                .then(response => {
+                    // Si el servidor devuelve un error 500 o 400, lo atrapamos aquí
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const divNotif = document.getElementById('notificacionPedido');
 
@@ -342,7 +339,8 @@
                     }
                 })
                 .catch(error => {
-                    alert("Error de conexión al intentar actualizar el estado.");
+                    console.error("Error en fetch:", error);
+                    alert("Error de conexión al intentar actualizar el estado. Revisa la consola.");
                 });
             }
         }

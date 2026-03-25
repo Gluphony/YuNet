@@ -6,8 +6,8 @@
 
 <style>
     /* ==========================================
-               1. VARIABLES GLOBALES (MODO CLARO)
-               ========================================== */
+                   1. VARIABLES GLOBALES (MODO CLARO)
+                   ========================================== */
     :root {
         --bg-main: #F4F7FE;
         --bg-card: #FFFFFF;
@@ -25,8 +25,8 @@
     }
 
     /* ==========================================
-               1.5 VARIABLES MODO OSCURO
-               ========================================== */
+                   1.5 VARIABLES MODO OSCURO
+                   ========================================== */
     [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
@@ -49,8 +49,8 @@
     }
 
     /* ==========================================
-               2. BOTONES ESTILO NEÓN
-               ========================================== */
+                   2. BOTONES ESTILO NEÓN
+                   ========================================== */
     .btn-neon {
         background: transparent;
         color: var(--neon-blue-base) !important;
@@ -77,8 +77,8 @@
     }
 
     /* ==========================================
-               3. TABLA CON EFECTOS NEÓN
-               ========================================== */
+                   3. TABLA CON EFECTOS NEÓN
+                   ========================================== */
     .yunet-table-container {
         background-color: var(--bg-card);
         border-radius: 16px;
@@ -133,8 +133,8 @@
         }
 
     /* ==========================================
-               4. ELEMENTOS INTERNOS (Imágenes, Badges, Botones)
-               ========================================== */
+                   4. ELEMENTOS INTERNOS (Imágenes, Badges, Botones)
+                   ========================================== */
     .product-img {
         width: 50px;
         height: 50px;
@@ -188,8 +188,8 @@
         }
 
     /* ==========================================
-               5. INPUTS DEL MODAL (Estilo Dinámico)
-               ========================================== */
+                   5. INPUTS DEL MODAL (Estilo Dinámico)
+                   ========================================== */
     .custom-input {
         background-color: var(--bg-main) !important;
         border: 1px solid var(--border-color) !important;
@@ -216,6 +216,66 @@
 
     [data-bs-theme="dark"] .btn-close-dynamic {
         filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* ==========================================
+                   6. ESTILOS PARA LA VISTA PREVIA DE TIENDA
+                   ========================================== */
+    .preview-tech-card {
+        background: #1C1C24; /* Forzamos el modo oscuro de la tienda */
+        border: 1px solid rgba(198, 195, 242, 0.1);
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        width: 320px; /* Tamaño fijo para la previsualización */
+        position: relative;
+        text-align: left;
+    }
+
+    .preview-tech-img-box {
+        height: 220px;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preview-tech-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+    }
+
+    .preview-badge-premium {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        z-index: 10;
+        white-space: nowrap;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .preview-btn-tech {
+        background: linear-gradient(135deg, #20C997 0%, #16a085 100%);
+        color: #13131A;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        width: 100%;
+        padding: 10px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
     }
 </style>
 
@@ -253,7 +313,7 @@
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Estado</th>
-                        <th style="width: 100px; text-align: center;">Acción</th>
+                        <th style="width: 120px; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -286,7 +346,14 @@
                                         @(item.ESTADO ? "Activo" : "Inactivo")
                                     </span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center d-flex justify-content-center gap-1">
+                                    <button type="button" class="action-btn" title="Vista Previa Tienda" style="color: var(--success-color);"
+                                            data-bs-toggle="modal" data-bs-target="#modalVistaPrevia"
+                                            data-id="@item.ID_PRODUCTO" data-modelo="@item.MODELO"
+                                            data-precio="@item.PRECIO" data-existencias="@item.EXISTENCIAS">
+                                        <i class="bi bi-eye fs-5"></i>
+                                    </button>
+
                                     <button type="button" class="action-btn" title="Editar Producto"
                                             data-bs-toggle="modal" data-bs-target="#modalEditar"
                                             data-id="@item.ID_PRODUCTO" data-marca="@item.ID_MARCA"
@@ -345,14 +412,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">ID Marca</label>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Marca</label>
                             <select class="form-select custom-input" id="edit_Marca" name="ID_MARCA" asp-items="ViewBag.Marcas" required>
                                 <option value="">Seleccione...</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">ID Categoría</label>
+                            <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Categoría</label>
                             <select class="form-select custom-input" id="edit_Categoria" name="ID_CATEGORIA" asp-items="ViewBag.Categorias">
                                 <option value="">Seleccione...</option>
                             </select>
@@ -400,9 +467,43 @@
     </div>
 </div>
 
+@* MODAL VISTA PREVIA DE TIENDA *@
+<div class="modal fade" id="modalVistaPrevia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 350px;">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1) grayscale(100%) brightness(200%);"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center pt-0">
+                <div class="preview-tech-card shadow-lg">
+                    <span id="preview_Badge" class="preview-badge-premium" style="display: none;"></span>
+
+                    <div class="preview-tech-img-box">
+                        <img id="preview_Img" src="" alt="Producto" class="preview-tech-img" onerror="this.src='/images/no-image.png'" />
+                    </div>
+
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <h5 id="preview_Modelo" class="fw-bold mb-1 text-white text-truncate"></h5>
+                        <small class="mb-3" style="color: #adb5bd;">Envío gratis disponible</small>
+
+                        <div class="mt-auto d-flex flex-column gap-3">
+                            <span id="preview_Precio" class="fw-bold fs-4" style="color: #20C997;"></span>
+
+                            <button class="btn preview-btn-tech" disabled style="opacity: 0.8; cursor: default;">
+                                <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Script Modal Editar
             var modalEditar = document.getElementById('modalEditar');
             if (modalEditar) {
                 modalEditar.addEventListener('show.bs.modal', function (event) {
@@ -420,6 +521,39 @@
                     var precioStr = button.getAttribute('data-precio');
                     if (precioStr) {
                         document.getElementById('edit_Precio').value = precioStr.replace(',', '.');
+                    }
+                });
+            }
+
+            // Script Modal Vista Previa Tienda
+            var modalVistaPrevia = document.getElementById('modalVistaPrevia');
+            if (modalVistaPrevia) {
+                modalVistaPrevia.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+
+                    // Extraer datos
+                    var id = button.getAttribute('data-id');
+                    var modelo = button.getAttribute('data-modelo');
+                    var precio = parseFloat(button.getAttribute('data-precio').replace(',', '.'));
+                    var existencias = parseInt(button.getAttribute('data-existencias'));
+
+                    // Poblar la tarjeta
+                    document.getElementById('preview_Modelo').textContent = modelo;
+                    document.getElementById('preview_Modelo').title = modelo;
+
+                    // Formatear el precio a moneda
+                    document.getElementById('preview_Precio').textContent = "$" + precio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                    // Actualizar la imagen
+                    document.getElementById('preview_Img').src = "/Producto/VerImagen/" + id;
+
+                    // Lógica del Badge de "Últimas unidades"
+                    var badge = document.getElementById('preview_Badge');
+                    if (existencias <= 5 && existencias > 0) {
+                        badge.textContent = "¡Últimas " + existencias + " unidades!";
+                        badge.style.display = "block";
+                    } else {
+                        badge.style.display = "none";
                     }
                 });
             }

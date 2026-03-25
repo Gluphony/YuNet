@@ -72,13 +72,8 @@ namespace CapaDatos
                             pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
                             pedido.ESTADO = dr["Estado"].ToString();
 
-                            /* NOTA SOBRE COLUMNAS EXTRA: 
-                             * Tu SP devuelve 'Cliente' y 'Metodo_Pago'. Si agregas las propiedades 
-                             * 'public string? CLIENTE { get; set; }' y 'public string? METODO_PAGO_NOMBRE { get; set; }' 
-                             * a tu entidad, las mapeas así:
-                             * * pedido.CLIENTE = dr["Cliente"].ToString();
-                             * pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : null;
-                             */
+                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
+                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "N/A";
 
                             lista.Add(pedido);
                         }
@@ -147,7 +142,8 @@ namespace CapaDatos
                             pedido.FECHA_PEDIDO = Convert.ToDateTime(dr["Fecha_Pedido"]);
                             pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
                             pedido.ESTADO = dr["Estado"].ToString();
-                            // Aquí también podrías mapear METODO_PAGO_NOMBRE si lo agregas a la entidad
+                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
+                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "N/A";
 
                             lista.Add(pedido);
                         }
@@ -189,9 +185,8 @@ namespace CapaDatos
                             pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
                             pedido.ESTADO = dr["Estado"].ToString();
 
-                            // Si agregas las propiedades extra:
-                            // pedido.CLIENTE = dr["Cliente"].ToString();
-                            // pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"].ToString();
+                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
+                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "N/A";
 
                             lista.Add(pedido);
                         }
@@ -232,9 +227,8 @@ namespace CapaDatos
                             pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
                             pedido.ESTADO = dr["Estado"].ToString();
 
-                            // Si agregas las propiedades extra:
-                            // pedido.CLIENTE = dr["Cliente"].ToString();
-                            // pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : null;
+                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
+                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "N/A";
 
                             lista.Add(pedido);
                         }
@@ -294,13 +288,11 @@ namespace CapaDatos
 
             return pedido; // Retornará el pedido lleno, o null si no lo encontró
         }
-    
-    // 8. OBTENER EL TICKET/DETALLES DEL PEDIDO
-        public List<dynamic> ObtenerDetallesPorPedido(int idPedido)
+
+        // 8. OBTENER EL TICKET/DETALLES DEL PEDIDO
+        public List<DetallePedido> ObtenerDetallesPorPedido(int idPedido)
         {
-            // Usamos dynamic para no obligarte a crear una entidad nueva si no quieres, 
-            // aunque lo ideal a futuro es tener una clase DetallePedido en tus Entidades.
-            List<dynamic> detalles = new List<dynamic>();
+            List<DetallePedido> detalles = new List<DetallePedido>();
 
             try
             {
@@ -316,16 +308,25 @@ namespace CapaDatos
                     {
                         while (dr.Read())
                         {
-                            // Usamos un objeto anónimo (ExpandoObject) simulado o creamos la estructura
-                            var detalle = new
-                            {
-                                Id_Detalle_Pedido = Convert.ToInt32(dr["Id_Detalle_Pedido"]),
-                                Producto = dr["Producto"].ToString(),
-                                Numero_Serie_IMEI = dr["Numero_Serie_IMEI"].ToString(),
-                                Cantidad = Convert.ToInt32(dr["Cantidad"]),
-                                Precio_Unitario = Convert.ToDecimal(dr["Precio_Unitario"]),
-                                Subtotal = Convert.ToDecimal(dr["Subtotal"])
-                            };
+                            DetallePedido detalle = new DetallePedido();
+
+                            detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["Id_Detalle_Pedido"]);
+
+                            // Inyectamos el ID del Pedido manualmente para que el ticket no muestre 0
+                            detalle.ID_PEDIDO = idPedido;
+
+                            // Mapeamos el nombre del producto a la propiedad correcta de tu entidad
+                            detalle.PRODUCTO = dr["Producto"].ToString();
+
+                            // Mapeamos el IMEI validando que no venga nulo desde la base de datos
+                            detalle.IMEI_VENDIDO = dr["Numero_Serie_IMEI"] != DBNull.Value ? dr["Numero_Serie_IMEI"].ToString() : "N/A";
+
+                            detalle.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
+                            detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["Precio_Unitario"]);
+
+                            // Nota: No mapeamos ID_PRODUCTO porque tu SP devuelve el nombre y no el ID.
+                            // Tampoco mapeamos SUBTOTAL porque tu entidad ya lo calcula automáticamente.
+
                             detalles.Add(detalle);
                         }
                     }
