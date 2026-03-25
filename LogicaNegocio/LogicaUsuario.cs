@@ -78,12 +78,26 @@ namespace LogicaNegocio
         }
 
         // DESACTIVAR USUARIO
-        public bool DesactivarUsuario(int idUsuario)
+        public bool DesactivarUsuario(int idUsuario, int idUsuarioLogueado) // <-- 1. Agregamos el parámetro
         {
             if (idUsuario <= 0)
                 throw new ArgumentException("ID de usuario no válido.");
 
-            return _dataUsuario.DesactivarUsuario(idUsuario);
+            if (idUsuarioLogueado <= 0)
+                throw new UnauthorizedAccessException("Error: No se pudo identificar la sesión del usuario actual.");
+
+            // <-- 2. Se lo pasamos a la capa de datos
+            return _dataUsuario.DesactivarUsuario(idUsuario, idUsuarioLogueado);
+        }
+        public bool RestablecerClave(string correo, string nuevaClave)
+        {
+            if (string.IsNullOrWhiteSpace(correo) || !correo.Contains("@"))
+                throw new ArgumentException("Debe ingresar un correo válido.");
+
+            if (string.IsNullOrWhiteSpace(nuevaClave))
+                throw new ArgumentException("La nueva contraseña no puede estar vacía.");
+
+            return _dataUsuario.RestablecerClave(correo.Trim(), nuevaClave.Trim());
         }
     }
 }

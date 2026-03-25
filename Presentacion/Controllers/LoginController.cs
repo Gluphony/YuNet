@@ -12,19 +12,20 @@ namespace Presentacion.Controllers
 {
     public class LoginController : Controller
     {
+        // Instanciamos la lógica
         private readonly LogicaLogin _logicaSeguridad = new LogicaLogin();
+        private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario();
 
+        // =================================================================
+        // LOGIN
+        // =================================================================
         [HttpGet]
         public IActionResult Index()
         {
-            // 💡 MEJORA: Prevenir NullReferenceException
-            // Verificamos primero si User e Identity no son nulos antes de preguntar si está autenticado
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
-                // Si ya está logueado, lo devolvemos a la tienda/home, NO al login de nuevo
                 return RedirectToAction("Index", "Home");
             }
-
             return View();
         }
 
@@ -61,7 +62,6 @@ namespace Presentacion.Controllers
                         authProperties
                     );
 
-                    // Login exitoso -> Lo mandamos al Home
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -77,17 +77,81 @@ namespace Presentacion.Controllers
             }
         }
 
-        // 💡 MEJORA: El método Salir() debe ser accesible por GET o POST, 
-        // normalmente se usa GET desde un enlace en el Layout.
+        // =================================================================
+        // SALIR (CERRAR SESIÓN)
+        // =================================================================
         [HttpGet]
         public async Task<IActionResult> Salir()
         {
-            // Cerramos la sesión eliminando la cookie
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // 💡 MEJORA DE EXPERIENCIA: Al salir, lo mandamos a la tienda como visitante, 
-            // no lo forzamos a ver la pantalla de Login otra vez (opcional, pero recomendado).
             return RedirectToAction("Index", "Home");
+        }
+
+        // =================================================================
+        // REGISTRO
+        // =================================================================
+        [HttpGet]
+        public IActionResult Registro()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Registro(string Nombre, string Correo, string Clave, int Id_Rol)
+        {
+            try
+            {
+                bool respuesta = _logicaUsuario.InsertarUsuario(Nombre, Correo, Clave, Id_Rol);
+
+                if (respuesta)
+                {
+                    ViewBag.Exito = "¡Cuenta creada con éxito! Ahora puedes iniciar sesión.";
+                    return View("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+            }
+
+            return View();
+        }
+
+        // =================================================================
+        // RESTABLECER CLAVE
+        // =================================================================
+        [HttpGet]
+        public IActionResult RestablecerClave()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult RestablecerClave(string Correo, string NuevaClave)
+        {
+            try
+            {
+                // Asegúrate de tener el método RestablecerClave en tu LogicaUsuario y Base de Datos
+                bool exito = _logicaUsuario.RestablecerClave(Correo, NuevaClave);
+
+                if (exito)
+                {
+                    // Si cambia la clave, mandamos un mensaje de éxito al Login
+                    ViewBag.Exito = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
+                    return View("Index");
+                }
+                else
+                {
+                    TempData["Error"] = "El correo ingresado no pertenece a ningún usuario activo.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return View();
         }
     }
 }

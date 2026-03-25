@@ -1,0 +1,122 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Restablecer Clave - YuNet</title>
+    <style>
+        body {
+            background-color: #121216;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background-color: #1a1a21;
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .text-center {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .text-center h2 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: bold;
+            }
+
+            .text-center p {
+                color: #888;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #121216;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+            .form-control:focus {
+                border-color: #00e5ff;
+            }
+
+        .btn-cyan {
+            width: 100%;
+            padding: 15px;
+            background-color: transparent;
+            border: 1px solid #00e5ff;
+            color: #00e5ff;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .btn-cyan:hover {
+                background-color: rgba(0, 229, 255, 0.1);
+            }
+
+        .error-msg {
+            background-color: rgba(255, 50, 100, 0.1);
+            border: 1px solid rgba(255, 50, 100, 0.3);
+            color: #ff4d6d;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .link-back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #00e5ff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="text-center">
+            <h2>Recuperar Acceso</h2>
+            <p>Ingrese su correo para generar una nueva contraseña</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="error-msg">@TempData["Error"]</div>
+        }
+
+        <form asp-controller="Login" asp-action="RestablecerClave" method="post">
+            <input type="email" name="Correo" class="form-control" placeholder="usuario@yunet.com" required />
+            <input type="password" name="NuevaClave" class="form-control" placeholder="Nueva Contraseña" required />
+
+            <button type="submit" class="btn-cyan">RESTABLECER CLAVE</button>
+        </form>
+
+        <a href="~/Login/Index" class="link-back">Volver al Inicio de Sesión</a>
+    </div>
+</body>
+</html>

@@ -56,11 +56,44 @@ namespace Presentacion.Controllers
             // Si el usuario es admin y el conteo total es 1 o menos, significa que es el último
             return esElUsuarioAfectadoAdmin && cantidadAdminsActivos <= 1;
         }
+        // 1. Mostrar la vista
+        [HttpGet]
+        public IActionResult RestablecerClave()
+        {
+            return View();
+        }
 
+        // 2. Procesar el formulario
+        [HttpPost]
+        public IActionResult RestablecerClave(string Correo, string NuevaClave)
+        {
+            try
+            {
+                LogicaUsuario _logica = new LogicaUsuario();
+                bool exito = _logica.RestablecerClave(Correo, NuevaClave);
+
+                if (exito)
+                {
+                    TempData["Exito"] = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
+                    return RedirectToAction("Index"); // Lo mandamos de vuelta al Login
+                }
+                else
+                {
+                    TempData["Error"] = "El correo ingresado no pertenece a ningún usuario activo.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            // Si falla, lo devolvemos a la misma pantalla de restablecer
+            return View();
+        }
 
         // --- ACCIONES DEL CONTROLADOR ---
 
-        // 1. VISTA PRINCIPAL
+        //  VISTA PRINCIPAL
         [HttpGet]
         public IActionResult Index()
         {
@@ -141,8 +174,8 @@ namespace Presentacion.Controllers
 
         // 4. DESACTIVAR USUARIO
         [HttpPost]
-        [ValidateAntiForgeryToken] // Seguridad CSRF
-        public async Task<IActionResult> Desactivar(int Id_Usuario) // Nota: Corregí "idUsuario" a "Id_Usuario"
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Desactivar(int Id_Usuario)
         {
             try
             {
@@ -155,7 +188,8 @@ namespace Presentacion.Controllers
                     return RedirectToAction("Index");
                 }
 
-                bool respuesta = _logicaUsuario.DesactivarUsuario(Id_Usuario);
+                // <-- AQUÍ ESTÁ LA MAGIA: Le pasamos idActual a la lógica
+                bool respuesta = _logicaUsuario.DesactivarUsuario(Id_Usuario, idActual);
 
                 if (respuesta)
                 {
@@ -163,7 +197,6 @@ namespace Presentacion.Controllers
                     if (Id_Usuario == idActual)
                     {
                         await HttpContext.SignOutAsync();
-                        // Ajusta "Login", "Auth" al controlador donde manejas el inicio de sesión
                         return RedirectToAction("Index", "Login");
                     }
 

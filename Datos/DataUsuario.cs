@@ -109,7 +109,7 @@ namespace Datos
         }
 
         // 6. DESACTIVAR USUARIO (Borrado Lógico)
-        public bool DesactivarUsuario(int idUsuario)
+        public bool DesactivarUsuario(int idUsuario, int idUsuarioLogueado) // <-- 1. Agregamos el parámetro
         {
             bool respuesta = false;
             using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
@@ -121,6 +121,9 @@ namespace Datos
 
                     cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
 
+                    // <-- 2. Lo enviamos a SQL Server
+                    cmd.Parameters.AddWithValue("@Id_Usuario_Logueado", idUsuarioLogueado);
+
                     conexion.Open();
                     cmd.ExecuteNonQuery();
                     respuesta = true;
@@ -128,6 +131,33 @@ namespace Datos
                 catch (Exception ex)
                 {
                     throw new Exception("Error al desactivar el usuario: " + ex.Message);
+                }
+            }
+            return respuesta;
+        }
+        public bool RestablecerClave(string correo, string nuevaClave)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Seguridad.Sp_RestablecerClavePorCorreo", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Correo", correo);
+                    cmd.Parameters.AddWithValue("@NuevaClave", nuevaClave);
+
+                    conexion.Open();
+                    // Leemos el resultado (1 si existe, 0 si no)
+                    int resultado = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    if (resultado == 1)
+                        respuesta = true;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al restablecer clave: " + ex.Message);
                 }
             }
             return respuesta;
