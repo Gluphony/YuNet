@@ -115,53 +115,53 @@ namespace Presentacion.Controllers
         // ==========================================
         // GET: Pedido/Create
         // ==========================================
-        public ActionResult Create()
-        {
-            CargarUsuariosDropdown();
-            return View(new Pedido());
-        }
+        //public ActionResult Create()
+        //{
+        //    CargarUsuariosDropdown();
+        //    return View(new Pedido());
+        //}
 
-        // ==========================================
-        // POST: Pedido/Create
-        // ==========================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(Pedido nuevoPedido)
-        {
-            try
-            {
-                nuevoPedido.FECHA_PEDIDO = DateTime.Now;
+        //// ==========================================
+        //// POST: Pedido/Create
+        //// ==========================================
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Create(Pedido nuevoPedido)
+        //{
+        //    try
+        //    {
+        //        nuevoPedido.FECHA_PEDIDO = DateTime.Now;
 
-                // Limpiamos validaciones
-                ModelState.Remove("ID_PEDIDO");
-                ModelState.Remove("Usuario");
-                ModelState.Remove("Detalles");
-                ModelState.Remove("DetallePedidos");
+        //        // Limpiamos validaciones
+        //        ModelState.Remove("ID_PEDIDO");
+        //        ModelState.Remove("Usuario");
+        //        ModelState.Remove("Detalles");
+        //        ModelState.Remove("DetallePedidos");
 
-                if (ModelState.IsValid)
-                {
-                    int idGenerado = _logicaPedido.Crear(nuevoPedido);
-                    TempData["MensajeExito"] = $"¡Pedido #{idGenerado} creado correctamente!";
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    var listaErrores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                    ViewBag.Error = "Revise los campos: " + string.Join(" | ", listaErrores);
-                }
-            }
-            catch (ArgumentException argEx)
-            {
-                ViewBag.Error = argEx.Message;
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Error en el servidor: " + ex.Message;
-            }
+        //        if (ModelState.IsValid)
+        //        {
+        //            int idGenerado = _logicaPedido.Crear(nuevoPedido);
+        //            TempData["MensajeExito"] = $"¡Pedido #{idGenerado} creado correctamente!";
+        //            return RedirectToAction("Index");
+        //        }
+        //        else
+        //        {
+        //            var listaErrores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+        //            ViewBag.Error = "Revise los campos: " + string.Join(" | ", listaErrores);
+        //        }
+        //    }
+        //    catch (ArgumentException argEx)
+        //    {
+        //        ViewBag.Error = argEx.Message;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.Error = "Error en el servidor: " + ex.Message;
+        //    }
 
-            CargarUsuariosDropdown();
-            return View(nuevoPedido);
-        }
+        //    CargarUsuariosDropdown();
+        //    return View(nuevoPedido);
+        //}
 
         // ==========================================
         // POST: Pedido/ActualizarEstado

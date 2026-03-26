@@ -18,5 +18,16 @@ namespace Entidades
 
         // Propiedad calculada en memoria
         public decimal SUBTOTAL => CANTIDAD * PRECIO_UNITARIO;
+
+        // --- NUEVAS PROPIEDADES PARA DEVOLUCIONES ---
+
+        // Flag para saber si mostramos el botón rojo de "Reportar" o no
+        public bool Tiene_Devolucion { get; set; }
+
+        // Si ya hay reporte, guardamos el ID para crear el botón "Ver Reporte"
+        public int? Id_Devolucion_Vinculada { get; set; }
+
+        // Para mostrarle al cliente si su reporte dice "Pendiente", "Aprobado", etc.
+        public string? ESTADO_REPORTE { get; set; }
     }
 }

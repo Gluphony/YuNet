@@ -3,8 +3,6 @@ using Entidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LogicaNegocio
 {
@@ -12,25 +10,31 @@ namespace LogicaNegocio
     {
         private readonly DatosPedidos _datosPedidos = new DatosPedidos();
 
-        // 1. CREAR PEDIDO
-        public int Crear(Pedido pedido)
+        // ==========================================
+        // 1. PROCESAR COMPRA (REEMPLAZA AL ANTIGUO CREAR)
+        // ==========================================
+        public int ProcesarCompra(int idUsuario, int? idMetodoPago, decimal total, List<DetalleCarrito> detallesCarrito)
         {
-            if (pedido == null)
-                throw new ArgumentNullException(nameof(pedido), "La información del pedido no puede estar vacía.");
-
-            if (pedido.ID_USUARIO <= 0)
+            // Validaciones de negocio cruciales:
+            if (idUsuario <= 0)
                 throw new ArgumentException("El pedido debe estar asociado a un usuario válido.");
 
-            // Validamos que el total no sea negativo (permitimos 0 en caso de promociones o canjes al 100%)
-            if (pedido.TOTAL < 0)
+            if (total < 0)
                 throw new ArgumentException("El total del pedido no puede ser menor a cero.");
 
-            // Si el método de pago no viene nulo, validamos que su ID sea válido
-            if (pedido.ID_METODO_PAGO.HasValue && pedido.ID_METODO_PAGO.Value <= 0)
+            if (idMetodoPago.HasValue && idMetodoPago.Value <= 0)
                 throw new ArgumentException("El método de pago seleccionado no es válido.");
 
-            return _datosPedidos.Crear(pedido);
+            if (detallesCarrito == null || !detallesCarrito.Any())
+                throw new ArgumentException("El carrito no tiene productos para procesar la compra.");
+
+            // Si todo está correcto, pasamos la pelota a la Capa de Datos
+            return _datosPedidos.ProcesarCompraTransaccional(idUsuario, idMetodoPago, total, detallesCarrito);
         }
+
+        // ==========================================
+        // MÉTODOS EXISTENTES (INTACTOS)
+        // ==========================================
 
         // 2. LISTAR TODOS LOS PEDIDOS
         public List<Pedido> Listar()
@@ -47,11 +51,6 @@ namespace LogicaNegocio
             if (string.IsNullOrWhiteSpace(nuevoEstado))
                 throw new ArgumentException("Debe especificar el nuevo estado del pedido.");
 
-            // Opcional: Validar contra estados permitidos
-            // string[] estadosValidos = { "Pendiente", "Procesando", "Completado", "Cancelado" };
-            // if (!Array.Exists(estadosValidos, e => e.Equals(nuevoEstado.Trim(), StringComparison.OrdinalIgnoreCase)))
-            //     throw new ArgumentException("El estado especificado no está permitido.");
-
             return _datosPedidos.ActualizarEstado(idPedido, nuevoEstado.Trim());
         }
 
@@ -67,7 +66,6 @@ namespace LogicaNegocio
         // 5. LISTAR PEDIDOS POR RANGO DE FECHAS
         public List<Pedido> ListarPorFecha(DateTime fechaInicio, DateTime fechaFin)
         {
-            // Regla vital para consultas de fechas
             if (fechaInicio > fechaFin)
             {
                 throw new ArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
@@ -84,27 +82,23 @@ namespace LogicaNegocio
 
             return _datosPedidos.ListarPorEstado(estado.Trim());
         }
+
         // 7. OBTENER PEDIDO POR ID (Detalles)
         public Pedido ObtenerPorId(int idPedido)
         {
-            // Validamos que el ID tenga lógica
             if (idPedido <= 0)
                 throw new ArgumentException("El ID del pedido no es válido.");
 
-            // Llamamos a la capa de datos
             return _datosPedidos.ObtenerPorId(idPedido);
         }
-        // Dentro de tu clase LogicaPedido:
+
         // 8. OBTENER DETALLES POR PEDIDO
         public List<DetallePedido> ObtenerDetallesPorPedido(int idPedido)
         {
-            // Validamos que el ID tenga lógica
             if (idPedido <= 0)
                 throw new ArgumentException("El ID del pedido no es válido para buscar detalles.");
 
-            // Llama al método de la capa de datos que ahora devuelve List<DetallePedido>
             return _datosPedidos.ObtenerDetallesPorPedido(idPedido);
         }
     }
 }
- 

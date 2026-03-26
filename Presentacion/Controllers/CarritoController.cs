@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
+using System.Data; // ¡Agregado para manejar DataTable y DataView correctamente!
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration; // Nuevo: Para leer la configuración (cadena de conexión)
-using Microsoft.Data.SqlClient; // Nuevo: Para ejecutar los SPs con ADO.NET (usa System.Data.SqlClient si tu versión es antigua)
 using Entidades;
 using LogicaNegocio;
 
@@ -16,13 +14,10 @@ namespace Presentacion.Controllers
     public class CarritoController : Controller
     {
         private readonly LogicaCarrito _logicaCarrito = new LogicaCarrito();
-        private readonly string _cadenaConexion;
 
-        // Constructor modificado para inyectar IConfiguration y obtener la cadena de conexión
-        public CarritoController(IConfiguration config)
+        // Constructor limpio
+        public CarritoController()
         {
-            // OJO: Asegúrate de que "DefaultConnection" sea el nombre exacto de tu conexión en appsettings.json
-            _cadenaConexion = config.GetConnectionString("CadenaSQL");
         }
 
         // --- MÉTODO AUXILIAR: Extraer el ID del usuario de las "Cookies/Claims" de sesión ---
@@ -37,7 +32,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 1. VISTA PRINCIPAL (MI CARRITO)
+        // 1. VISTA PRINCIPAL (MI CARRITO / POS ADMIN)
         // ==========================================
         public IActionResult Index()
         {
@@ -50,11 +45,35 @@ namespace Presentacion.Controllers
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 ViewBag.ListaDetalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
 
+                // LÓGICA EXCLUSIVA PARA EL ADMIN
+                if (User.IsInRole("Administrador"))
+                {
+                    LogicaProducto logicaProd = new LogicaProducto();
+                    DataTable todosLosProductos = logicaProd.ListarProductos();
+
+                    // --- SOLUCIÓN ASUNTO 1: Filtrar productos activos ---
+                    DataView vistaProductos = new DataView(todosLosProductos);
+
+                    // IMPORTANTE: Revisa en tu Base de Datos cómo se llama la columna de estado.
+                    // Si se llama "ACTIVO" o "ESTADO" y es un BIT/INT, sería "ESTADO = 1"
+                    vistaProductos.RowFilter = "ESTADO = 1"; // <-- ¡Cambia 'ACTIVO' por el nombre real de tu columna!
+
+                    ViewBag.ProductosDisponibles = vistaProductos.ToTable();
+                    // ----------------------------------------------------
+
+                    LogicaUsuario logicaUsu = new LogicaUsuario();
+                    DataTable todosLosUsuarios = logicaUsu.ListarUsuarios();
+
+                    DataView vistaUsuarios = new DataView(todosLosUsuarios);
+                    vistaUsuarios.RowFilter = "ID_ROL = 2"; // Filtramos solo clientes
+                    ViewBag.ClientesDisponibles = vistaUsuarios.ToTable();
+                }
+
                 return View(miCarrito);
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Error al cargar tu carrito: " + ex.Message;
+                TempData["MensajeError"] = "Error al cargar la pantalla: " + ex.Message;
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -201,7 +220,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 5. PROCESAR COMPRA (NUEVO CHECKOUT)
+        // 5. PROCESAR COMPRA (AHORA SÍ, LIMPIO Y POR CAPAS)
         // ==========================================
         [HttpPost]
         public IActionResult ProcesarCompra(int? idMetodoPago)
@@ -209,7 +228,6 @@ namespace Presentacion.Controllers
             int idUsuario = ObtenerIdUsuarioLogueado();
             if (idUsuario <= 0) return RedirectToAction("Index", "Login");
 
-            int nuevoIdPedido = 0;
             var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
 
             try
@@ -217,80 +235,92 @@ namespace Presentacion.Controllers
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 var detallesCarrito = logicaDetalle.Listar(miCarrito.ID_CARRITO);
 
-                if (detallesCarrito == null || !detallesCarrito.Any())
-                {
-                    TempData["MensajeError"] = "Tu carrito está vacío. Agrega productos antes de pagar.";
-                    return RedirectToAction("Index");
-                }
+                LogicaPedido logicaPedido = new LogicaPedido();
+                int nuevoIdPedido = logicaPedido.ProcesarCompra(idUsuario, idMetodoPago, miCarrito.TOTAL, detallesCarrito);
 
-                using (SqlConnection con = new SqlConnection(_cadenaConexion))
-                {
-                    con.Open();
-                    // Usamos transacciones para que, si falta stock de un producto, todo se cancele limpiamente
-                    using (SqlTransaction transaccion = con.BeginTransaction())
-                    {
-                        try
-                        {
-                            // A. Crear el Encabezado del Pedido
-                            using (SqlCommand cmd = new SqlCommand("Venta.Sp_CrearPedido", con, transaccion))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
-                                cmd.Parameters.AddWithValue("@Id_Metodo_Pago", (object)idMetodoPago ?? DBNull.Value);
-                                cmd.Parameters.AddWithValue("@Total", miCarrito.TOTAL);
-                                cmd.Parameters.AddWithValue("@Estado", "PENDIENTE"); // Estado inicial
-
-                                // Ejecutamos y capturamos el ID del nuevo pedido
-                                nuevoIdPedido = Convert.ToInt32(cmd.ExecuteScalar());
-                            }
-
-                            // B. Insertar los Detalles (Ciclo por cada producto)
-                            foreach (var item in detallesCarrito)
-                            {
-                                using (SqlCommand cmdDetalle = new SqlCommand("Venta.Sp_InsertarDetallePedido", con, transaccion))
-                                {
-                                    cmdDetalle.CommandType = CommandType.StoredProcedure;
-                                    cmdDetalle.Parameters.AddWithValue("@Id_Pedido", nuevoIdPedido);
-                                    cmdDetalle.Parameters.AddWithValue("@Id_Producto", item.ID_PRODUCTO);
-                                    cmdDetalle.Parameters.AddWithValue("@Imei_Vendido", DBNull.Value); // Se asignará en almacén
-                                    cmdDetalle.Parameters.AddWithValue("@Cantidad", item.CANTIDAD);
-                                    cmdDetalle.Parameters.AddWithValue("@Precio_Unitario", item.PRECIO_UNITARIO);
-                                    cmdDetalle.Parameters.AddWithValue("@Id_Usuario", idUsuario); // Para Kárdex
-
-                                    cmdDetalle.ExecuteNonQuery();
-                                }
-                            }
-
-                            // C. Confirmar la transacción si todo fue un éxito
-                            transaccion.Commit();
-                        }
-                        catch (SqlException sqlEx)
-                        {
-                            // Atrapa los RAISERROR del SP (ej. Stock insuficiente)
-                            transaccion.Rollback();
-                            TempData["MensajeError"] = "Error al procesar el pedido: " + sqlEx.Message;
-                            return RedirectToAction("Index");
-                        }
-                        catch (Exception)
-                        {
-                            transaccion.Rollback();
-                            TempData["MensajeError"] = "Ocurrió un error inesperado al guardar el pedido.";
-                            return RedirectToAction("Index");
-                        }
-                    }
-                }
-
-                // Si llegamos hasta aquí, el pago/pedido fue un éxito. Vaciamos el carrito.
                 _logicaCarrito.VaciarCarrito(miCarrito.ID_CARRITO);
 
                 TempData["MensajeExito"] = $"¡Tu pedido #{nuevoIdPedido} ha sido generado exitosamente!";
 
-                // Redirigimos a la pantalla de éxito
                 return RedirectToAction("Confirmacion", new { idPedido = nuevoIdPedido });
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Error crítico al procesar la compra: " + ex.Message;
+                TempData["MensajeError"] = ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ==========================================
+        // MÉTODOS EXCLUSIVOS PARA EL POS (ADMIN)
+        // ==========================================
+
+        [HttpPost]
+        public IActionResult AgregarAdmin(int idProducto, int cantidad)
+        {
+            try
+            {
+                int idAdmin = ObtenerIdUsuarioLogueado();
+                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idAdmin);
+
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, cantidad);
+
+                TempData["MensajeExito"] = "Producto agregado al pedido.";
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al agregar: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult Eliminar(int idDetalle)
+        {
+            try
+            {
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                logicaDetalle.Eliminar(idDetalle);
+                TempData["MensajeExito"] = "Producto removido del pedido.";
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al remover: " + ex.Message;
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult ProcesarCompraAdmin(int idClienteReal, int idMetodoPago)
+        {
+            try
+            {
+                int idAdmin = ObtenerIdUsuarioLogueado();
+                var carritoAdmin = _logicaCarrito.ObtenerOCrearCarrito(idAdmin);
+
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                var detallesCarrito = logicaDetalle.Listar(carritoAdmin.ID_CARRITO);
+
+                if (!detallesCarrito.Any())
+                {
+                    TempData["MensajeError"] = "No puedes generar un pedido vacío.";
+                    return RedirectToAction("Index");
+                }
+
+                LogicaPedido logicaPedido = new LogicaPedido();
+                int nuevoIdPedido = logicaPedido.ProcesarCompra(idClienteReal, idMetodoPago, carritoAdmin.TOTAL, detallesCarrito);
+
+                _logicaCarrito.VaciarCarrito(carritoAdmin.ID_CARRITO);
+
+                // Asunto 2 completamente implementado aquí:
+                TempData["MensajeExito"] = $"¡Pedido #{nuevoIdPedido} generado exitosamente!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al procesar el pedido: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -301,7 +331,6 @@ namespace Presentacion.Controllers
         [HttpGet]
         public IActionResult Confirmacion(int idPedido)
         {
-            // Le pasamos el ID a la vista para que pueda mostrar el número de orden
             ViewBag.IdPedido = idPedido;
             return View();
         }

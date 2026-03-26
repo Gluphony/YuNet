@@ -52,7 +52,7 @@ namespace Presentacion.Controllers
                 {
                     // Llamamos a tu capa lógica para guardar
                     // Asumo que tienes un método Crear() en tu LogicaDevolucion
-                    _logicaDevolucion.Crear(nuevaDevolucion);
+                    Convert.ToInt32(_logicaDevolucion);
 
                     TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
                     return RedirectToAction("Index");

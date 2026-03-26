@@ -1,53 +1,141 @@
 ﻿@model Entidades.Carrito
+@using System.Data
 
 @{
-    ViewData["Title"] = User.IsInRole("Administrador") ? "Crear Pedido Manual" : "Mi Carrito";
-    var detalles = ViewBag.ListaDetalles as List<Entidades.DetalleCarrito> ?? new List<Entidades.DetalleCarrito>();
-
-    // OJO AQUÍ: Necesitamos que tu controlador envíe los productos disponibles
-    var productosDisponibles = ViewBag.ProductosDisponibles as List<Entidades.Producto> ?? new List<Entidades.Producto>();
+    ViewData["Title"] = "Gestión de Pedidos";
+    var detalles = ViewBag.ListaDetalles as List<Entidades.DetalleCarrito>;
+    var productosDisponibles = ViewBag.ProductosDisponibles as DataTable;
+    var clientesDisponibles = ViewBag.ClientesDisponibles as DataTable;
 }
 
 <style>
-    .admin-panel {
+    /* ==========================================
+           1. VARIABLES ENCAPSULADAS (MODO CLARO)
+           ========================================== */
+    .pos-wrapper {
+        --neon-blue-base: #007bff;
+        --neon-blue-glow: rgba(0, 123, 255, 0.4);
+        --bg-card: #ffffff;
+        --border-color: #dee2e6;
+        --text-main: #212529;
+        --text-muted: #6c757d;
+        --neon-green: #28a745;
+        --input-bg: #f8f9fa;
+    }
+
+    /* ==========================================
+           2. SUPER SELECTOR MODO OSCURO (INFALIBLE)
+           ========================================== */
+    html[data-bs-theme="dark"] .pos-wrapper,
+    html[data-theme="dark"] .pos-wrapper,
+    body.dark-mode .pos-wrapper,
+    body.dark-theme .pos-wrapper,
+    body[data-layout-mode="dark"] .pos-wrapper,
+    .dark-style .pos-wrapper {
+        --neon-blue-base: #00D4FF !important;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4) !important;
+        --bg-card: #1a1e29 !important;
+        --border-color: #2a2f3a !important;
+        --text-main: #ffffff !important;
+        --text-muted: #a0aabf !important;
+        --neon-green: #00FF7F !important;
+        --input-bg: #222736 !important; /* Color sólido oscuro en vez de rgba */
+    }
+
+    /* ==========================================
+           3. DISEÑO ORIGINAL APLICADO A VARIABLES
+           ========================================== */
+    .pos-wrapper .admin-panel {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 1.5rem;
-    }
-
-    .table-dark-custom {
         color: var(--text-main);
+        transition: all 0.3s ease;
     }
 
-        .table-dark-custom th {
+    .pos-wrapper .table-neon {
+        width: 100%;
+        color: var(--text-main);
+        border-collapse: collapse;
+    }
+
+        .pos-wrapper .table-neon th {
             color: var(--neon-blue-base);
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--neon-blue-base);
+            padding: 12px 8px;
+            text-align: left;
+            transition: color 0.3s ease;
         }
 
-        .table-dark-custom td {
+        .pos-wrapper .table-neon td {
             border-bottom: 1px solid var(--border-color);
+            padding: 12px 8px;
             vertical-align: middle;
+            transition: border-color 0.3s ease;
         }
 
-    .btn-agregar {
-        background-color: var(--neon-blue-tint);
+    .pos-wrapper .form-control-neon {
+        background-color: var(--input-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+        .pos-wrapper .form-control-neon:focus {
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 0 8px var(--neon-blue-glow);
+            color: var(--text-main);
+            outline: none;
+        }
+
+    .pos-wrapper .btn-neon-sm {
+        background: transparent;
         color: var(--neon-blue-base);
         border: 1px solid var(--neon-blue-base);
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-        .btn-agregar:hover {
-            background-color: var(--neon-blue-base);
-            color: #000;
+        .pos-wrapper .btn-neon-sm:hover {
+            background: var(--neon-blue-base);
+            color: #ffffff;
+            box-shadow: 0 0 10px var(--neon-blue-glow);
         }
+
+    /* Regla del botón en modo oscuro usando el wrapper */
+    html[data-bs-theme="dark"] .pos-wrapper .btn-neon-sm:hover,
+    body.dark-mode .pos-wrapper .btn-neon-sm:hover,
+    .dark-style .pos-wrapper .btn-neon-sm:hover {
+        color: #000;
+    }
 </style>
 
-<div class="container-fluid py-4" style="color: var(--text-main);">
+<div class="container-fluid py-4 pos-wrapper">
+
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["MensajeError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["MensajeError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     @if (User.IsInRole("Administrador"))
     {
         <h2 class="h3 fw-bold mb-4" style="color: var(--neon-blue-base);">
-            <i class="bi bi-person-lines-fill me-2"></i> Crear Pedido para Cliente
+            <i class="bi bi-pc-display me-2"></i> NUEVO DISEÑO POS (Admin)
         </h2>
 
         <div class="row g-4">
@@ -55,56 +143,44 @@
 
                 <div class="admin-panel mb-4 shadow-sm">
                     <h5 class="fw-bold mb-3">1. Seleccionar Cliente</h5>
-                    <div class="d-flex gap-2">
-                        <select class="form-select" id="selectClienteAdmin" style="background-color: var(--bg-main); color: var(--text-main); border-color: var(--border-color);">
-                            <option value="">-- Buscar y seleccionar cliente --</option>
-                            <option value="1">Carlos (ID: 1)</option>
-                            <option value="2">María (ID: 2)</option>
-                        </select>
-                        <button class="btn btn-outline-info">Fijar Cliente</button>
-                    </div>
+                    <select class="form-select form-control-neon" id="selectClienteAdmin">
+                        <option value="">-- Buscar y seleccionar cliente --</option>
+                        @if (clientesDisponibles != null)
+                        {
+                            foreach (DataRow cliente in clientesDisponibles.Rows)
+                            {
+                                <option value="@cliente["ID_USUARIO"]">@cliente["NOMBRE"]</option>
+                            }
+                        }
+                    </select>
                 </div>
 
                 <div class="admin-panel shadow-sm">
-                    <h5 class="fw-bold mb-3">2. Agregar Productos</h5>
-
+                    <h5 class="fw-bold mb-3">2. Catálogo de Productos</h5>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table table-dark-custom">
+                        <table class="table-neon">
                             <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Stock</th>
-                                    <th>Precio</th>
-                                    <th class="text-end">Acción</th>
-                                </tr>
+                                <tr><th>Producto</th><th>Stock</th><th>Precio</th><th class="text-end">Acción</th></tr>
                             </thead>
                             <tbody>
-                                @if (productosDisponibles.Any())
+                                @if (productosDisponibles != null)
                                 {
-                                    foreach (var prod in productosDisponibles)
+                                    foreach (DataRow prod in productosDisponibles.Rows)
                                     {
                                         <tr>
-                                            <td class="fw-bold">@prod.NOMBRE</td>
-                                            <td>@prod.STOCK</td>
-                                            <td>C$ @prod.PRECIO.ToString("N2")</td>
+                                            <td class="fw-bold">@prod["MODELO"]</td>
+                                            <td>@prod["EXISTENCIAS"]</td>
+                                            <td>C$ @Convert.ToDecimal(prod["PRECIO"]).ToString("N2")</td>
                                             <td class="text-end">
-                                                <form action="/Carrito/AgregarAdmin" method="post" class="d-flex justify-content-end gap-2">
-                                                    <input type="hidden" name="idProducto" value="@prod.ID_PRODUCTO" />
-                                                    <input type="number" name="cantidad" value="1" min="1" max="@prod.STOCK" class="form-control form-control-sm" style="width: 70px; background-color: var(--bg-main); color: white;">
-                                                    <button type="submit" class="btn btn-sm btn-agregar click-anim">Agregar</button>
+                                                <form action="/Carrito/AgregarAdmin" method="POST" class="d-flex justify-content-end gap-2 m-0 form-agregar">
+                                                    <input type="hidden" name="idClienteReal" class="cliente-hidden" value="" />
+                                                    <input type="hidden" name="idProducto" value="@prod["ID_PRODUCTO"]" />
+                                                    <input type="number" name="cantidad" value="1" min="1" max="@prod["EXISTENCIAS"]" class="form-control-neon px-2" style="width: 70px;">
+                                                    <button type="submit" class="btn-neon-sm btn-agregar-submit">Agregar</button>
                                                 </form>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center py-4 text-muted">
-                                            <i class="bi bi-box-seam fs-3 d-block mb-2"></i>
-                                            El catálogo está vacío. El controlador debe enviar ViewBag.ProductosDisponibles.
-                                        </td>
-                                    </tr>
                                 }
                             </tbody>
                         </table>
@@ -118,50 +194,53 @@
                         <i class="bi bi-cart-check me-2"></i> Pedido Actual
                     </h5>
 
-                    <div class="flex-grow-1">
-                        @if (detalles.Count > 0)
+                    <div class="flex-grow-1" style="max-height: 350px; overflow-y: auto;">
+                        @if (detalles != null && detalles.Count > 0)
                         {
                             <ul class="list-group list-group-flush mb-3">
                                 @foreach (var item in detalles)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; border-color: var(--border-color); color: var(--text-main);">
                                         <div>
-                                            <div class="fw-bold">@item.NOMBRE_PRODUCTO</div>
-                                            <small class="text-muted">@item.CANTIDAD x C$ @item.PRECIO_UNITARIO</small>
+                                            <div class="fw-bold">Prod ID: @item.ID_PRODUCTO</div>
+                                            <small class="text-muted" style="color: var(--text-muted) !important;">@item.CANTIDAD unidades</small>
                                         </div>
-                                        <span class="fw-bold text-info">C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))</span>
-                                        <form action="/DetalleCarrito/Eliminar" method="post">
-                                            <input type="hidden" name="idDetalle" value="@item.ID_DETALLE" />
-                                            <button class="btn btn-sm text-danger"><i class="bi bi-trash"></i></button>
-                                        </form>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="fw-bold" style="color: var(--neon-blue-base);">C$ @item.SUBTOTAL</span>
+                                            <form action="/Carrito/Eliminar" method="POST" class="m-0">
+                                                <input type="hidden" name="idClienteReal" class="cliente-hidden" value="" />
+                                                <input type="hidden" name="idDetalle" value="@item.ID_DETALLE" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </div>
                                     </li>
                                 }
                             </ul>
                         }
                         else
                         {
-                            <div class="text-center py-5 text-muted">
-                                Aún no has agregado productos al pedido de este cliente.
-                            </div>
+                            <div class="text-center py-5 text-muted" style="color: var(--text-muted) !important;">No hay productos.</div>
                         }
                     </div>
 
                     <hr style="border-color: var(--border-color);" />
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fs-5">Total a Cobrar:</span>
-                        <span class="fs-3 fw-bold" style="color: var(--neon-blue-base);">C$ @Model.TOTAL.ToString("N2")</span>
+                        <span class="fs-5">Total:</span>
+                        <span class="fs-3 fw-bold" style="color: var(--neon-blue-base);">C$ @(Model?.TOTAL.ToString("N2") ?? "0.00")</span>
                     </div>
 
-                    @if (detalles.Count > 0)
+                    @if (detalles != null && detalles.Count > 0)
                     {
-                        <form action="/Carrito/ProcesarCompraAdmin" method="post">
-                            <input type="hidden" name="idClienteReal" id="idClienteRealHidden" value="" required />
-                            <select name="idMetodoPago" class="form-select mb-3" style="background-color: var(--bg-main); color: var(--text-main);">
+                        <form action="/Carrito/ProcesarCompraAdmin" method="POST" id="formGenerarPedido">
+                            <input type="hidden" name="idClienteReal" id="hiddenClientForm" class="cliente-hidden" value="" />
+
+                            <select name="idMetodoPago" class="form-select form-control-neon mb-3" required>
                                 <option value="1">Efectivo</option>
                                 <option value="2">Transferencia</option>
+                                <option value="3">Tarjeta</option>
                             </select>
-                            <button type="submit" class="btn w-100 py-3 fw-bold fs-5" style="background-color: var(--neon-blue-base); color: black;">
+                            <button type="submit" class="btn w-100 py-3 fw-bold fs-5" style="background-color: var(--neon-blue-base); color: #000; border-radius: 12px;">
                                 Generar Pedido
                             </button>
                         </form>
@@ -172,9 +251,43 @@
     }
     else
     {
-        <div class="text-center py-5">
-            <h3>Vista del Cliente</h3>
-            <p>Aquí se mantiene tu diseño original del carrito para usuarios normales.</p>
+        <div class="alert alert-warning p-5 text-center">
+            <h2>⚠️ ESTÁS VIENDO LA VISTA DE CLIENTE NORMAL</h2>
+            <p>El sistema no te detecta como "Administrador". Por eso no ves el nuevo diseño del POS.</p>
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Manejo del estado del cliente
+            var clienteGuardado = sessionStorage.getItem("adminSelectedClient");
+            if (clienteGuardado) {
+                $('#selectClienteAdmin').val(clienteGuardado);
+                $('.cliente-hidden').val(clienteGuardado);
+            }
+
+            $('#selectClienteAdmin').change(function () {
+                var idCliente = $(this).val();
+                sessionStorage.setItem("adminSelectedClient", idCliente);
+                $('.cliente-hidden').val(idCliente);
+            });
+
+            // Validar antes de enviar que el hidden no esté vacío
+            $('.form-agregar').submit(function(e) {
+                if (!$('#selectClienteAdmin').val()) {
+                    e.preventDefault();
+                    alert("Selecciona un cliente arriba.");
+                }
+            });
+
+            $('#formGenerarPedido').submit(function(e) {
+                if (!$('#hiddenClientForm').val()) {
+                    e.preventDefault();
+                    alert("Selecciona un cliente arriba para poder generar el pedido.");
+                }
+            });
+        });
+    </script>
+}

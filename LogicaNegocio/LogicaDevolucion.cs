@@ -2,9 +2,6 @@
 using Entidades;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LogicaNegocio
 {
@@ -15,8 +12,6 @@ namespace LogicaNegocio
         // 1. LISTAR DEVOLUCIONES
         public List<Devolucion> Listar()
         {
-            // Como no hay parámetros de entrada, no hay mucho que validar antes de ir a la BD.
-            // Simplemente pasamos la solicitud a la capa de Datos.
             try
             {
                 return _datosDevoluciones.Listar();
@@ -26,17 +21,79 @@ namespace LogicaNegocio
                 throw new Exception("Ocurrió un error en la capa lógica al intentar obtener las devoluciones.", ex);
             }
         }
-        public bool Crear(Devolucion devolucion)
+
+        // 2. CREAR DEVOLUCIÓN (Para el Cliente)
+     
+        public bool Crear(int idDetallePedido, string motivoCliente, out string mensaje)
         {
-            // Pequeñas validaciones
-            if (devolucion.ID_DETALLE_DEVOLUCION <= 0)
-                throw new ArgumentException("Debe especificar un detalle válido.");
+            mensaje = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(devolucion.MOTIVO_CLIENTE))
-                throw new ArgumentException("El motivo del cliente es obligatorio.");
+            try
+            {
+                // Pequeñas validaciones
+                if (idDetallePedido <= 0)
+                {
+                    mensaje = "Debe especificar un producto válido para reportar.";
+                    return false;
+                }
 
-            return _datosDevoluciones.Crear(devolucion);
+                if (string.IsNullOrWhiteSpace(motivoCliente))
+                {
+                    mensaje = "El motivo del cliente es obligatorio.";
+                    return false;
+                }
+
+                // 👇 Y AQUÍ le pasamos los dos parámetros correctos a la capa de Datos
+                bool respuesta = _datosDevoluciones.Crear(idDetallePedido, motivoCliente);
+
+                if (respuesta)
+                    mensaje = "El reporte ha sido enviado al administrador correctamente.";
+                else
+                    mensaje = "No se pudo registrar el reporte en la base de datos.";
+
+                return respuesta;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Ocurrió un error al crear la devolución: " + ex.Message;
+                return false;
+            }
         }
 
+        // 3. PROCESAR DEVOLUCIÓN (Para el Admin)
+        public bool ProcesarAdmin(Devolucion devolucion, out string mensaje)
+        {
+            mensaje = string.Empty;
+
+            try
+            {
+                // Validaciones para el administrador
+                if (devolucion.ID_DEVOLUCION <= 0)
+                {
+                    mensaje = "Error: No se identificó el reporte a procesar.";
+                    return false;
+                }
+
+                if (string.IsNullOrWhiteSpace(devolucion.ESTADO_REPORTE))
+                {
+                    mensaje = "Debe asignar un estado al reporte (Ej. Aprobado o Rechazado).";
+                    return false;
+                }
+
+                bool respuesta = _datosDevoluciones.ProcesarAdmin(devolucion);
+
+                if (respuesta)
+                    mensaje = "La devolución ha sido procesada correctamente.";
+                else
+                    mensaje = "No se pudo procesar la devolución en la base de datos.";
+
+                return respuesta;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Ocurrió un error al procesar la devolución: " + ex.Message;
+                return false;
+            }
+        }
     }
 }
