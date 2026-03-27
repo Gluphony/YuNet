@@ -284,7 +284,16 @@
                                     <i class="bi bi-cart3 me-1 d-lg-none"></i> Mi Carrito
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Historial", "Pedido")">
+                                    <i class="bi bi-bag-check me-1 d-lg-none"></i> Mis Pedidos
+                                </a>
+                            </li>
                         }
+
+                        // Aquí imagino que sigue tu código para el Administrador, Jefe de Almacen, etc...
+
 
                         @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
                         {

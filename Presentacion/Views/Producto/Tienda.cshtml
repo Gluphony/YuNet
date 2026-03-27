@@ -160,20 +160,30 @@
     <div class="grilla-fluida">
         @foreach (var item in Model)
         {
-            if (item.ESTADO && item.EXISTENCIAS > 0)
+            // Solo verificamos que el producto esté activo. Dejamos pasar los que tienen 0 existencias.
+            if (item.ESTADO)
             {
                 string modeloJs = item.MODELO.Replace("'", "\\'");
 
                 <div class="tech-card">
-                    @if (item.EXISTENCIAS <= 5)
+
+                    @* 1. LÓGICA DE BADGES (Etiquetas superiores) *@
+                    @if (item.EXISTENCIAS <= 0)
                     {
+                        // Si no hay stock, mostramos etiqueta roja
+                        <span class="badge-premium" style="background: rgba(220, 53, 69, 0.15); color: #dc3545; border-color: rgba(220, 53, 69, 0.3);">
+                            ¡Agotado!
+                        </span>
+                    }
+                    else if (item.EXISTENCIAS <= 5)
+                    {
+                        // Si queda poco, mostramos la etiqueta amarilla que ya tenías
                         <span class="badge-premium">¡Últimas @item.EXISTENCIAS unidades!</span>
                     }
-        
 
                     <div class="tech-img-box">
                         <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"
-                             alt="@item.MODELO" class="tech-img"
+                             alt="@item.MODELO" class="tech-img @(item.EXISTENCIAS <= 0 ? "opacity-50" : "")"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
                         <i class="bi bi-phone" style="font-size: 5rem; color: rgba(255,255,255,0.05); display: none;"></i>
                     </div>
@@ -189,9 +199,21 @@
                                 $@item.PRECIO.ToString("N2")
                             </span>
 
-                            <button class="btn btn-tech" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs')">
-                                <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
-                            </button>
+                            @* 2. LÓGICA DEL BOTÓN ESTILO AMAZON *@
+                            @if (item.EXISTENCIAS > 0)
+                            {
+                                // Si hay inventario, botón verde funcional
+                                <button class="btn btn-tech" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs')">
+                                    <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
+                                </button>
+                            }
+                            else
+                            {
+                                // Si es 0, botón gris bloqueado
+                                <button class="btn btn-tech" disabled style="background: rgba(255, 255, 255, 0.05); color: #6c757d; cursor: not-allowed; opacity: 0.8;">
+                                    <i class="bi bi-x-circle me-2"></i> Sin Inventario
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>

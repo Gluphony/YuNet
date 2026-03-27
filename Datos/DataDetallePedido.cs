@@ -45,6 +45,7 @@ namespace Datos
         }
 
         // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
+        // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
         public List<DetallePedido> ListarTicket(int idPedido)
         {
             var olista = new List<DetallePedido>();
@@ -62,15 +63,33 @@ namespace Datos
                         {
                             while (reader.Read())
                             {
-                                olista.Add(new DetallePedido()
+                                // 1. Armamos el objeto base
+                                var detalle = new DetallePedido()
                                 {
                                     ID_DETALLE_PEDIDO = Convert.ToInt32(reader["Id_Detalle_Pedido"]),
                                     PRODUCTO = reader["Producto"].ToString(),
                                     IMEI_VENDIDO = reader["Numero_Serie_IMEI"].ToString(),
                                     CANTIDAD = Convert.ToInt32(reader["Cantidad"]),
                                     PRECIO_UNITARIO = Convert.ToDecimal(reader["Precio_Unitario"])
-                                    // Subtotal se calcula solo en el Model
-                                });
+                                };
+
+                                // 2. Lógica para saber si ya hay un reporte (Devolución)
+                                if (reader["ID_DEVOLUCION"] != DBNull.Value)
+                                {
+                                    detalle.Tiene_Devolucion = true;
+                                    detalle.Id_Devolucion_Vinculada = Convert.ToInt32(reader["ID_DEVOLUCION"]);
+                                    detalle.ESTADO_REPORTE = reader["ESTADO_REPORTE"] != DBNull.Value ? reader["ESTADO_REPORTE"].ToString() : "Pendiente";
+                                }
+                                else
+                                {
+                                    // No hay reporte todavía
+                                    detalle.Tiene_Devolucion = false;
+                                    detalle.Id_Devolucion_Vinculada = null;
+                                    detalle.ESTADO_REPORTE = null;
+                                }
+
+                                // 3. Lo agregamos a la lista final
+                                olista.Add(detalle);
                             }
                         }
                     }
@@ -81,4 +100,3 @@ namespace Datos
         }
     }
 }
-

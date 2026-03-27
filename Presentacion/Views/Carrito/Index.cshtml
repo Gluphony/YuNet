@@ -201,7 +201,7 @@
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; border-color: var(--border-color); color: var(--text-main);">
                                         <div>
-                                            <div class="fw-bold">Prod ID: @item.ID_PRODUCTO</div>
+                                            <div class="fw-bold"><i class="bi bi-box-seam me-2 text-muted"></i> @item.NOMBRE_PRODUCTO</div>
                                             <small class="text-muted" style="color: var(--text-muted) !important;">@item.CANTIDAD unidades</small>
                                         </div>
                                         <div class="d-flex align-items-center gap-3">
@@ -250,17 +250,95 @@
     }
     else
     {
-        <div class="alert alert-warning p-5 text-center mt-4 shadow-sm" style="border-radius: 16px;">
-            <h2>🛍️ TU CARRITO DE COMPRAS</h2>
-            <p class="fs-5">Aquí se mostrarán los productos que has seleccionado.</p>
+        <div class="d-flex align-items-center mb-4 gap-2">
+            <i class="bi bi-cart3 fs-2" style="color: var(--neon-blue-base);"></i>
+            <h2 class="h3 fw-bold mb-0" style="color: var(--text-main);">Mi Carrito de Compras</h2>
         </div>
+
+        @if (detalles != null && detalles.Count > 0)
+        {
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="admin-panel shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table-neon w-100 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th class="text-center">Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in detalles)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold py-3">
+                                                <i class="bi bi-box-seam me-2 text-muted"></i> @item.NOMBRE_PRODUCTO
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-secondary text-light px-3 py-2 rounded-pill">@item.CANTIDAD</span>
+                                            </td>
+                                            <td class="text-end fw-bold" style="color: var(--neon-blue-base);">C$ @item.SUBTOTAL</td>
+                                            <td class="text-center">
+                                                <form action="/Carrito/Eliminar" method="POST" class="m-0">
+                                                    <input type="hidden" name="idDetalle" value="@item.ID_DETALLE" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-2 lh-1" title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="admin-panel shadow-sm" style="border-top: 4px solid var(--neon-green);">
+                        <h5 class="fw-bold mb-3 pb-2" style="border-bottom: 1px solid var(--border-color);">Resumen de Compra</h5>
+
+                        <div class="d-flex justify-content-between mb-4 align-items-center">
+                            <span class="text-muted">Total a pagar:</span>
+                            <span class="fs-3 fw-bold" style="color: var(--neon-green);">C$ @(Model?.TOTAL.ToString("N2") ?? "0.00")</span>
+                        </div>
+
+                        <form action="/Carrito/ProcesarCompra" method="POST">
+                            <label class="form-label small text-muted">Método de Pago</label>
+                            <select name="idMetodoPago" class="form-select form-control-neon mb-4" required>
+                                <option value="1">Efectivo (Pago Contra Entrega)</option>
+                                <option value="2">Transferencia Bancaria</option>
+                                <option value="3">Tarjeta de Crédito/Débito</option>
+                            </select>
+
+                            <button type="submit" class="btn w-100 py-3 fw-bold fs-6" style="background-color: var(--neon-green); color: #000; border-radius: 12px; transition: all 0.3s;">
+                                <i class="bi bi-bag-check-fill me-2"></i> Confirmar Pedido
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="admin-panel text-center py-5 shadow-sm">
+                <i class="bi bi-cart-x display-1 opacity-25 mb-3 d-block" style="color: var(--neon-blue-base);"></i>
+                <h4 class="fw-bold mb-2">Tu carrito está vacío</h4>
+                <p class="text-muted mb-4">Parece que aún no has agregado ningún producto a tu carrito.</p>
+                <a href="/Producto/Index" class="btn px-4 py-2" style="background-color: var(--neon-blue-base); color: #000; font-weight: bold; border-radius: 8px;">
+                    <i class="bi bi-shop me-2"></i> Ir a la Tienda
+                </a>
+            </div>
+        }
     }
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Manejo del estado del cliente
             var clienteGuardado = sessionStorage.getItem("adminSelectedClient");
             if (clienteGuardado) {
                 $('#selectClienteAdmin').val(clienteGuardado);
@@ -273,16 +351,15 @@
                 $('.cliente-hidden').val(idCliente);
             });
 
-            // Validar antes de enviar que el hidden no esté vacío
             $('.form-agregar').submit(function(e) {
-                if (!$('#selectClienteAdmin').val()) {
+                if ($('#selectClienteAdmin').length > 0 && !$('#selectClienteAdmin').val()) {
                     e.preventDefault();
                     alert("Selecciona un cliente arriba.");
                 }
             });
 
             $('#formGenerarPedido').submit(function(e) {
-                if (!$('#hiddenClientForm').val()) {
+                if ($('#hiddenClientForm').length > 0 && !$('#hiddenClientForm').val()) {
                     e.preventDefault();
                     alert("Selecciona un cliente arriba para poder generar el pedido.");
                 }

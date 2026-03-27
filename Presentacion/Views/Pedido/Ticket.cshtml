@@ -8,12 +8,15 @@
 
 <style>
     /* ==========================================
-           VARIABLES NEÓN Y TEMAS (Basado en el Home)
-           ========================================== */
+               VARIABLES NEÓN Y TEMAS (Basado en el Home)
+               ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
         --neon-blue-tint: rgba(0, 212, 255, 0.1);
+        --neon-red-base: #ff4d4d;
+        --neon-red-glow: rgba(255, 77, 77, 0.4);
+        --neon-red-tint: rgba(255, 77, 77, 0.1);
     }
 
     /* Diseño de la Tarjeta Ticket */
@@ -54,6 +57,23 @@
             transform: translateY(-2px);
         }
 
+    /* Botón Neón Rojo (Para Reportar) */
+    .btn-neon-danger {
+        background: transparent;
+        color: var(--neon-red-base) !important;
+        border: 1px solid var(--neon-red-base);
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon-danger:hover {
+            background: var(--neon-red-base);
+            color: #fff !important;
+            box-shadow: 0 0 15px var(--neon-red-glow);
+            transform: translateY(-2px);
+        }
+
     .btn-outline-custom {
         background: transparent;
         color: var(--text-main);
@@ -84,8 +104,8 @@
         }
 
     /* ==========================================
-       ESTILOS PARA LA TABLA DEL TICKET
-       ========================================== */
+           ESTILOS PARA LA TABLA DEL TICKET
+           ========================================== */
     .table-ticket {
         background-color: transparent !important;
         color: var(--text-main) !important;
@@ -113,39 +133,36 @@
         border-radius: 8px;
     }
     /* ==========================================
-           ESTILOS DE IMPRESIÓN (Blanco y Negro)
-           ========================================== */
+               ESTILOS DE IMPRESIÓN (Blanco y Negro)
+               ========================================== */
     @@media print {
-        body
+        body {
+            background-color: white !important;
+        }
 
-    {
-        background-color: white !important;
-    }
-
-    .d-print-none {
-        display: none !important;
-    }
-
-    .ticket-card {
-        box-shadow: none !important;
-        border: 1px solid #000 !important;
-        background-color: white !important;
-    }
-
-        .ticket-card::before {
+        .d-print-none {
             display: none !important;
         }
 
-        .ticket-card * {
-            color: black !important;
+        .ticket-card {
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+            background-color: white !important;
         }
 
-    .total-box {
-        background-color: transparent !important;
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-    }
+            .ticket-card::before {
+                display: none !important;
+            }
 
+            .ticket-card * {
+                color: black !important;
+            }
+
+        .total-box {
+            background-color: transparent !important;
+            border: 1px solid #000 !important;
+            box-shadow: none !important;
+        }
     }
 </style>
 
@@ -175,6 +192,13 @@
     </div>
 }
 
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center d-print-none" style="background-color: rgba(0, 212, 255, 0.1); color: var(--neon-blue-base); border-radius: 8px; border-left: 4px solid var(--neon-blue-base) !important;">
+        <i class="bi bi-check-circle-fill fs-5 me-3"></i>
+        <div>@TempData["MensajeExito"]</div>
+    </div>
+}
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <div class="ticket-card mb-4" id="seccionTicket">
@@ -200,6 +224,7 @@
                                 <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Descripción</th>
                                 <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Precio Unit.</th>
                                 <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Importe</th>
+                                <th scope="col" class="pb-3 text-uppercase text-center d-print-none" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Garantía</th>
                             </tr>
                         </thead>
                         <tbody style="border-bottom: 1px dashed rgba(255,255,255,0.2);">
@@ -210,7 +235,7 @@
                                     <tr>
                                         <td class="py-3 fw-bold" style="background-color: transparent; color: var(--text-main); width: 10%;">@item.CANTIDAD</td>
 
-                                        <td class="py-3" style="background-color: transparent; color: var(--text-main); width: 50%;">
+                                        <td class="py-3" style="background-color: transparent; color: var(--text-main); width: 40%;">
                                             <span class="d-block fw-bold">@item.PRODUCTO</span>
 
                                             @if (item.IMEI_VENDIDO != "N/A" && !string.IsNullOrWhiteSpace(item.IMEI_VENDIDO))
@@ -219,17 +244,33 @@
                                             }
                                         </td>
 
-                                        <td class="py-3 text-end" style="background-color: transparent; color: var(--text-muted); width: 20%;">@item.PRECIO_UNITARIO.ToString("C")</td>
+                                        <td class="py-3 text-end" style="background-color: transparent; color: var(--text-muted); width: 15%;">@item.PRECIO_UNITARIO.ToString("C")</td>
 
-                                        <td class="py-3 text-end fw-bold" style="background-color: transparent; color: var(--text-main); width: 20%;">@item.SUBTOTAL.ToString("C")</td>
+                                        <td class="py-3 text-end fw-bold" style="background-color: transparent; color: var(--text-main); width: 15%;">@item.SUBTOTAL.ToString("C")</td>
+
+                                        <td class="py-3 text-center d-print-none" style="background-color: transparent; width: 20%;">
+                                            @if (item.Tiene_Devolucion)
+                                            {
+                                                <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base); font-size: 0.85rem; padding: 0.4em 0.8em; box-shadow: 0 0 5px var(--neon-blue-glow);">
+                                                    @item.ESTADO_REPORTE
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-neon-danger"
+                                                        onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@item.PRODUCTO.Replace("'", "\\'")')">
+                                                    <i class="bi bi-exclamation-circle me-1"></i> Reportar
+                                                </button>
+                                            }
+                                        </td>
                                     </tr>
                                 }
 
-                                }
+                            }
                             else if (ViewBag.Error == null)
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center py-5" style="background-color: transparent;">
+                                    <td colspan="5" class="text-center py-5" style="background-color: transparent;">
                                         <i class="bi bi-cart-x fs-2 mb-2 d-block" style="color: var(--neon-blue-base); opacity: 0.5;"></i>
                                         <span style="color: var(--text-muted);">No hay detalles para este pedido.</span>
                                     </td>
@@ -265,3 +306,78 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                <h5 class="modal-title fw-bold" id="modalReporteLabel" style="color: var(--neon-red-base); text-shadow: 0 0 8px var(--neon-red-glow);">
+                    <i class="bi bi-shield-exclamation me-2"></i>Reportar Problema
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form asp-controller="Devolucion" asp-action="Create" method="post">
+                <div class="modal-body p-4">
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">
+                        Estás a punto de reportar el producto:<br />
+                        <strong id="lblProductoReporte" style="color: var(--text-main); display: block; margin-top: 5px;"></strong>
+                    </p>
+
+                    <input type="hidden" id="inputDetalleDevolucion" name="ID_DETALLE_DEVOLUCION" value="" />
+
+                    <div class="mb-3 mt-4">
+                        <label for="motivoCliente" class="form-label" style="color: var(--neon-blue-base);">Motivo de la devolución</label>
+                        <textarea class="form-control" id="motivoCliente" name="MOTIVO_CLIENTE" rows="4" required
+                                  style="background-color: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); resize: none;"
+                                  placeholder="Ej: La pantalla vino rota, no enciende..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px dashed rgba(255,255,255,0.1);">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-neon-danger px-4">
+                        Enviar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // Función para abrir el modal y poner los datos (Esta ya la tenías, te la dejo de referencia)
+        function abrirModalReporte(idDetalle, producto) {
+            document.getElementById('idDetalleReporte').value = idDetalle;
+            document.getElementById('nombreProductoReporte').innerText = producto;
+            var modal = new bootstrap.Modal(document.getElementById('modalReporte'));
+            modal.show();
+        }
+
+        // NUEVO: Función para enviar el reporte por AJAX
+        function enviarReporteAjax() {
+            var idDetalle = document.getElementById('idDetalleReporte').value;
+            var motivo = document.getElementById('motivoReporte').value;
+
+            if(motivo.trim() === '') {
+                alert('Por favor, escribe un motivo.');
+                return;
+            }
+
+            // Enviamos los datos al controlador
+            $.post('/Devolucion/Create', {
+                ID_DETALLE_PEDIDO: idDetalle,
+                MOTIVO_CLIENTE: motivo
+            }, function (response) {
+                if (response.exito) {
+                    alert('¡Éxito! ' + response.mensaje);
+                    // Recargamos la página para que el botón rojo cambie al estado "Pendiente"
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.mensaje);
+                }
+            }).fail(function() {
+                alert('Ocurrió un error de conexión al enviar el reporte.');
+            });
+        }
+    </script>
+}

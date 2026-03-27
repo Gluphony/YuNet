@@ -12,7 +12,9 @@ namespace Presentacion.Controllers
     {
         private readonly LogicaDevolucion _logicaDevolucion = new LogicaDevolucion();
 
-        // --- 1. ACCIÓN PARA MOSTRAR LA LISTA DE DEVOLUCIONES ---
+        // ========================================================
+        // 1. GET: MUESTRA LA LISTA DE DEVOLUCIONES (Para el Admin)
+        // ========================================================
         [HttpGet]
         public IActionResult Index()
         {
@@ -29,45 +31,67 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // NUEVO: GET: Devolucion/Create (Muestra el formulario)
+        // 2. GET: Muestra el formulario para crear devolución
         // ========================================================
         [HttpGet]
         public IActionResult Create()
         {
-            // Mandamos una entidad en blanco a la vista
             return View(new Devolucion());
         }
 
         // ========================================================
-        // NUEVO: POST: Devolucion/Create (Guarda los datos)
+        // 3. POST: El cliente envía su reporte
         // ========================================================
         [HttpPost]
-        [ValidateAntiForgeryToken] // Seguridad contra ataques CSRF
-        public IActionResult Create(Devolucion nuevaDevolucion)
+        public IActionResult Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE)
         {
             try
             {
-                // Limpiamos la validación del ID por si la BD lo genera automáticamente
-                ModelState.Remove("ID_DEVOLUCION");
+                // Llamamos a tu lógica
+                bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, out string mensajeRespuesta);
 
-                if (ModelState.IsValid)
+                if (respuesta)
                 {
-                    // Llamamos a tu capa lógica para guardar
-                    // Asumo que tienes un método Crear() en tu LogicaDevolucion
-                    Convert.ToInt32(_logicaDevolucion);
-
-                    TempData["MensajeExito"] = "¡La devolución se registró correctamente!";
-                    return RedirectToAction("Index");
+                    // Devolvemos JSON para que Javascript lo atrape sin recargar la página
+                    return Json(new { exito = true, mensaje = mensajeRespuesta });
                 }
-
-                // Si hay errores de validación, recargamos la vista con los datos que escribió el usuario
-                ViewBag.Error = "Por favor, revisa los campos del formulario.";
-                return View(nuevaDevolucion);
+                else
+                {
+                    return Json(new { exito = false, mensaje = mensajeRespuesta });
+                }
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error al registrar la devolución: " + ex.Message;
-                return View(nuevaDevolucion);
+                return Json(new { exito = false, mensaje = "Error inesperado: " + ex.Message });
+            }
+        }
+
+        // ========================================================
+        // 4. POST: El Admin aprueba o rechaza (NUEVO)
+        // ========================================================
+        [HttpPost]
+        public IActionResult Procesar(Devolucion devolucionAdmin)
+        {
+            try
+            {
+                bool respuesta = _logicaDevolucion.ProcesarAdmin(devolucionAdmin, out string mensajeRespuesta);
+
+                if (respuesta)
+                {
+                    TempData["MensajeExito"] = mensajeRespuesta;
+                }
+                else
+                {
+                    TempData["MensajeError"] = mensajeRespuesta;
+                }
+
+                // Recargamos la tabla del administrador
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error crítico al procesar: " + ex.Message;
+                return RedirectToAction("Index");
             }
         }
     }

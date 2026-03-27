@@ -10,6 +10,12 @@
         --neon-blue-glow: rgba(0, 212, 255, 0.3);
         --neon-green: #00FF7F;
         --neon-red: #FF3366;
+        /* Asumiendo variables de tu layout general */
+        --bg-main: #0f0f1a;
+        --bg-card: #1a1a2e;
+        --border-color: #2a2a4a;
+        --text-main: #ffffff;
+        --text-muted: #8b8b9f;
     }
 
     /* Card Principal */
@@ -39,25 +45,29 @@
         }
 
     /* Estilos de Tabla */
-    .table-neon thead th {
-        border-bottom: 2px solid var(--border-color) !important;
-        color: var(--text-muted) !important;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .table-neon {
+        color: var(--text-main);
     }
 
-    .table-neon tbody tr {
-        transition: all 0.3s ease;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-        .table-neon tbody tr:hover {
-            background-color: rgba(0, 212, 255, 0.03) !important;
-            box-shadow: inset 4px 0 0 var(--neon-blue);
+        .table-neon thead th {
+            border-bottom: 2px solid var(--border-color) !important;
+            color: var(--text-muted) !important;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-    /* Badges de Inventario */
+        .table-neon tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+            .table-neon tbody tr:hover {
+                background-color: rgba(0, 212, 255, 0.03) !important;
+                box-shadow: inset 4px 0 0 var(--neon-blue);
+            }
+
+    /* Badges de Inventario / Estado */
     .badge-stock-yes {
         background: rgba(0, 255, 127, 0.1) !important;
         color: var(--neon-green) !important;
@@ -70,6 +80,13 @@
         color: var(--neon-red) !important;
         border: 1px solid var(--neon-red) !important;
         box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+    }
+
+    .badge-pendiente {
+        background: rgba(255, 193, 7, 0.1) !important;
+        color: #ffc107 !important;
+        border: 1px solid #ffc107 !important;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
     }
 
     .imei-tag {
@@ -114,11 +131,19 @@
         }
     </div>
 
-    @if (ViewBag.Error != null)
+    @if (TempData["MensajeExito"] != null)
+    {
+        <div class="alert shadow-lg border-0 mb-4 d-flex align-items-center" style="background-color: rgba(0, 255, 127, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-3"></i>
+            <div>@TempData["MensajeExito"]</div>
+        </div>
+    }
+
+    @if (ViewBag.Error != null || TempData["MensajeError"] != null)
     {
         <div class="alert shadow-lg border-0 mb-4 d-flex align-items-center" style="background-color: rgba(255, 51, 102, 0.1); color: var(--neon-red); border: 1px solid var(--neon-red); border-radius: 12px;">
             <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
-            <div>@ViewBag.Error</div>
+            <div>@(ViewBag.Error ?? TempData["MensajeError"])</div>
         </div>
     }
 
@@ -136,9 +161,8 @@
                         <tr>
                             <th class="ps-4 py-3">Info. Devolución</th>
                             <th class="py-3">Producto / IMEI</th>
-                            <th class="py-3">Detalles</th>
-                            <th class="py-3 text-center">Estado Dispositivo</th>
-                            <th class="py-3 text-center">Reingreso Stock</th>
+                            <th class="py-3">Motivo Cliente</th>
+                            <th class="py-3 text-center">Estado Reporte</th>
                             <th class="pe-4 py-3 text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -161,31 +185,35 @@
                                         <div class="text-truncate text-main small mb-1" style="max-width: 200px;" title="@dev.MOTIVO_CLIENTE">
                                             @dev.MOTIVO_CLIENTE
                                         </div>
-                                        <span class="text-info opacity-75 small fw-bold">Acción: @dev.ACCION_TOMADA</span>
                                     </td>
                                     <td class="py-4 text-center">
-                                        <span class="badge rounded-pill bg-dark border border-secondary text-light px-3 py-2" style="font-weight: 500;">
-                                            @(string.IsNullOrEmpty(dev.ESTADO_DISPOSITIVO_RECIBIDO) ? "N/A" : dev.ESTADO_DISPOSITIVO_RECIBIDO)
-                                        </span>
-                                    </td>
-                                    <td class="py-4 text-center">
-                                        @if (dev.REGRESAR_INVENTARIO)
+                                        @if (dev.ESTADO_REPORTE == "Pendiente")
                                         {
-                                            <span class="badge badge-stock-yes rounded-pill px-3 py-2">
-                                                <i class="bi bi-shield-check me-1"></i> SÍ
-                                            </span>
+                                            <span class="badge badge-pendiente rounded-pill px-3 py-2"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
+                                        }
+                                        else if (dev.ESTADO_REPORTE == "Aprobado")
+                                        {
+                                            <span class="badge badge-stock-yes rounded-pill px-3 py-2"><i class="bi bi-check-lg me-1"></i> Aprobado</span>
                                         }
                                         else
                                         {
-                                            <span class="badge badge-stock-no rounded-pill px-3 py-2">
-                                                <i class="bi bi-shield-x me-1"></i> NO
-                                            </span>
+                                            <span class="badge badge-stock-no rounded-pill px-3 py-2"><i class="bi bi-x-lg me-1"></i> Rechazado</span>
                                         }
                                     </td>
                                     <td class="pe-4 py-4 text-end">
-                                        <a href="@Url.Action("Details", "Devolucion", new { id = dev.ID_DEVOLUCION })" class="action-btn" title="Explorar">
-                                            <i class="bi bi-search"></i>
-                                        </a>
+                                        @if (dev.ESTADO_REPORTE == "Pendiente")
+                                        {
+                                            <button type="button" class="action-btn" style="color: var(--neon-blue); border-color: var(--neon-blue);"
+                                                    onclick="abrirModalAdmin(@dev.ID_DEVOLUCION)" title="Procesar Reporte">
+                                                <i class="bi bi-gear-fill"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Details", "Devolucion", new { id = dev.ID_DEVOLUCION })" class="action-btn" title="Ver Detalles">
+                                                <i class="bi bi-search"></i>
+                                            </a>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -193,7 +221,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="5" class="text-center py-5">
                                     <div class="py-5">
                                         <i class="bi bi-box-arrow-in-left display-1 opacity-10 mb-3" style="color: var(--neon-blue);"></i>
                                         <h5 class="text-muted">No hay registros de devoluciones</h5>
@@ -208,3 +236,64 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalProcesarAdmin" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1a1a2e; border: 1px solid var(--neon-blue); border-radius: 12px;">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title text-light"><i class="bi bi-gear-wide-connected me-2 text-info"></i> Procesar Devolución</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="@Url.Action("Procesar", "Devolucion")" method="post">
+                <div class="modal-body text-light">
+                    <input type="hidden" id="adminIdDevolucion" name="ID_DEVOLUCION" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-info small fw-bold">1. Decisión del Reporte</label>
+                        <select class="form-select bg-dark text-light border-secondary" name="ESTADO_REPORTE" required>
+                            <option value="">-- Selecciona una acción --</option>
+                            <option value="Aprobado">Aprobar Devolución</option>
+                            <option value="Rechazado">Rechazar Devolución</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-info small fw-bold">2. Estado del Dispositivo Recibido</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" name="ESTADO_DISPOSITIVO_RECIBIDO" placeholder="Ej: Rayado, Intacto, Roto..." required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-info small fw-bold">3. Acción Tomada (Notas)</label>
+                        <textarea class="form-control bg-dark text-light border-secondary" name="ACCION_TOMADA" rows="2" placeholder="Ej: Se realiza reembolso y se contacta proveedor..."></textarea>
+                    </div>
+
+                    <div class="form-check mt-4 p-3 border border-secondary rounded" style="background: rgba(0, 255, 127, 0.05);">
+                        <input class="form-check-input ms-1" type="checkbox" id="checkInventario" name="REGRESAR_INVENTARIO" value="true">
+                        <label class="form-check-label ms-2 fw-bold text-light" for="checkInventario">
+                            ¿Reingresar al stock disponible?
+                        </label>
+                        <div class="ms-2 small text-muted">Marca esto solo si el producto se puede volver a vender.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-neon-add px-4">Guardar Decisión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function abrirModalAdmin(idDevolucion) {
+            // Inyectamos el ID de la fila en el formulario oculto
+            document.getElementById('adminIdDevolucion').value = idDevolucion;
+
+            // Abrimos el modal mágicamente
+            var modal = new bootstrap.Modal(document.getElementById('modalProcesarAdmin'));
+            modal.show();
+        }
+    </script>
+}

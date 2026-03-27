@@ -29,5 +29,7 @@ namespace Entidades
 
         // Para mostrarle al cliente si su reporte dice "Pendiente", "Aprobado", etc.
         public string? ESTADO_REPORTE { get; set; }
+
+
     }
 }
