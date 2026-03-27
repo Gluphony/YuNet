@@ -34,45 +34,57 @@ namespace Presentacion.Controllers
             }
         }
 
-        // ==========================================
-        // GET: Pedido/Historial (Exclusivo para el Cliente)
-        // ==========================================
-        public ActionResult Historial()
+[HttpGet]
+public ActionResult Historial()
+{
+    try
+    {
+        // 1. Obtenemos el ID del usuario directamente de las Claims de su sesión
+        var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                      ?? User.FindFirst("IdUsuario")?.Value;
+
+        if (string.IsNullOrEmpty(claimId))
         {
-            try
-            {
-                // TODO: Cambiar este ID "1" por la variable de sesión o Claim de tu usuario logueado.
-                // Ejemplo Session: int idUsuarioActual = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
-                int idUsuarioActual = 1;
-
-                var misPedidos = _logicaPedido.Listar()
-                                              .Where(p => p.ID_USUARIO == idUsuarioActual)
-                                              .ToList();
-
-                return View(misPedidos);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Error = "Error al cargar tu historial de compras: " + ex.Message;
-                return View(new List<Pedido>());
-            }
+            // Si por alguna razón la sesión se perdió, lo mandamos al Login
+            return RedirectToAction("Login", "Cuenta"); 
         }
 
-        // ==========================================
-        // GET: Pedido/Details/5 (Detalle general del pedido)
-        // ==========================================
+        int idUsuarioActual = int.Parse(claimId);
+
+                // 2. Filtramos los pedidos para que solo vea los suyos
+                var misPedidos = _logicaPedido.ListarPorUsuario(idUsuarioActual);
+
+                return View(misPedidos);
+    }
+    catch (Exception ex)
+    {
+        ViewBag.Error = "Error al cargar tu historial de compras: " + ex.Message;
+        return View(new List<Pedido>());
+    }
+}
+
         public ActionResult Details(int id)
         {
             try
             {
+                // 1. Obtenemos la información general del pedido
                 var pedido = _logicaPedido.ObtenerPorId(id);
 
+                // Si alguien intenta buscar un ID que no existe, lo regresamos
                 if (pedido == null)
                 {
                     TempData["MensajeError"] = "El pedido solicitado no existe o fue eliminado.";
+                    // Nota: Si esta vista es solo para el cliente, quizás quieras cambiar "Index" por "Historial"
                     return RedirectToAction("Index");
                 }
 
+                // 2. ¡LO NUEVO! Buscamos los productos que pertenecen a este ID de pedido
+                var listaProductos = _logicaPedido.ObtenerDetallesPorPedido(id);
+
+                // 3. ¡LO NUEVO! Guardamos la lista en el ViewBag para leerla en el HTML
+                ViewBag.Detalles = listaProductos;
+
+                // 4. Mandamos el pedido a la vista como modelo principal
                 return View(pedido);
             }
             catch (Exception ex)

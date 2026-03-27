@@ -476,6 +476,7 @@
             </div>
             <div class="modal-body d-flex justify-content-center pt-0">
                 <div class="preview-tech-card shadow-lg">
+                    @* Este badge lo llenaremos dinámicamente con JS (Agotado o Últimas unidades) *@
                     <span id="preview_Badge" class="preview-badge-premium" style="display: none;"></span>
 
                     <div class="preview-tech-img-box">
@@ -489,7 +490,8 @@
                         <div class="mt-auto d-flex flex-column gap-3">
                             <span id="preview_Precio" class="fw-bold fs-4" style="color: #20C997;"></span>
 
-                            <button class="btn preview-btn-tech" disabled style="opacity: 0.8; cursor: default;">
+                            @* Botón dinámico controlado por JS *@
+                            <button id="preview_Btn" class="btn preview-btn-tech" disabled style="opacity: 0.8; cursor: default;">
                                 <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
                             </button>
                         </div>
@@ -525,7 +527,7 @@
                 });
             }
 
-            // Script Modal Vista Previa Tienda
+           // Script Modal Vista Previa Tienda
             var modalVistaPrevia = document.getElementById('modalVistaPrevia');
             if (modalVistaPrevia) {
                 modalVistaPrevia.addEventListener('show.bs.modal', function (event) {
@@ -544,16 +546,49 @@
                     // Formatear el precio a moneda
                     document.getElementById('preview_Precio').textContent = "$" + precio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-                    // Actualizar la imagen
-                    document.getElementById('preview_Img').src = "/Producto/VerImagen/" + id;
+                    // Actualizar la imagen y quitar opacidad si antes estaba agotado
+                    var imgElement = document.getElementById('preview_Img');
+                    imgElement.src = "/Producto/VerImagen/" + id;
+                    imgElement.classList.remove('opacity-50');
 
-                    // Lógica del Badge de "Últimas unidades"
+                    // Referencias a los elementos dinámicos
                     var badge = document.getElementById('preview_Badge');
-                    if (existencias <= 5 && existencias > 0) {
+                    var btnPreview = document.getElementById('preview_Btn');
+
+                    // LÓGICA ESTILO AMAZON: Agotado vs Últimas unidades vs Normal
+                    if (existencias <= 0) {
+                        // AGOTADO
+                        badge.textContent = "¡Agotado!";
+                        badge.style.display = "block";
+                        badge.style.background = "rgba(220, 53, 69, 0.15)";
+                        badge.style.color = "#dc3545";
+                        badge.style.borderColor = "rgba(220, 53, 69, 0.3)";
+
+                        imgElement.classList.add('opacity-50'); // Apagamos la imagen
+
+                        btnPreview.innerHTML = '<i class="bi bi-x-circle me-2"></i> Sin Inventario';
+                        btnPreview.style.background = "rgba(255, 255, 255, 0.05)";
+                        btnPreview.style.color = "#6c757d";
+                    }
+                    else if (existencias <= 5) {
+                        // ÚLTIMAS UNIDADES
                         badge.textContent = "¡Últimas " + existencias + " unidades!";
                         badge.style.display = "block";
-                    } else {
+                        badge.style.background = "rgba(255, 193, 7, 0.15)";
+                        badge.style.color = "#ffc107";
+                        badge.style.borderColor = "rgba(255, 193, 7, 0.3)";
+
+                        btnPreview.innerHTML = '<i class="bi bi-cart-plus me-2"></i> Añadir al Carrito';
+                        btnPreview.style.background = "linear-gradient(135deg, #20C997 0%, #16a085 100%)";
+                        btnPreview.style.color = "#13131A";
+                    }
+                    else {
+                        // NORMAL (Ocultamos el badge)
                         badge.style.display = "none";
+
+                        btnPreview.innerHTML = '<i class="bi bi-cart-plus me-2"></i> Añadir al Carrito';
+                        btnPreview.style.background = "linear-gradient(135deg, #20C997 0%, #16a085 100%)";
+                        btnPreview.style.color = "#13131A";
                     }
                 });
             }

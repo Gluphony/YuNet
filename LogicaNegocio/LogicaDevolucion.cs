@@ -10,6 +10,8 @@ namespace LogicaNegocio
         private readonly DatosDevoluciones _datosDevoluciones = new DatosDevoluciones();
 
         // 1. LISTAR DEVOLUCIONES
+
+
         public List<Devolucion> Listar()
         {
             try
@@ -42,8 +44,6 @@ namespace LogicaNegocio
                     mensaje = "El motivo del cliente es obligatorio.";
                     return false;
                 }
-
-                // 👇 Y AQUÍ le pasamos los dos parámetros correctos a la capa de Datos
                 bool respuesta = _datosDevoluciones.Crear(idDetallePedido, motivoCliente);
 
                 if (respuesta)

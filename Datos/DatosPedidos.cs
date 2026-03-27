@@ -154,7 +154,6 @@ namespace CapaDatos
             return respuesta;
         }
 
-        // 4. LISTAR PEDIDOS POR USUARIO
         public List<Pedido> ListarPorUsuario(int idUsuario)
         {
             List<Pedido> lista = new List<Pedido>();
@@ -172,12 +171,20 @@ namespace CapaDatos
                         while (dr.Read())
                         {
                             Pedido pedido = new Pedido();
+
+                            // Columnas que SÍ vienen de tu procedimiento almacenado
                             pedido.ID_PEDIDO = Convert.ToInt32(dr["Id_Pedido"]);
                             pedido.FECHA_PEDIDO = Convert.ToDateTime(dr["Fecha_Pedido"]);
                             pedido.TOTAL = Convert.ToDecimal(dr["Total"]);
                             pedido.ESTADO = dr["Estado"].ToString();
-                            pedido.CLIENTE = dr["Cliente"] != DBNull.Value ? dr["Cliente"].ToString() : "Desconocido";
-                            pedido.METODO_PAGO_NOMBRE = dr["Metodo_Pago"] != DBNull.Value ? dr["Metodo_Pago"].ToString() : "N/A";
+
+                            // Asignamos el id del usuario que ya tenemos por el parámetro
+                            pedido.ID_USUARIO = idUsuario;
+
+                            // 👇 Textos manuales para las columnas que NO vienen en el SP 👇
+                            pedido.CLIENTE = "Yo";
+                            pedido.METODO_PAGO_NOMBRE = "Ver detalles";
+
                             lista.Add(pedido);
                         }
                     }

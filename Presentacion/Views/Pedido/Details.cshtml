@@ -184,18 +184,65 @@
                         <i class="bi bi-box-seam me-3" style="color: var(--neon-blue-base);"></i> Productos en el Pedido
                     </h5>
                 </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-center align-items-center" style="min-height: 300px;">
 
-                    <div class="text-center p-5">
-                        <div class="mb-4 position-relative d-inline-block">
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; background-color: var(--neon-blue-tint); filter: blur(20px); border-radius: 50%;"></div>
-                            <i class="bi bi-box-seam position-relative" style="font-size: 4rem; color: var(--neon-blue-base); filter: drop-shadow(0 0 10px var(--neon-blue-glow));"></i>
+                <div class="card-body p-4" style="min-height: 300px;">
+
+                    @if (ViewBag.Detalles != null && ((IEnumerable<dynamic>)ViewBag.Detalles).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle mb-0" style="--bs-table-bg: transparent;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(0, 212, 255, 0.2);">
+                                        <th style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Producto</th>
+                                        <th class="text-center" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Cantidad</th>
+                                        <th class="text-end" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Precio Unit.</th>
+                                        <th class="text-end" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in ViewBag.Detalles)
+                                    {
+                                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                            <td class="py-3" style="background-color: transparent;">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: rgba(255, 255, 255, 0.05); color: var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="bi bi-box"></i>
+                                                    </div>
+                                                    <span style="color: var(--text-main); font-weight: 500;">@item.PRODUCTO</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center py-3" style="color: var(--text-muted); background-color: transparent;">
+                                                @item.CANTIDAD
+                                            </td>
+                                            <td class="text-end py-3" style="color: var(--text-muted); background-color: transparent;">
+                                                C$ @item.PRECIO_UNITARIO.ToString("N2")
+                                            </td>
+                                            <td class="text-end py-3 fw-bold" style="color: var(--neon-blue-base); background-color: transparent;">
+                                                C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                        <h5 class="fw-bold" style="color: var(--text-main);">Sin productos asignados</h5>
-                        <p class="mt-2" style="color: var(--text-muted); max-width: 350px;">
-                            Los detalles de los productos para este pedido aún no están disponibles en el sistema.
-                        </p>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                            <div class="text-center p-5">
+                                <div class="mb-4 position-relative d-inline-block">
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; background-color: var(--neon-blue-tint); filter: blur(20px); border-radius: 50%;"></div>
+                                    <i class="bi bi-box-seam position-relative" style="font-size: 4rem; color: var(--neon-blue-base); filter: drop-shadow(0 0 10px var(--neon-blue-glow));"></i>
+                                </div>
+                                <h5 class="fw-bold" style="color: var(--text-main);">Sin productos asignados</h5>
+                                <p class="mt-2" style="color: var(--text-muted); max-width: 350px;">
+                                    Los detalles de los productos para este pedido aún no están disponibles en el sistema.
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                </div>
 
                 </div>
             </div>

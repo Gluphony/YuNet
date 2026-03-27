@@ -235,6 +235,30 @@ namespace Presentacion.Controllers
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 var detallesCarrito = logicaDetalle.Listar(miCarrito.ID_CARRITO);
 
+                // --- NUEVA VALIDACIÓN DE STOCK ---
+                LogicaProducto logicaProd = new LogicaProducto();
+                DataTable productosActuales = logicaProd.ListarProductos();
+
+                foreach (var detalle in detallesCarrito)
+                {
+                    // Buscamos el producto en el DataTable para ver su stock
+                    DataRow[] filaProducto = productosActuales.Select($"ID_PRODUCTO = {detalle.ID_PRODUCTO}");
+
+                    if (filaProducto.Length > 0)
+                    {
+                        int stockDisponible = Convert.ToInt32(filaProducto[0]["EXISTENCIAS"]);
+
+                        if (detalle.CANTIDAD > stockDisponible)
+                        {
+                            // ¡Pausa! No hay suficiente stock. Le avisamos al cliente y lo regresamos al carrito.
+                            string nombreProducto = filaProducto[0]["NOMBRE"].ToString();
+                            TempData["MensajeError"] = $"Lo sentimos, no podemos procesar tu compra. Del producto '{nombreProducto}' solicitaste {detalle.CANTIDAD}, pero solo nos quedan {stockDisponible} unidades.";
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+                // --- FIN DE LA VALIDACIÓN ---
+
                 LogicaPedido logicaPedido = new LogicaPedido();
                 int nuevoIdPedido = logicaPedido.ProcesarCompra(idUsuario, idMetodoPago, miCarrito.TOTAL, detallesCarrito);
 
@@ -246,11 +270,10 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = ex.Message;
+                TempData["MensajeError"] = "Error al procesar: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
-
         // ==========================================
         // MÉTODOS EXCLUSIVOS PARA EL POS (ADMIN)
         // ==========================================
@@ -309,12 +332,34 @@ namespace Presentacion.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // --- NUEVA VALIDACIÓN DE STOCK PARA EL ADMIN ---
+                LogicaProducto logicaProd = new LogicaProducto();
+                DataTable productosActuales = logicaProd.ListarProductos();
+
+                foreach (var detalle in detallesCarrito)
+                {
+                    DataRow[] filaProducto = productosActuales.Select($"ID_PRODUCTO = {detalle.ID_PRODUCTO}");
+
+                    if (filaProducto.Length > 0)
+                    {
+                        int stockDisponible = Convert.ToInt32(filaProducto[0]["EXISTENCIAS"]);
+
+                        if (detalle.CANTIDAD > stockDisponible)
+                        {
+                            // Le avisamos al Admin
+                            string nombreProducto = filaProducto[0]["NOMBRE"].ToString();
+                            TempData["MensajeError"] = $"Error de Stock: Intentas vender {detalle.CANTIDAD} de '{nombreProducto}', pero solo hay {stockDisponible} en el inventario.";
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+                // --- FIN DE LA VALIDACIÓN ---
+
                 LogicaPedido logicaPedido = new LogicaPedido();
                 int nuevoIdPedido = logicaPedido.ProcesarCompra(idClienteReal, idMetodoPago, carritoAdmin.TOTAL, detallesCarrito);
 
                 _logicaCarrito.VaciarCarrito(carritoAdmin.ID_CARRITO);
 
-                // Asunto 2 completamente implementado aquí:
                 TempData["MensajeExito"] = $"¡Pedido #{nuevoIdPedido} generado exitosamente!";
                 return RedirectToAction("Index");
             }

@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<Entidades.Pedido>
 
 @{
-    ViewData["Title"] = "Mis Compras";
+    ViewData["Title"] = "Mis Pedidos";
 }
 
 <style>
     /* ==========================================
-                       VARIABLES NEÓN
-           ========================================== */
+               VARIABLES Y ESTILOS BASE
+               ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -15,250 +15,307 @@
         --neon-green: #00FF7F;
         --neon-red: #ff3366;
         --neon-yellow: #ffcc00;
-        --neon-purple: #C6C3F2;
+        --bg-card: #0F172A;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --text-main: #F8FAFC;
+        --text-muted: #94A3B8;
     }
 
-    /* ==========================================
-                       ESTILOS DE LA VISTA
-           ========================================== */
-    .order-card {
+    /* Tarjetas de Pedido E-commerce */
+    .customer-order-card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
         overflow: hidden;
-        color: var(--text-main);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-        .order-card:hover {
-            border-color: var(--neon-blue-base);
-            box-shadow: 0 10px 30px var(--neon-blue-glow);
+        .customer-order-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
-    .order-card-header {
-        background-color: transparent;
+    .order-header {
+        background-color: rgba(255, 255, 255, 0.02);
         border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+    }
+
+    .order-body {
         padding: 1.5rem;
     }
 
-    /* Tabla Adaptable */
-    .table-orders {
-        margin-bottom: 0;
-        color: var(--text-main);
+    /* Textos */
+    .text-label {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.2rem;
+        display: block;
     }
 
-        .table-orders th {
-            background-color: var(--neon-blue-tint);
-            color: var(--neon-blue-base);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            padding: 1.2rem;
-        }
-
-        .table-orders td {
-            background-color: transparent;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.2rem;
-            vertical-align: middle;
-            transition: background-color 0.2s;
-        }
-
-        .table-orders tbody tr:hover td {
-            background-color: var(--neon-blue-tint);
-        }
-
-        .table-orders tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-    /* Botones de Acción de la Tabla estilo Icon-Circle */
-    .action-btn {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        background-color: var(--bg-main);
-        transition: all 0.3s ease;
+    .text-value {
         color: var(--text-main);
+        font-weight: 600;
+        font-size: 1rem;
+        margin: 0;
     }
-
-        .action-btn.view:hover {
-            color: var(--neon-blue-base);
-            border-color: var(--neon-blue-base);
-            background-color: var(--neon-blue-tint);
-            box-shadow: 0 0 15px var(--neon-blue-glow);
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .action-btn.ticket:hover {
-            color: var(--neon-purple);
-            border-color: var(--neon-purple);
-            background-color: rgba(198, 195, 242, 0.1);
-            box-shadow: 0 0 15px rgba(198, 195, 242, 0.4);
-            transform: scale(1.1) rotate(-5deg);
-        }
 
     /* Badges de Estado Neón */
     .status-badge {
         font-weight: 700;
-        font-size: 0.75rem;
-        padding: 0.5em 1.2em;
+        font-size: 0.85rem;
+        padding: 0.5em 1em;
         border-radius: 8px;
         letter-spacing: 0.5px;
         text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
         .status-badge.completado {
             color: var(--neon-green);
             background-color: rgba(0, 255, 127, 0.1);
             border: 1px solid var(--neon-green);
-            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
         }
 
         .status-badge.pendiente {
             color: var(--neon-yellow);
             background-color: rgba(255, 204, 0, 0.1);
             border: 1px solid var(--neon-yellow);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
         }
 
         .status-badge.cancelado {
             color: var(--neon-red);
             background-color: rgba(255, 51, 102, 0.1);
             border: 1px solid var(--neon-red);
-            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
         }
 
-        .status-badge.desconocido {
-            color: var(--neon-blue-base);
-            background-color: var(--neon-blue-tint);
-            border: 1px solid var(--neon-blue-base);
-            box-shadow: 0 0 10px var(--neon-blue-glow);
-        }
-
-    /* Dropdown adaptado */
-    .dropdown-menu-neon {
-        background-color: var(--bg-card);
-        border: 1px solid var(--neon-blue-base) !important;
-        box-shadow: 0 5px 20px var(--neon-blue-glow);
+    /* Botones de Acción Cliente */
+    .btn-customer {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
     }
 
-        .dropdown-menu-neon .dropdown-item {
-            color: var(--text-main);
+    .btn-details {
+        background-color: var(--neon-blue-tint);
+        color: var(--neon-blue-base) !important;
+        border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+        .btn-details:hover {
+            background-color: var(--neon-blue-base);
+            color: #000 !important;
+            box-shadow: 0 0 15px var(--neon-blue-glow);
         }
 
-            .dropdown-menu-neon .dropdown-item:hover {
-                background-color: var(--neon-blue-tint);
-                color: var(--neon-blue-base);
-            }
+    .btn-report {
+        background-color: transparent;
+        color: var(--text-muted) !important;
+        border: 1px solid var(--border-color);
+    }
+
+        .btn-report:hover {
+            background-color: rgba(255, 51, 102, 0.1);
+            color: var(--neon-red) !important;
+            border-color: var(--neon-red);
+        }
 </style>
 
 <div class="container-fluid container-xl py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
-        <div>
-            <div class="premium-label mb-1" style="color: var(--neon-blue-base); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Mi Perfil</div>
-            <h2 class="h3 mb-1 fw-bold" style="color: var(--text-main);">Mi Historial de Compras</h2>
-            <p class="mb-0" style="color: var(--text-muted);">Revisa el estado y los detalles de todos tus pedidos en YuNet</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 m-0" style="color: var(--text-main); font-weight: 700;">
+            <i class="bi bi-bag-check me-2" style="color: var(--neon-blue-base);"></i> Mis Pedidos
+        </h2>
+
+        <div class="dropdown">
+            <button class="btn btn-customer dropdown-toggle" type="button" id="btnFiltrarPedidos" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid var(--border-color); color: var(--text-main);">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="btnFiltrarPedidos" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="TODOS">Todos los pedidos</a></li>
+                <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
+                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="COMPLETADO" style="color: var(--neon-green);">Completados</a></li>
+                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="PENDIENTE" style="color: var(--neon-yellow);">Pendientes</a></li>
+                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="CANCELADO" style="color: var(--neon-red);">Cancelados</a></li>
+            </ul>
         </div>
     </div>
 
-    <div class="order-card">
-        <div class="order-card-header d-flex justify-content-between align-items-center">
-            <h5 class="m-0 fw-bold d-flex align-items-center" style="color: var(--neon-blue-base);">
-                <div class="icon-circle me-3" style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem;">
-                    <i class="bi bi-bag-check"></i>
-                </div>
-                Mis Pedidos
-            </h5>
-
-            <div class="dropdown">
-                <button class="btn btn-sm d-flex align-items-center" type="button" data-bs-toggle="dropdown" style="background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.5rem 1rem;">
-                    <i class="bi bi-funnel me-2" style="color: var(--neon-blue-base);"></i> Filtrar <i class="bi bi-chevron-down ms-2" style="font-size: 0.7rem;"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg dropdown-menu-neon mt-2">
-                    <li><a class="dropdown-item" href="#">Todas mis compras</a></li>
-                    <li><hr class="dropdown-divider" style="border-color: rgba(0, 212, 255, 0.2);"></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-yellow);"><i class="bi bi-clock-history me-2"></i>Pendientes</a></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-green);"><i class="bi bi-check2-circle me-2"></i>Completados</a></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-red);"><i class="bi bi-x-circle me-2"></i>Cancelados</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="card-body p-0">
-            @if (Model != null && Model.Any())
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var item in Model)
             {
-                <div class="table-responsive">
-                    <table class="table table-orders align-middle" id="dataTable">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">ID Pedido</th>
-                                <th>Fecha</th>
-                                <th>Total</th>
-                                <th class="text-center">Estado</th>
-                                <th class="pe-4 text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="ps-4 fw-bold" style="color: var(--neon-blue-base);">
-                                        #@item.ID_PEDIDO
-                                    </td>
-                                    <td style="color: var(--text-muted);">
-                                        @item.FECHA_PEDIDO.ToString("dd MMM, yyyy")
-                                    </td>
-                                    <td class="fw-bold" style="letter-spacing: 0.5px; color: var(--text-main);">
-                                        C$ @item.TOTAL.ToString("N2")
-                                    </td>
-                                    <td class="text-center">
-                                        @{
-                                            string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
-                                            string claseBadge = estadoStr == "COMPLETADO" ? "completado" :
-                                            estadoStr == "PENDIENTE" ? "pendiente" :
-                                            estadoStr == "CANCELADO" ? "cancelado" : "desconocido";
-                                        }
-                                        <span class="status-badge @claseBadge">
-                                            @item.ESTADO
-                                        </span>
-                                    </td>
-                                    <td class="pe-4 text-end">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="/Pedido/Details/@item.ID_PEDIDO" class="action-btn view" title="Ver Detalles">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="@Url.Action("Ticket", "Pedido", new { id = item.ID_PEDIDO })" class="action-btn ticket" title="Ver e Imprimir Ticket">
-                                                <i class="bi bi-printer"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <div class="mb-4">
-                        <div class="icon-circle mx-auto" style="width: 100px; height: 100px; font-size: 3rem;">
-                            <i class="bi bi-bag-x"></i>
+                // Configuración de estado visual
+                string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
+                string claseBadge = estadoStr == "COMPLETADO" ? "completado" : estadoStr == "PENDIENTE" ? "pendiente" : "cancelado";
+                string iconBadge = estadoStr == "COMPLETADO" ? "bi-check-circle" : estadoStr == "PENDIENTE" ? "bi-clock-history" : "bi-x-circle";
+
+                <div class="col-12 tarjeta-pedido-wrapper" data-estado="@estadoStr">
+                    <div class="customer-order-card">
+                        <div class="order-header d-flex flex-column flex-md-row justify-content-between gap-3">
+                            <div class="d-flex gap-4 flex-wrap">
+                                <div>
+                                    <span class="text-label">Fecha del Pedido</span>
+                                    <p class="text-value">@item.FECHA_PEDIDO.ToString("dd 'de' MMM, yyyy")</p>
+                                </div>
+                                <div>
+                                    <span class="text-label">Total Pagado</span>
+                                    <p class="text-value" style="color: var(--neon-blue-base);">C$ @item.TOTAL.ToString("N2")</p>
+                                </div>
+                            </div>
+                            <div class="text-md-end">
+                                <span class="text-label">N° de Pedido</span>
+                                <p class="text-value">#@item.ID_PEDIDO</p>
+                            </div>
+                        </div>
+
+                        <div class="order-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                            <div>
+                                <span class="text-label mb-2">Estado Actual</span>
+                                <div class="status-badge @claseBadge">
+                                    <i class="bi @iconBadge"></i> @item.ESTADO
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                <a href="@Url.Action("Details", "Pedido", new { id = item.ID_PEDIDO })" class="btn btn-customer btn-details text-decoration-none">
+                                    <i class="bi bi-box-seam"></i> Ver Productos
+                                </a>
+
+                                <button type="button" class="btn btn-customer btn-report" onclick="abrirModalReporte(@item.ID_PEDIDO)">
+                                    <i class="bi bi-exclamation-triangle"></i> Tengo un problema
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <h5 class="fw-bold" style="color: var(--text-main);">Aún no tienes compras</h5>
-                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Tus pedidos aparecerán aquí una vez que finalices una compra en nuestra tienda.</p>
-                    <a href="/ProductoController" class="btn mt-4 px-4 py-2" style="background-color: var(--neon-blue-tint); border: 1px solid var(--neon-blue-base); color: var(--neon-blue-base); border-radius: 8px; font-weight: 600;">Ir a la tienda</a>
                 </div>
             }
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column justify-content-center align-items-center p-5 mt-4" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;">
+            <div class="mb-3">
+                <i class="bi bi-bag-x" style="font-size: 3rem; color: var(--text-muted);"></i>
+            </div>
+            <h5 class="text-white">Aún no tienes compras</h5>
+            <p style="color: var(--text-muted);">Tus pedidos aparecerán aquí una vez que finalices una compra.</p>
+            <a href="@Url.Action("Index", "Tienda")" class="btn btn-customer btn-details mt-2">Ir a la tienda</a>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: 700;">
+                    <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--neon-red);"></i> Reportar un problema
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="formReporte">
+                    <div class="mb-3">
+                        <label class="form-label text-label">Número de Pedido</label>
+                        <input type="text" class="form-control" id="txtIdPedidoReporte" readonly
+                               style="background-color: rgba(255,255,255,0.02); color: var(--neon-blue-base); border: 1px solid var(--border-color); font-weight: bold;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-label">¿Qué problema tuviste?</label>
+                        <select class="form-select" id="cboMotivoReporte"
+                                style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);">
+                            <option value="Producto dañado" style="color: black;">El producto llegó dañado o defectuoso</option>
+                            <option value="Producto incorrecto" style="color: black;">Me enviaron un producto incorrecto</option>
+                            <option value="Faltan artículos" style="color: black;">Faltan artículos en mi paquete</option>
+                            <option value="No llegó" style="color: black;">Mi pedido nunca llegó</option>
+                            <option value="Otro" style="color: black;">Otro problema</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-label">Detalles adicionales</label>
+                        <textarea class="form-control" id="txtDetalleReporte" rows="3" placeholder="Por favor, explica detalladamente qué sucedió..."
+                                  style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-customer" data-bs-dismiss="modal" style="color: var(--text-muted); border: 1px solid var(--border-color);">Cancelar</button>
+                <button type="button" class="btn btn-customer" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
+                    <i class="bi bi-send-fill me-1"></i> Enviar Reporte
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Declaramos la variable global para el modal
+        let modalReporteBootstrap;
+
+        // Función global para que el botón "onclick" la pueda encontrar
+        function abrirModalReporte(idPedido) {
+            document.getElementById('txtIdPedidoReporte').value = idPedido;
+            document.getElementById('cboMotivoReporte').selectedIndex = 0;
+            document.getElementById('txtDetalleReporte').value = '';
+
+            const modalEl = document.getElementById('modalReporte');
+            modalReporteBootstrap = new bootstrap.Modal(modalEl);
+            modalReporteBootstrap.show();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // --- LÓGICA DEL FILTRO ---
+            const botonesFiltro = document.querySelectorAll('.btn-filtro');
+            const tarjetas = document.querySelectorAll('.tarjeta-pedido-wrapper');
+
+            botonesFiltro.forEach(boton => {
+                boton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const filtroSeleccionado = this.getAttribute('data-filtro');
+
+                    tarjetas.forEach(tarjeta => {
+                        if (filtroSeleccionado === "TODOS" || tarjeta.getAttribute('data-estado') === filtroSeleccionado) {
+                            tarjeta.style.display = 'block';
+                        } else {
+                            tarjeta.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // --- LÓGICA DE ENVIAR REPORTE ---
+            document.getElementById('btnEnviarReporte').addEventListener('click', function() {
+                const idPedido = document.getElementById('txtIdPedidoReporte').value;
+                const motivo = document.getElementById('cboMotivoReporte').value;
+                const detalle = document.getElementById('txtDetalleReporte').value;
+
+                if(detalle.trim() === '') {
+                    alert('Por favor, escribe un poco de detalle sobre el problema.');
+                    return;
+                }
+
+                console.log("Enviando reporte:", { Pedido: idPedido, Motivo: motivo, Detalle: detalle });
+                alert(`¡Reporte del Pedido #${idPedido} enviado al Administrador!\nMotivo: ${motivo}`);
+
+                modalReporteBootstrap.hide();
+            });
+        });
+    </script>
+}
