@@ -218,10 +218,24 @@
             </h2>
             <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona las marcas de tus productos</p>
         </div>
+        <div class="d-flex justify-content-end align-items-center gap-3">
+            @* Botón de Exportar (Estilo Outline Info con coherencia Neón) *@
+            <a href="@Url.Action("DescargarPdf", "Marca")"
+                   target="_blank"
+                   id="linkPdf"
+                   class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
+                   style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+            </a>
 
-        <button type="button" class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrear">
-            <i class="bi bi-plus-lg"></i> Nueva Marca
-        </button>
+            @* Botón Nueva Marca (Estilo Neón Principal) *@
+            <button type="button"
+                    class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalCrear">
+                <i class="bi bi-plus-lg"></i> Nueva Marca
+            </button>
+        </div>
     </div>
 
     @* --- TARJETA PRINCIPAL --- *@
@@ -236,7 +250,8 @@
                             <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted); border-radius: 8px 0 0 8px; border-top: 1px solid var(--border-color) !important; border-bottom: 1px solid var(--border-color) !important; border-left: 1px solid var(--border-color) !important;">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input type="text" name="nombre" class="form-control custom-input border-start-0" placeholder="Buscar marca..." style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
+                            @* AGREGADO: id="txtBuscar" para que el script del PDF pueda leer el valor *@
+                            <input type="text" id="txtBuscar" name="nombre" value="@Context.Request.Query["nombre"]" class="form-control custom-input border-start-0" placeholder="Buscar marca..." style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
                         </div>
                         <button type="submit" class="btn btn-neon px-3">Buscar</button>
                     </form>
@@ -383,10 +398,26 @@
 @section Scripts {
     <script>
         function cargarModalEditar(id, nombre, estado) {
-            document.getElementById('editIdMarca').value = id;
-            document.getElementById('editNombreMarca').value = nombre;
-            // Configurar el select con true o false (cadena)
-            document.getElementById('editEstadoMarca').value = estado.toLowerCase();
-        }
+             document.getElementById('editIdMarca').value = id;
+             document.getElementById('editNombreMarca').value = nombre;
+             document.getElementById('editEstadoMarca').value = estado.toLowerCase();
+         }
+
+         // Usamos una variable para el elemento para no repetir código
+         const linkPdf = document.getElementById("linkPdf");
+         const txtBuscar = document.getElementById("txtBuscar");
+
+         if (linkPdf && txtBuscar) {
+             linkPdf.addEventListener("click", function (e) {
+                 // Obtenemos el valor actual o un string vacío si no hay nada
+                 const busqueda = txtBuscar.value || "";
+                
+                 // Construimos la URL dinámica
+                 const urlBase = "@Url.Action("DescargarPdf", "Marca")";
+                 this.href = `${urlBase}?busqueda=${encodeURIComponent(busqueda)}`;
+                
+                 console.log("Generando reporte para:", busqueda); // Útil para debugear en consola
+             });
+         }
     </script>
 }

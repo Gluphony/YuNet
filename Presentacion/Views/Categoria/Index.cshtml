@@ -218,9 +218,22 @@
             <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona la clasificación de tus productos</p>
         </div>
 
-        <button type="button" class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
-            <i class="bi bi-plus-lg"></i> Nueva Categoría
-        </button>
+        @* Agrupamos los botones para que se mantengan juntos a la derecha *@
+        <div class="d-flex gap-3">
+            @* Botón Exportar *@
+            <a href="@Url.Action("DescargarPdf", "Categoria")"
+                   target="_blank"
+                   id="linkPdf"
+                   class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
+                   style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+            </a>
+
+            @* Botón Nueva Categoría *@
+            <button type="button" class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
+                <i class="bi bi-plus-lg"></i> Nueva Categoría
+            </button>
+        </div>
     </div>
 
     @* --- TARJETA PRINCIPAL --- *@
@@ -230,18 +243,30 @@
             @* Filtros *@
             <div class="row mb-4 align-items-center">
                 <div class="col-md-6 col-lg-5">
-                    <form asp-action="Filtrar" method="get" class="d-flex gap-2">
+                    @* Cambiamos a asp-action="Filtrar" para que coincida con tu método del controlador *@
+                    <form asp-controller="Categoria" asp-action="Filtrar" method="get" class="d-flex gap-2">
                         <div class="input-group">
                             <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted); border-radius: 8px 0 0 8px; border-top: 1px solid var(--border-color) !important; border-bottom: 1px solid var(--border-color) !important; border-left: 1px solid var(--border-color) !important;">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input type="text" name="nombre" class="form-control custom-input border-start-0" placeholder="Buscar categoría..." style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
+                            @* Agregamos value="@Context.Request.Query["nombre"]" para que el texto persista *@
+                            <input type="text"
+                                   name="nombre"
+                                   id="txtBuscar"
+                                   class="form-control custom-input border-start-0"
+                                   placeholder="Buscar categoría..."
+                                   value="@Context.Request.Query["nombre"]"
+                                   style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
                         </div>
                         <button type="submit" class="btn btn-neon px-3">Buscar</button>
                     </form>
                 </div>
-                <div class="col-auto mt-3 mt-md-0">
-                    <a asp-action="Index" class="btn btn-outline-secondary border-0" style="background-color: var(--bg-main); color: var(--text-main);" title="Recargar">
+    
+                @* Botón Recargar: Limpia el filtro volviendo al Index *@
+                <div class="col-auto">
+                    <a asp-action="Index" class="btn btn-outline-secondary border-0 d-flex align-items-center justify-content-center"
+                           style="background-color: var(--bg-main); color: var(--text-main); width: 42px; height: 42px; border-radius: 8px;"
+                           title="Recargar lista completa">
                         <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>
@@ -406,5 +431,28 @@
                 form.submit();
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Capturamos el enlace del PDF y el input del buscador
+            const linkPdf = document.getElementById("linkPdf");
+            const txtBuscar = document.querySelector('input[name="nombre"]');
+
+            if (linkPdf && txtBuscar) {
+                // 2. Escuchamos el evento 'click' en el botón de Exportar
+                linkPdf.addEventListener("click", function (e) {
+                    // 3. Obtenemos el valor actual del buscador (lo que el usuario escribió)
+                    const valorBusqueda = txtBuscar.value.trim();
+                    
+                    // 4. Construimos la URL dinámica hacia el controlador de Categoría
+                    const urlBase = "@Url.Action("DescargarPdf", "Categoria")";
+                    
+                    // 5. Seteamos el nuevo href con el parámetro 'busqueda'
+                    // Esto hace que el controlador reciba el filtro antes de generar el PDF
+                    this.href = `${urlBase}?busqueda=${encodeURIComponent(valorBusqueda)}`;
+                    
+                    console.log("Exportando PDF con filtro: " + valorBusqueda);
+                });
+                }
+        });
     </script>
 }

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Entidades;
 using LogicaNegocio;
-using Entidades;
+using Microsoft.AspNetCore.Mvc;
+using Presentacion.Reportes; // El namespace de tu nueva carpeta
+using QuestPDF.Fluent;
 using System;
 using System.Collections.Generic;
 
@@ -115,6 +117,39 @@ namespace Presentacion.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+
+        public IActionResult DescargarPdf(string busqueda)
+        {
+            try
+            {
+                // 1. Traemos los datos y forzamos a que sea una Lista fija en memoria
+                List<Marca> lista = string.IsNullOrEmpty(busqueda)
+                                    ? _logicaMarca.Listar().ToList()
+                                    : _logicaMarca.FiltrarPorNombre(busqueda).ToList();
+
+                // 2. Si la lista está vacía, evitamos que el PDF falle
+                if (lista == null) lista = new List<Marca>();
+
+                var documento = new MarcaReporte(lista);
+
+                // 3. Generamos los bytes
+                byte[] pdfBytes = documento.GeneratePdf();
+
+                var stream = new MemoryStream(pdfBytes);
+
+                // 4. Retornamos el archivo
+                // Usar "application/pdf" sin el nombre del archivo como tercer parámetro 
+                // a veces ayuda a que el navegador no fuerce la descarga inmediata
+                return File(stream, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                // Esto evitará que el proyecto se cierre si algo falla dentro
+                return Content("Error al generar PDF: " + ex.Message);
+            }
         }
     }
 }
