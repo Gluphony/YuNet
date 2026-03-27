@@ -3,9 +3,11 @@ using Entidades;
 using LogicaNegocio;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Presentacion.Controllers
 {
+    [Authorize(Roles = "Administrador,Vendedor")]
     public class DevolucionController : Controller
     {
         private readonly LogicaDevolucion _logicaDevolucion = new LogicaDevolucion();

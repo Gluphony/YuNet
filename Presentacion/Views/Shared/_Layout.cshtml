@@ -11,191 +11,191 @@
 
     <style>
         /* ==========================================
-        1. PALETA DE COLORES "TECH E-COMMERCE"
-        ========================================== */
+                        1. PALETA DE COLORES "TECH E-COMMERCE"
+                        ========================================== */
         :root {
-        --bg-main: #F1F5F9;
-        --bg-card: #FFFFFF;
-        --text-main: #0F172A;
-        --text-muted: #64748B;
-        --border-color: #E2E8F0;
-        --header-bg: #FFFFFF;
-        --hover-bg: #F8FAFC;
-        --tech-primary: #2563EB;
-        --tech-accent: #06B6D4;
-        --tech-glow: rgba(37, 99, 235, 0.2);
+            --bg-main: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --header-bg: #FFFFFF;
+            --hover-bg: #F8FAFC;
+            --tech-primary: #2563EB;
+            --tech-accent: #06B6D4;
+            --tech-glow: rgba(37, 99, 235, 0.2);
         }
 
         [data-theme="dark"] {
-        --bg-main: #0B0F19;
-        --bg-card: #151E2E;
-        --text-main: #F8FAFC;
-        --text-muted: #94A3B8;
-        --border-color: #334155;
-        --header-bg: #0F172A;
-        --hover-bg: #1E293B;
-        --tech-primary: #3B82F6;
-        --tech-accent: #22D3EE;
-        --tech-glow: rgba(34, 211, 238, 0.2);
+            --bg-main: #0B0F19;
+            --bg-card: #151E2E;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --header-bg: #0F172A;
+            --hover-bg: #1E293B;
+            --tech-primary: #3B82F6;
+            --tech-accent: #22D3EE;
+            --tech-glow: rgba(34, 211, 238, 0.2);
         }
 
         html, body {
-        height: 100%;
-        margin: 0;
-        background-color: var(--bg-main) !important;
-        color: var(--text-main);
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        transition: background-color 0.3s ease, color 0.3s ease;
+            height: 100%;
+            margin: 0;
+            background-color: var(--bg-main) !important;
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .text-muted {
-        color: var(--text-muted) !important;
+            color: var(--text-muted) !important;
         }
 
         /* ==========================================
-        2. HEADER RETRÁCTIL Y ANIMACIONES
-        ========================================== */
+                        2. HEADER RETRÁCTIL Y ANIMACIONES
+                        ========================================== */
         .yunet-header {
-        background-color: var(--header-bg) !important;
-        border-bottom: 1px solid var(--border-color);
-        padding: 0.7rem 1.5rem;
-        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        z-index: 1040;
+            background-color: var(--header-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.7rem 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1040;
         }
 
         .header-hidden {
-        transform: translateY(-100%);
+            transform: translateY(-100%);
         }
 
         .header-toggle-tab {
-        position: fixed;
-        top: 75px;
-        right: 30px;
-        background: var(--tech-primary);
-        color: white;
-        border: none;
-        border-radius: 0 0 8px 8px;
-        padding: 2px 15px 5px 15px;
-        cursor: pointer;
-        z-index: 1039;
-        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        box-shadow: 0 4px 10px var(--tech-glow);
+            position: fixed;
+            top: 75px;
+            right: 30px;
+            background: var(--tech-primary);
+            color: white;
+            border: none;
+            border-radius: 0 0 8px 8px;
+            padding: 2px 15px 5px 15px;
+            cursor: pointer;
+            z-index: 1039;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 10px var(--tech-glow);
         }
 
         .header-hidden ~ .header-toggle-tab {
-        top: 0;
-        background: var(--tech-accent);
+            top: 0;
+            background: var(--tech-accent);
         }
 
         .click-anim {
-        transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .click-anim:active {
-        transform: scale(0.92) !important;
-        }
+            .click-anim:active {
+                transform: scale(0.92) !important;
+            }
 
         /* ==========================================
-        3. ESTILOS DE NAVEGACIÓN
-        ========================================== */
+                        3. ESTILOS DE NAVEGACIÓN
+                        ========================================== */
         .navbar-brand {
-        font-weight: 800;
-        font-size: 1.5rem;
-        color: var(--text-main) !important;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-main) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-link-btn {
-        color: var(--text-main) !important;
-        font-weight: 600;
-        padding: 0.5rem 1.2rem !important;
-        border-radius: 20px;
-        margin: 0 0.2rem;
+            color: var(--text-main) !important;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem !important;
+            border-radius: 20px;
+            margin: 0 0.2rem;
         }
 
-        .nav-link-btn:hover, .nav-item.show .nav-link-btn {
-        background-color: var(--hover-bg);
-        color: var(--tech-accent) !important;
-        box-shadow: 0 0 15px var(--tech-glow);
-        transform: translateY(-2px);
-        }
+            .nav-link-btn:hover, .nav-item.show .nav-link-btn {
+                background-color: var(--hover-bg);
+                color: var(--tech-accent) !important;
+                box-shadow: 0 0 15px var(--tech-glow);
+                transform: translateY(-2px);
+            }
 
         .header-search {
-        background-color: var(--hover-bg);
-        border-radius: 24px;
-        padding: 0.6rem 1.2rem;
-        border: 1px solid transparent;
-        color: var(--text-main);
-        width: 100%;
-        transition: all 0.3s ease;
+            background-color: var(--hover-bg);
+            border-radius: 24px;
+            padding: 0.6rem 1.2rem;
+            border: 1px solid transparent;
+            color: var(--text-main);
+            width: 100%;
+            transition: all 0.3s ease;
         }
 
-        .header-search:focus {
-        outline: none;
-        border-color: var(--tech-primary);
-        box-shadow: 0 0 0 4px var(--tech-glow);
-        background-color: var(--bg-card);
-        }
+            .header-search:focus {
+                outline: none;
+                border-color: var(--tech-primary);
+                box-shadow: 0 0 0 4px var(--tech-glow);
+                background-color: var(--bg-card);
+            }
 
         .user-circle {
-        background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%);
-        color: white;
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        cursor: pointer;
+            background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
         }
 
         .user-circle-guest {
-        background: var(--text-muted) !important;
+            background: var(--text-muted) !important;
         }
 
         .dropdown-menu {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .dropdown-item {
-        color: var(--text-main);
-        font-weight: 500;
-        padding: 0.7rem 1.2rem;
-        transition: 0.2s;
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            transition: 0.2s;
         }
 
-        .dropdown-item:hover {
-        background-color: var(--hover-bg);
-        color: var(--tech-primary);
-        }
+            .dropdown-item:hover {
+                background-color: var(--hover-bg);
+                color: var(--tech-primary);
+            }
 
         #main-content {
-        margin-top: 90px;
-        min-height: calc(100vh - 150px);
-        transition: margin-top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin-top: 90px;
+            min-height: calc(100vh - 150px);
+            transition: margin-top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         .header-hidden ~ #main-content {
-        margin-top: 20px;
+            margin-top: 20px;
         }
 
         /* ==========================================
-        4. FOOTER
-        ========================================== */
+                        4. FOOTER
+                        ========================================== */
         .footer-link {
-        color: var(--text-muted);
-        text-decoration: none;
-        transition: color 0.3s ease;
-        display: inline-block;
-        margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
 
             .footer-link:hover {
@@ -204,8 +204,8 @@
             }
 
         /* ==========================================
-                   5. ANIMACIONES DE DROPDOWN Y PERFIL
-                   ========================================== */
+                                   5. ANIMACIONES DE DROPDOWN Y PERFIL
+                                   ========================================== */
         .dropdown-menu.show {
             animation: dropDownAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             transform-origin: top;
@@ -266,7 +266,7 @@
                         </a>
                     </li>
 
-                    @if (!User.Identity.IsAuthenticated || User.IsInRole("Usuario"))
+                    @if (User.Identity?.IsAuthenticated != true || User.IsInRole("Usuario"))
                     {
                         <li class="nav-item">
                             <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Index", "Producto")">
@@ -275,7 +275,7 @@
                         </li>
                     }
 
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         @if (User.IsInRole("Usuario"))
                         {
@@ -298,10 +298,7 @@
                                     <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Devolucion")"><i class="bi bi-arrow-return-left me-2" style="color: var(--tech-primary);"></i> Devoluciones</a></li>
                                 </ul>
                             </li>
-                        }
 
-                        @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
-                        {
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-link-btn dropdown-toggle click-anim" href="#" role="button" data-bs-toggle="dropdown">
                                     Inventario
@@ -315,6 +312,15 @@
                                         <li><a class="dropdown-item click-anim" href="@Url.Action("Index", "Categoria")"><i class="bi bi-tags me-2" style="color: var(--tech-accent);"></i> Categorías</a></li>
                                     }
                                 </ul>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Auditor"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-btn click-anim" href="@Url.Action("Index", "Auditoria")">
+                                    <i class="bi bi-shield-check me-1" style="color: var(--tech-accent);"></i> Auditoría
+                                </a>
                             </li>
                         }
 
@@ -341,7 +347,7 @@
                 </button>
 
                 @{
-                    bool isLogged = User.Identity?.IsAuthenticated ?? false;
+                    bool isLogged = User.Identity?.IsAuthenticated == true;
                     string userName = isLogged ? (User.Identity.Name ?? "Usuario") : "Invitado";
                     string userRole = isLogged ? (User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Rol") : "Sesión no iniciada";
                     string inicial = isLogged && !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "?";
@@ -361,7 +367,7 @@
                         {
                             <li><a class="dropdown-item py-2 click-anim" href="#"><i class="bi bi-person me-2 text-muted"></i> Mi Perfil</a></li>
                             <li><hr class="dropdown-divider border-secondary"></li>
-                            <li><a class="dropdown-item py-2 text-danger fw-bold click-anim" href="@Url.Action("Salir", "Home")"><i class="bi bi-power me-2"></i> Salir</a></li>
+                            <li><a class="dropdown-item py-2 text-danger fw-bold click-anim" href="@Url.Action("Salir", "Login")"><i class="bi bi-power me-2"></i> Salir</a></li>
                         }
                         else
                         {

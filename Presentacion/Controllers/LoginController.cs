@@ -12,13 +12,9 @@ namespace Presentacion.Controllers
 {
     public class LoginController : Controller
     {
-        // Instanciamos la lógica
         private readonly LogicaLogin _logicaSeguridad = new LogicaLogin();
         private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario();
 
-        // =================================================================
-        // LOGIN
-        // =================================================================
         [HttpGet]
         public IActionResult Index()
         {
@@ -39,22 +35,52 @@ namespace Presentacion.Controllers
                 if (dtUsuario != null && dtUsuario.Rows.Count > 0)
                 {
                     DataRow fila = dtUsuario.Rows[0];
+                    string rolUsuario = fila["Nombre_Rol"].ToString();
 
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.NameIdentifier, fila["Id_Usuario"].ToString()),
                         new Claim(ClaimTypes.Name, fila["Nombre"].ToString()),
                         new Claim(ClaimTypes.Email, fila["Correo"].ToString()),
-                        new Claim(ClaimTypes.Role, fila["Nombre_Rol"].ToString())
+                        new Claim(ClaimTypes.Role, rolUsuario)
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    // =========================================================
+                    // 1. LÓGICA DE TIEMPOS DE SESIÓN INDEPENDIENTES POR ROL
+                    // =========================================================
+                    DateTimeOffset tiempoExpiracion;
+                    bool permitirRefresco;
+                    bool esPersistente;
+
+                    if (rolUsuario == "Usuario")
+                    {
+                        tiempoExpiracion = DateTimeOffset.UtcNow.AddMinutes(15); // 15 Minutos límite
+                        permitirRefresco = false; // No se renueva el tiempo al navegar
+                        esPersistente = false; // Se cierra si apagan el navegador
+                    }
+                    else if (rolUsuario == "Vendedor")
+                    {
+                        tiempoExpiracion = DateTimeOffset.UtcNow.AddHours(1); // 1 Hora límite
+                        permitirRefresco = false;
+                        esPersistente = false;
+                    }
+                    else
+                    {
+                        // Administradores, Auditores y otros
+                        tiempoExpiracion = DateTimeOffset.UtcNow.AddHours(8); // 8 Horas
+                        permitirRefresco = true; // Se renueva si siguen activos
+                        esPersistente = true; // Se mantiene iniciada
+                    }
+
                     var authProperties = new AuthenticationProperties
                     {
-                        AllowRefresh = true,
-                        IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                        AllowRefresh = permitirRefresco,
+                        IsPersistent = esPersistente,
+                        ExpiresUtc = tiempoExpiracion
                     };
+                    // =========================================================
 
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
@@ -77,9 +103,6 @@ namespace Presentacion.Controllers
             }
         }
 
-        // =================================================================
-        // SALIR (CERRAR SESIÓN)
-        // =================================================================
         [HttpGet]
         public async Task<IActionResult> Salir()
         {
@@ -87,9 +110,6 @@ namespace Presentacion.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // =================================================================
-        // REGISTRO
-        // =================================================================
         [HttpGet]
         public IActionResult Registro()
         {
@@ -118,9 +138,6 @@ namespace Presentacion.Controllers
             return View();
         }
 
-        // =================================================================
-        // RESTABLECER CLAVE
-        // =================================================================
         [HttpGet]
         public IActionResult RestablecerClave()
         {
@@ -132,12 +149,10 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // Asegúrate de tener el método RestablecerClave en tu LogicaUsuario y Base de Datos
                 bool exito = _logicaUsuario.RestablecerClave(Correo, NuevaClave);
 
                 if (exito)
                 {
-                    // Si cambia la clave, mandamos un mensaje de éxito al Login
                     ViewBag.Exito = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
                     return View("Index");
                 }

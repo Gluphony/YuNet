@@ -10,10 +10,7 @@ namespace Presentacion.Controllers
     [Authorize]
     public class DetalleCarritoController : Controller
     {
-        // Instanciamos tu lógica exacta
         private readonly LogicaDetalleCarrito _logicaDetalle = new LogicaDetalleCarrito();
-
-        // Necesitamos la cabecera solo para obtener el ID_CARRITO del usuario logueado
         private readonly LogicaCarrito _logicaCarrito = new LogicaCarrito();
 
         // --- MÉTODO AUXILIAR PARA OBTENER EL USUARIO ---
@@ -28,7 +25,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 1. AGREGAR PRODUCTO AL CARRITO
+        // 1. AGREGAR PRODUCTO AL CARRITO (Cliente Normal)
         // ==========================================
         [HttpPost]
         public IActionResult Agregar(int idProducto, int cantidad = 1)
@@ -41,7 +38,7 @@ namespace Presentacion.Controllers
                 // 1. Obtenemos el ID del carrito del usuario (o lo creamos si no tiene)
                 var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
 
-                // 2. Ejecutamos TU método exacto de la lógica
+                // 2. Ejecutamos la lógica de detalle para agregarlo a ese carrito específico
                 _logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, cantidad);
 
                 TempData["MensajeExito"] = "Producto agregado al carrito correctamente.";
@@ -51,19 +48,18 @@ namespace Presentacion.Controllers
                 TempData["MensajeError"] = "Error al agregar el producto: " + ex.Message;
             }
 
-            // Lo enviamos a la vista principal del carrito
+            // Lo enviamos a la vista principal del carrito (o podrías enviarlo de vuelta al catálogo)
             return RedirectToAction("Index", "Carrito");
         }
 
         // ==========================================
-        // 2. ELIMINAR ÍTEM DEL CARRITO
+        // 2. ELIMINAR ÍTEM DEL CARRITO (Cliente Normal)
         // ==========================================
         [HttpPost]
         public IActionResult Eliminar(int idDetalle)
         {
             try
             {
-                // Ejecutamos TU método exacto de la lógica
                 _logicaDetalle.Eliminar(idDetalle);
                 TempData["MensajeExito"] = "Producto eliminado del carrito.";
             }
@@ -72,7 +68,6 @@ namespace Presentacion.Controllers
                 TempData["MensajeError"] = "Error al eliminar: " + ex.Message;
             }
 
-            // Regresamos a la vista principal del carrito
             return RedirectToAction("Index", "Carrito");
         }
     }

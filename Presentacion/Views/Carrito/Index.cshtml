@@ -10,8 +10,8 @@
 
 <style>
     /* ==========================================
-           1. VARIABLES ENCAPSULADAS (MODO CLARO)
-           ========================================== */
+               1. VARIABLES ENCAPSULADAS (MODO CLARO)
+               ========================================== */
     .pos-wrapper {
         --neon-blue-base: #007bff;
         --neon-blue-glow: rgba(0, 123, 255, 0.4);
@@ -24,8 +24,8 @@
     }
 
     /* ==========================================
-           2. SUPER SELECTOR MODO OSCURO (INFALIBLE)
-           ========================================== */
+               2. SUPER SELECTOR MODO OSCURO (INFALIBLE)
+               ========================================== */
     html[data-bs-theme="dark"] .pos-wrapper,
     html[data-theme="dark"] .pos-wrapper,
     body.dark-mode .pos-wrapper,
@@ -39,12 +39,12 @@
         --text-main: #ffffff !important;
         --text-muted: #a0aabf !important;
         --neon-green: #00FF7F !important;
-        --input-bg: #222736 !important; /* Color sólido oscuro en vez de rgba */
+        --input-bg: #222736 !important;
     }
 
     /* ==========================================
-           3. DISEÑO ORIGINAL APLICADO A VARIABLES
-           ========================================== */
+               3. DISEÑO ORIGINAL APLICADO A VARIABLES
+               ========================================== */
     .pos-wrapper .admin-panel {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -107,7 +107,6 @@
             box-shadow: 0 0 10px var(--neon-blue-glow);
         }
 
-    /* Regla del botón en modo oscuro usando el wrapper */
     html[data-bs-theme="dark"] .pos-wrapper .btn-neon-sm:hover,
     body.dark-mode .pos-wrapper .btn-neon-sm:hover,
     .dark-style .pos-wrapper .btn-neon-sm:hover {
@@ -251,9 +250,9 @@
     }
     else
     {
-        <div class="alert alert-warning p-5 text-center">
-            <h2>⚠️ ESTÁS VIENDO LA VISTA DE CLIENTE NORMAL</h2>
-            <p>El sistema no te detecta como "Administrador". Por eso no ves el nuevo diseño del POS.</p>
+        <div class="alert alert-warning p-5 text-center mt-4 shadow-sm" style="border-radius: 16px;">
+            <h2>🛍️ TU CARRITO DE COMPRAS</h2>
+            <p class="fs-5">Aquí se mostrarán los productos que has seleccionado.</p>
         </div>
     }
 </div>
