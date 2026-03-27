@@ -8,7 +8,7 @@ using System;
 
 namespace Presentacion.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrador, Admin, Auditor")]
     public class ProveedorController : Controller
     {
         private readonly Logica_Proveedor _logicaProveedor = new Logica_Proveedor();

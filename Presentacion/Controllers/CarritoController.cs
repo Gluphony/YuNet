@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Data; // ¡Agregado para manejar DataTable y DataView correctamente!
+using System.Data;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +15,9 @@ namespace Presentacion.Controllers
     {
         private readonly LogicaCarrito _logicaCarrito = new LogicaCarrito();
 
-        // Constructor limpio
-        public CarritoController()
-        {
-        }
+        public CarritoController() { }
 
-        // --- MÉTODO AUXILIAR: Extraer el ID del usuario de las "Cookies/Claims" de sesión ---
+        // --- MÉTODO AUXILIAR: Extraer el ID del usuario ---
         private int ObtenerIdUsuarioLogueado()
         {
             var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -28,7 +25,7 @@ namespace Presentacion.Controllers
             {
                 return idUsuario;
             }
-            return 0; // Retorna 0 si falla (la lógica lo rechazará)
+            return 0;
         }
 
         // ==========================================
@@ -51,15 +48,9 @@ namespace Presentacion.Controllers
                     LogicaProducto logicaProd = new LogicaProducto();
                     DataTable todosLosProductos = logicaProd.ListarProductos();
 
-                    // --- SOLUCIÓN ASUNTO 1: Filtrar productos activos ---
                     DataView vistaProductos = new DataView(todosLosProductos);
-
-                    // IMPORTANTE: Revisa en tu Base de Datos cómo se llama la columna de estado.
-                    // Si se llama "ACTIVO" o "ESTADO" y es un BIT/INT, sería "ESTADO = 1"
-                    vistaProductos.RowFilter = "ESTADO = 1"; // <-- ¡Cambia 'ACTIVO' por el nombre real de tu columna!
-
+                    vistaProductos.RowFilter = "ESTADO = 1"; // Ajusta si tu columna se llama diferente (ej: ACTIVO = 1)
                     ViewBag.ProductosDisponibles = vistaProductos.ToTable();
-                    // ----------------------------------------------------
 
                     LogicaUsuario logicaUsu = new LogicaUsuario();
                     DataTable todosLosUsuarios = logicaUsu.ListarUsuarios();
@@ -97,130 +88,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 3. CAMBIAR ESTADO
-        // ==========================================
-        [HttpPost]
-        public IActionResult CambiarEstado(int idCarrito, string nuevoEstado)
-        {
-            try
-            {
-                _logicaCarrito.CambiarEstado(idCarrito, nuevoEstado);
-
-                if (nuevoEstado.ToUpper() == "COMPLETADO")
-                    TempData["MensajeExito"] = "¡Tu compra ha sido procesada con éxito!";
-                else if (nuevoEstado.ToUpper() == "CANCELADO")
-                    TempData["MensajeExito"] = "El carrito ha sido cancelado.";
-                else
-                    TempData["MensajeExito"] = $"El estado del carrito cambió a {nuevoEstado}.";
-            }
-            catch (Exception ex)
-            {
-                TempData["MensajeError"] = ex.Message;
-            }
-            return RedirectToAction("Index");
-        }
-
-        // ==========================================
-        // 4. ACTUALIZAR TOTAL (AJAX)
-        // ==========================================
-        [HttpPost]
-        public IActionResult ActualizarTotal(int idCarrito, decimal nuevoTotal)
-        {
-            try
-            {
-                _logicaCarrito.ActualizarTotal(idCarrito, nuevoTotal);
-                return Json(new { success = true, message = "Total actualizado correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // ==========================================
-        // AGREGAR PRODUCTO AL CARRITO (AJAX)
-        // ==========================================
-        [HttpPost]
-        public IActionResult Agregar([FromBody] JsonElement data)
-        {
-            try
-            {
-                int idProducto = data.GetProperty("id").GetInt32();
-                int idUsuario = ObtenerIdUsuarioLogueado();
-
-                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
-                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
-                logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, 1);
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // ==========================================
-        // OBTENER RESUMEN PARA OFFCANVAS
-        // ==========================================
-        [HttpGet]
-        public IActionResult ObtenerResumen()
-        {
-            int idUsuario = ObtenerIdUsuarioLogueado();
-            var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
-
-            LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
-            var detalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
-
-            return PartialView("_CarritoResumen", detalles);
-        }
-
-        // ==========================================
-        // OBTENER INFO BÁSICA (BADGE Y TOTAL)
-        // ==========================================
-        [HttpGet]
-        public JsonResult ObtenerInfoBasica()
-        {
-            int idUsuario = ObtenerIdUsuarioLogueado();
-            var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
-
-            LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
-            var detalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
-
-            int cantidadTotal = 0;
-            if (detalles != null)
-            {
-                foreach (var d in detalles) cantidadTotal += d.CANTIDAD;
-            }
-
-            return Json(new
-            {
-                count = cantidadTotal,
-                total = miCarrito.TOTAL
-            });
-        }
-
-        // ==========================================
-        // ELIMINAR ITEM (AJAX)
-        // ==========================================
-        [HttpPost]
-        [Route("DetalleCarrito/EliminarSimple/{id}")]
-        public IActionResult EliminarSimple(int id)
-        {
-            try
-            {
-                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
-                logicaDetalle.Eliminar(id);
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // ==========================================
-        // 5. PROCESAR COMPRA (AHORA SÍ, LIMPIO Y POR CAPAS)
+        // 3. PROCESAR COMPRA (CLIENTE NORMAL)
         // ==========================================
         [HttpPost]
         public IActionResult ProcesarCompra(int? idMetodoPago)
@@ -265,7 +133,6 @@ namespace Presentacion.Controllers
                 _logicaCarrito.VaciarCarrito(miCarrito.ID_CARRITO);
 
                 TempData["MensajeExito"] = $"¡Tu pedido #{nuevoIdPedido} ha sido generado exitosamente!";
-
                 return RedirectToAction("Confirmacion", new { idPedido = nuevoIdPedido });
             }
             catch (Exception ex)
@@ -371,7 +238,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 6. VISTA DE CONFIRMACIÓN DE PEDIDO
+        // VISTA DE CONFIRMACIÓN DE PEDIDO
         // ==========================================
         [HttpGet]
         public IActionResult Confirmacion(int idPedido)
