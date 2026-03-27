@@ -4,9 +4,11 @@ using LogicaNegocio;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq; // <-- ¡ESTA ES LA LIBRERÍA QUE FALTABA!
 
 namespace Presentacion.Controllers
 {
+    [AllowAnonymous]
     [Authorize(Roles = "Administrador,Vendedor")]
     public class DevolucionController : Controller
     {
@@ -42,13 +44,22 @@ namespace Presentacion.Controllers
         // ========================================================
         // 3. POST: El cliente envía su reporte
         // ========================================================
+        // ========================================================
+        // 3. POST: El cliente envía su reporte
+        // ========================================================
         [HttpPost]
-        public IActionResult Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE)
+        public IActionResult Create([FromBody] DevolucionRequest request) // Usamos una clase pequeña para recibir el JSON
         {
             try
             {
+                // Validación de seguridad básica
+                if (request == null || request.ID_DETALLE_PEDIDO <= 0)
+                {
+                    return Json(new { exito = false, mensaje = "Datos inválidos enviados al servidor." });
+                }
+
                 // Llamamos a tu lógica
-                bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, out string mensajeRespuesta);
+                bool respuesta = _logicaDevolucion.Crear(request.ID_DETALLE_PEDIDO, request.MOTIVO_CLIENTE, out string mensajeRespuesta);
 
                 if (respuesta)
                 {
@@ -74,6 +85,18 @@ namespace Presentacion.Controllers
         {
             try
             {
+                // Obtenemos el ID del Admin que está conectado actualmente.
+                var claimId = User.Claims.FirstOrDefault(c => c.Type == "IdUsuario")?.Value;
+                if (claimId != null)
+                {
+                    devolucionAdmin.ID_USUARIO_AUTORIZA = int.Parse(claimId);
+                }
+                else
+                {
+                    // Si por alguna razón no hay sesión, le ponemos un usuario por defecto
+                    devolucionAdmin.ID_USUARIO_AUTORIZA = 1;
+                }
+
                 bool respuesta = _logicaDevolucion.ProcesarAdmin(devolucionAdmin, out string mensajeRespuesta);
 
                 if (respuesta)
@@ -85,7 +108,6 @@ namespace Presentacion.Controllers
                     TempData["MensajeError"] = mensajeRespuesta;
                 }
 
-                // Recargamos la tabla del administrador
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -94,5 +116,39 @@ namespace Presentacion.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // ========================================================
+        // 5. GET: Detalles de la Devolución (SOLO LECTURA)
+        // ========================================================
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            try
+            {
+                // Traemos todas y filtramos por el ID 
+                var devolucion = _logicaDevolucion.Listar().FirstOrDefault(d => d.ID_DEVOLUCION == id);
+
+                if (devolucion == null)
+                {
+                    TempData["MensajeError"] = "No se encontró la devolución solicitada.";
+                    return RedirectToAction("Index");
+                }
+
+                return View(devolucion);
+            }
+            catch (Exception ex)
+            {
+                TempData["MensajeError"] = "Error al cargar los detalles: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+    }
+
+    // CLASE AUXILIAR: Pon esto al final de tu archivo DevolucionController.cs, 
+    // antes de la última llave }
+    public class DevolucionRequest
+    {
+        public int ID_DETALLE_PEDIDO { get; set; }
+        public string MOTIVO_CLIENTE { get; set; }
     }
 }

@@ -29,6 +29,39 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
+        // 🛒 NUEVO: AGREGAR AL CARRITO DESDE LA TIENDA (AJAX/JSON)
+        // ==========================================
+        [HttpPost]
+        public JsonResult Agregar(int idProducto)
+        {
+            try
+            {
+                int idUsuario = ObtenerIdUsuarioLogueado();
+
+                if (idUsuario <= 0)
+                {
+                    return Json(new { success = false, message = "Debes iniciar sesión para agregar productos." });
+                }
+
+                // 1. Obtenemos o creamos el carrito del usuario
+                var miCarrito = _logicaCarrito.ObtenerOCrearCarrito(idUsuario);
+
+                // 2. Agregamos el producto (por defecto 1 unidad)
+                LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
+                logicaDetalle.Agregar(miCarrito.ID_CARRITO, idProducto, 1);
+
+                // 3. Respondemos con éxito al JavaScript
+                return Json(new { success = true, message = "¡Producto agregado correctamente!" });
+            }
+            catch (Exception ex)
+            {
+                // Si hay error (ej. falta de stock de BD), se lo mandamos al JS para que muestre el Toast rojo
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        // ==========================================
         // 1. VISTA PRINCIPAL (MI CARRITO / POS ADMIN)
         // ==========================================
         public IActionResult Index()
@@ -141,6 +174,7 @@ namespace Presentacion.Controllers
                 return RedirectToAction("Index");
             }
         }
+
         // ==========================================
         // MÉTODOS EXCLUSIVOS PARA EL POS (ADMIN)
         // ==========================================

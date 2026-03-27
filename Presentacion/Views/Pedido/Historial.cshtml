@@ -193,9 +193,6 @@
                                     <i class="bi bi-box-seam"></i> Ver Productos
                                 </a>
 
-                                <button type="button" class="btn btn-customer btn-report" onclick="abrirModalReporte(@item.ID_PEDIDO)">
-                                    <i class="bi bi-exclamation-triangle"></i> Tengo un problema
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -216,15 +213,6 @@
     }
 </div>
 
-<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: 700;">
-                    <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--neon-red);"></i> Reportar un problema
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
 
             <div class="modal-body p-4">
                 <form id="formReporte">
@@ -269,18 +257,25 @@
         // Declaramos la variable global para el modal
         let modalReporteBootstrap;
 
-        // Función global para que el botón "onclick" la pueda encontrar
+        // Función global para que el botón "onclick" la pueda encontrar en el HTML
         function abrirModalReporte(idPedido) {
+            // Llenamos los campos del modal
             document.getElementById('txtIdPedidoReporte').value = idPedido;
             document.getElementById('cboMotivoReporte').selectedIndex = 0;
             document.getElementById('txtDetalleReporte').value = '';
 
-            const modalEl = document.getElementById('modalReporte');
-            modalReporteBootstrap = new bootstrap.Modal(modalEl);
+            // Si el modal no ha sido instanciado, lo instanciamos
+            if (!modalReporteBootstrap) {
+                const modalEl = document.getElementById('modalReporte');
+                modalReporteBootstrap = new bootstrap.Modal(modalEl);
+            }
+
+            // Lo mostramos
             modalReporteBootstrap.show();
         }
 
         document.addEventListener("DOMContentLoaded", function () {
+
             // --- LÓGICA DEL FILTRO ---
             const botonesFiltro = document.querySelectorAll('.btn-filtro');
             const tarjetas = document.querySelectorAll('.tarjeta-pedido-wrapper');
@@ -298,24 +293,62 @@
                         }
                     });
                 });
-            });
+            }); // <-- ¡AQUÍ FALTABA CERRAR EL FOREACH CORRECTAMENTE!
 
             // --- LÓGICA DE ENVIAR REPORTE ---
-            document.getElementById('btnEnviarReporte').addEventListener('click', function() {
+            document.getElementById('btnEnviarReporte').addEventListener('click', function () {
                 const idPedido = document.getElementById('txtIdPedidoReporte').value;
                 const motivo = document.getElementById('cboMotivoReporte').value;
                 const detalle = document.getElementById('txtDetalleReporte').value;
 
-                if(detalle.trim() === '') {
+                if (detalle.trim() === '') {
                     alert('Por favor, escribe un poco de detalle sobre el problema.');
                     return;
                 }
 
-                console.log("Enviando reporte:", { Pedido: idPedido, Motivo: motivo, Detalle: detalle });
-                alert(`¡Reporte del Pedido #${idPedido} enviado al Administrador!\nMotivo: ${motivo}`);
+                // Juntamos el motivo principal y el detalle para enviarlo a tu C#
+                const motivoCompleto = motivo + " - " + detalle;
 
-                modalReporteBootstrap.hide();
+                // En tu C# el método Create recibe ID_DETALLE_PEDIDO.
+                // Asegúrate de que en tu Base de Datos tenga sentido enviar el ID del PEDIDO general a esta variable.
+                const formData = new FormData();
+                formData.append("ID_DETALLE_PEDIDO", idPedido);
+                formData.append("MOTIVO_CLIENTE", motivoCompleto);
+
+                const btnEnviar = document.getElementById('btnEnviarReporte');
+                const textoOriginal = btnEnviar.innerHTML;
+
+                // Cambiamos el texto para mostrar que está cargando
+                btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+                btnEnviar.disabled = true;
+
+                // Hacemos la petición al backend
+                fetch('/Devolucion/Create', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exito) {
+                        alert('✅ ¡Reporte enviado! Nos pondremos en contacto contigo pronto.');
+                        if (modalReporteBootstrap) {
+                            modalReporteBootstrap.hide(); // Cerramos el modal
+                        }
+                    } else {
+                        alert('❌ Hubo un problema: ' + data.mensaje);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al intentar enviar el reporte.');
+                })
+                .finally(() => {
+                    // Regresamos el botón a la normalidad
+                    btnEnviar.innerHTML = textoOriginal;
+                    btnEnviar.disabled = false;
+                });
             });
-        });
+
+        }); // <-- ¡Y AQUÍ FALTABA CERRAR EL DOMContentLoaded!
     </script>
 }

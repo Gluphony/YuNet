@@ -16,8 +16,8 @@
 
 <style>
     /* ==========================================
-           VARIABLES NEÓN
-           ========================================== */
+                   VARIABLES NEÓN
+                   ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -25,11 +25,15 @@
         --neon-green: #00FF7F;
         --neon-red: #ff3366;
         --neon-yellow: #ffcc00;
+        --bg-card: #0F172A;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --text-main: #F8FAFC;
+        --text-muted: #94A3B8;
     }
 
     /* ==========================================
-           ESTILOS DE TARJETAS NEÓN
-           ========================================== */
+                   ESTILOS DE TARJETAS NEÓN
+                   ========================================== */
     .info-card {
         background-color: var(--bg-card) !important;
         border: 1px solid var(--border-color);
@@ -62,6 +66,23 @@
             color: var(--neon-blue-base) !important;
             background-color: var(--neon-blue-tint);
             box-shadow: 0 0 15px var(--neon-blue-glow);
+        }
+
+    .btn-report {
+        background-color: transparent;
+        color: var(--text-muted) !important;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+    }
+
+        .btn-report:hover {
+            background-color: rgba(255, 51, 102, 0.1);
+            color: var(--neon-red) !important;
+            border-color: var(--neon-red);
         }
 
     /* Badges de Estado Neón */
@@ -170,7 +191,7 @@
                     <div>
                         <small style="color: var(--text-muted); display: block; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">Total Pagado</small>
                         <h3 class="fw-bold mb-0 total-price mt-1">
-                            $@Model.TOTAL.ToString("N2")
+                            C$ @Model.TOTAL.ToString("N2")
                         </h3>
                     </div>
                 </div>
@@ -197,6 +218,7 @@
                                         <th class="text-center" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Cantidad</th>
                                         <th class="text-end" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Precio Unit.</th>
                                         <th class="text-end" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Subtotal</th>
+                                        <th class="text-center" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -219,6 +241,11 @@
                                             </td>
                                             <td class="text-end py-3 fw-bold" style="color: var(--neon-blue-base); background-color: transparent;">
                                                 C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))
+                                            </td>
+                                            <td class="text-center py-3" style="background-color: transparent;">
+                                                <button type="button" class="btn btn-report" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO)">
+                                                    <i class="bi bi-exclamation-triangle"></i> Reportar
+                                                </button>
                                             </td>
                                         </tr>
                                     }
@@ -243,9 +270,133 @@
                     }
 
                 </div>
-
-                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: 700;">
+                    <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--neon-red);"></i> Reportar un problema
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="formReporte">
+                    <input type="hidden" id="txtIdDetallePedidoReporte" />
+
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Estás reportando un problema con el producto seleccionado en este pedido.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">¿Qué problema tuviste?</label>
+                        <select class="form-select" id="cboMotivoReporte"
+                                style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);">
+                            <option value="Producto dañado" style="color: black;">El producto llegó dañado o defectuoso</option>
+                            <option value="Producto incorrecto" style="color: black;">Me enviaron un producto incorrecto</option>
+                            <option value="Faltan artículos" style="color: black;">Faltan artículos en mi paquete</option>
+                            <option value="No llegó" style="color: black;">Mi pedido nunca llegó</option>
+                            <option value="Otro" style="color: black;">Otro problema</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Detalles adicionales</label>
+                        <textarea class="form-control" id="txtDetalleReporte" rows="3" placeholder="Por favor, explica detalladamente qué sucedió..."
+                                  style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-neon-outline" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 8px; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
+                    <i class="bi bi-send-fill me-1"></i> Enviar Reporte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let modalReporteBootstrap;
+
+        // Función global para que el botón "onclick" la encuentre
+        function abrirModalReporte(idDetallePedido) {
+            document.getElementById('txtIdDetallePedidoReporte').value = idDetallePedido;
+            document.getElementById('cboMotivoReporte').selectedIndex = 0;
+            document.getElementById('txtDetalleReporte').value = '';
+
+            if (!modalReporteBootstrap) {
+                const modalEl = document.getElementById('modalReporte');
+                modalReporteBootstrap = new bootstrap.Modal(modalEl);
+            }
+
+            modalReporteBootstrap.show();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // --- LÓGICA DE ENVIAR REPORTE ---
+            document.getElementById('btnEnviarReporte').addEventListener('click', function () {
+                const idDetallePedido = document.getElementById('txtIdDetallePedidoReporte').value;
+                const motivo = document.getElementById('cboMotivoReporte').value;
+                const detalle = document.getElementById('txtDetalleReporte').value;
+
+                if (detalle.trim() === '') {
+                    alert('Por favor, escribe un poco de detalle sobre el problema.');
+                    return;
+                }
+
+                const motivoCompleto = motivo + " - " + detalle;
+
+                // Ahora sí, enviamos el ID_DETALLE_PEDIDO correcto que tu base de datos espera
+              const dataEnvio = {
+            ID_DETALLE_PEDIDO: parseInt(idDetallePedido),
+            MOTIVO_CLIENTE: motivoCompleto
+          };
+
+                const btnEnviar = document.getElementById('btnEnviarReporte');
+                const textoOriginal = btnEnviar.innerHTML;
+
+                btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+                btnEnviar.disabled = true;
+
+                // Hacemos la petición al backend
+                     fetch('/Devolucion/Create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // Le decimos al servidor que es JSON
+            },
+            body: JSON.stringify(dataEnvio)
+        })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exito) {
+                        alert('✅ ¡Reporte enviado! Nos pondremos en contacto contigo pronto.');
+                        if (modalReporteBootstrap) {
+                            modalReporteBootstrap.hide();
+                        }
+                    } else {
+                        alert('❌ Hubo un problema: ' + data.mensaje);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al intentar enviar el reporte.');
+                })
+                .finally(() => {
+                    btnEnviar.innerHTML = textoOriginal;
+                    btnEnviar.disabled = false;
+                });
+            });
+
+        });
+    </script>
+}

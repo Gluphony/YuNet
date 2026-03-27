@@ -7,8 +7,8 @@
 
 <style>
     /* ==========================================
-               1. GRID FLUIDO (Catálogo a pantalla completa)
-               ========================================== */
+                   1. GRID FLUIDO (Catálogo a pantalla completa)
+                   ========================================== */
     .grilla-fluida {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Tarjetas un poco más grandes para la tienda */
@@ -227,15 +227,19 @@
 @section Scripts {
     <script>
         function agregarAlCarrito(idProducto, modelo) {
-            // 1. Petición real al Controlador (AJAX / Fetch)
+            // 1. Usamos FormData para que ASP.NET entienda los datos perfectamente
+            let formData = new FormData();
+            formData.append("idProducto", idProducto); // Este nombre debe coincidir con el parámetro en tu Controller
+
+            // 2. Petición real al Controlador (AJAX / Fetch)
             fetch('/Carrito/Agregar', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: idProducto }) // Pasamos el ID del producto
+                body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error("Error en la red");
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // 2. Mostramos tu notificación visual (Toast)
@@ -259,7 +263,7 @@
 
                 } else {
                     // Si algo falla en tu lógica (ej. no hay stock o error de validación)
-                    mostrarNotificacion(`Error: ${data.message}`, true);
+                    mostrarNotificacion(`Aviso: ${data.message}`, true);
                 }
             })
             .catch(error => {
@@ -270,7 +274,8 @@
 
         // Función para traer el HTML actualizado del carrito y mostrar el panel
         function actualizarYAbrirOffcanvas() {
-            // AJUSTE: Asegúrate de que esta URL sea la correcta hacia tu controlador
+            // Nota: Si el método ObtenerResumen no existe en tu controlador,
+            // esta función dará error silencioso en consola pero el producto sí se guardará.
             fetch('/Carrito/ObtenerResumen')
                 .then(response => response.text())
                 .then(html => {

@@ -1,0 +1,162 @@
+﻿@model Entidades.Devolucion
+
+@{
+    ViewData["Title"] = "Detalles de Devolución";
+}
+
+<style>
+    :root {
+        --neon-blue: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.3);
+        --neon-yellow: #FFCC00;
+        --neon-yellow-glow: rgba(255, 204, 0, 0.2);
+        --neon-green: #00FF7F;
+        --neon-red: #FF3366;
+    }
+
+    /* Card de Formulario */
+    .form-card-dev {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color);
+        border-top: 4px solid var(--neon-blue) !important;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+    }
+
+    /* Inputs Estilizados (Solo Lectura) */
+    .custom-field-readonly {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        color: var(--neon-blue) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-weight: 600;
+    }
+
+    .stock-panel {
+        background-color: rgba(255, 204, 0, 0.05);
+        border: 1px solid var(--neon-yellow);
+        box-shadow: 0 0 15px var(--neon-yellow-glow);
+    }
+
+    .btn-cancel-dev {
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-cancel-dev:hover {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+            background: rgba(0, 212, 255, 0.1);
+        }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="premium-label mb-1" style="color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">
+                        Reporte de Post-Venta
+                    </div>
+                    <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Detalles de Devolución #@Model.ID_DEVOLUCION</h2>
+                    <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Consulta del historial y resolución técnica.</p>
+                </div>
+                <a href="@Url.Action("Index", "Devolucion")" class="btn btn-cancel-dev px-4">
+                    <i class="bi bi-arrow-left me-2"></i> Volver al Listado
+                </a>
+            </div>
+
+            <div class="card form-card-dev shadow-lg">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box me-3" style="color: var(--neon-blue);"><i class="bi bi-phone fs-5"></i></div>
+                        <h6 class="text-uppercase fw-bold mb-0" style="color: var(--neon-blue); font-size: 0.85rem; letter-spacing: 1px;">Dispositivo Reportado</h6>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Producto</label>
+                            <div class="form-control custom-field-readonly">@Model.PRODUCTO_NOMBRE</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">IMEI</label>
+                            <div class="form-control custom-field-readonly text-warning" style="font-family: monospace;">@Model.IMEI</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">Factura Orig.</label>
+                            <div class="form-control custom-field-readonly">#@Model.FACTURA_ORIGINAL</div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="form-label small fw-bold text-muted">Motivo del Cliente (Problema Reportado)</label>
+                            <div class="form-control custom-field-readonly" style="min-height: 60px; color: var(--text-main) !important;">
+                                @Model.MOTIVO_CLIENTE
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box me-3" style="color: var(--neon-blue);"><i class="bi bi-clipboard-check fs-5"></i></div>
+                        <h6 class="text-uppercase fw-bold mb-0" style="color: var(--neon-blue); font-size: 0.85rem; letter-spacing: 1px;">Resolución Administrativa</h6>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Estado del Reporte</label>
+                            <div class="form-control custom-field-readonly" style="color: @(Model.ESTADO_REPORTE == "Aprobado" ? "var(--neon-green)" : "var(--neon-red)") !important;">
+                                @Model.ESTADO_REPORTE
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Condición del Equipo</label>
+                            <div class="form-control custom-field-readonly">@Model.ESTADO_DISPOSITIVO_RECIBIDO</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Autorizado Por</label>
+                            <div class="form-control custom-field-readonly text-light">@Model.AUTORIZADO_POR_NOMBRE</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Acción Tomada</label>
+                            <div class="form-control custom-field-readonly" style="color: var(--text-main) !important;">
+                                @Model.ACCION_TOMADA
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            @if (Model.REGRESAR_INVENTARIO)
+                            {
+                                <div class="stock-panel p-4 rounded-3 d-flex align-items-center">
+                                    <div class="me-3 fs-3" style="color: var(--neon-yellow);">
+                                        <i class="bi bi-box-arrow-in-down"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-light">Reingresado a Inventario</h6>
+                                        <p class="mb-0 text-warning small">El equipo volvió al stock disponible y el IMEI fue liberado para una nueva venta.</p>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="p-4 rounded-3 d-flex align-items-center" style="background: rgba(255, 51, 102, 0.05); border: 1px solid rgba(255, 51, 102, 0.3);">
+                                    <div class="me-3 fs-3" style="color: var(--neon-red);">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-light">Baja Definitiva</h6>
+                                        <p class="mb-0 text-danger small">El equipo NO regresó al inventario disponible (Dañado/Garantía).</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization; // Agregado
+using Microsoft.AspNetCore.Authorization;
 using LogicaNegocio;
 using Entidades;
 
@@ -29,8 +29,12 @@ namespace Presentacion.Controllers
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
 
-                // Si es Admin, ve la tabla de gestión
-                if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Vendedor") || User.IsInRole("Auditor")))
+                // Verificamos de forma segura si el usuario está autenticado y tiene los roles
+                bool esAdminOGestor = User?.Identity?.IsAuthenticated == true &&
+                                     (User.IsInRole("Administrador") || User.IsInRole("Admin") ||
+                                      User.IsInRole("Vendedor") || User.IsInRole("Auditor"));
+
+                if (esAdminOGestor)
                 {
                     CargarListasDesplegables();
                     return View(lista); // Muestra la tabla CRUD
@@ -43,7 +47,10 @@ namespace Presentacion.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al listar productos: " + ex.Message;
-                return User.IsInRole("Administrador") ? View(new List<Producto>()) : View("Tienda", new List<Producto>());
+                // Devolvemos una lista vacía para que no se rompa la vista
+                return User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrador")
+                       ? View(new List<Producto>())
+                       : View("Tienda", new List<Producto>());
             }
         }
 
@@ -55,15 +62,12 @@ namespace Presentacion.Controllers
             {
                 return File(imagen, "image/jpeg");
             }
-            return File("~/img/no-image.png", "image/png");
+            return File("~/img/no-image.png", "image/png"); // Imagen por defecto si no tiene
         }
-
 
         // ==========================================
         // 💳 CHECKOUT / PAGAR: REQUIERE ESTAR LOGUEADO
         // ==========================================
-        // Como la clase tiene [Authorize], si no están logueados
-        // e intentan pagar, el sistema los mandará al Login solos.
         [HttpGet]
         public ActionResult Pagar()
         {
@@ -71,11 +75,9 @@ namespace Presentacion.Controllers
             return View();
         }
 
-
         // ==========================================
         // 🛠️ MANTENIMIENTO: SÓLO ADMINISTRADORES
         // ==========================================
-
         [Authorize(Roles = "Administrador,Admin")] // 🔒 Blindado solo para Admins
         public ActionResult Create()
         {
@@ -107,14 +109,14 @@ namespace Presentacion.Controllers
                 else
                 {
                     ViewBag.Error = "No se pudo registrar el producto en la base de datos.";
-                    CargarListasDesplegables();
+                    CargarListasDesplegables(oProducto.ID_CATEGORIA, oProducto.ID_MARCA);
                     return View(oProducto);
                 }
             }
             catch (Exception ex)
             {
                 ViewBag.Error = "Error SQL/Sistema: " + ex.Message;
-                CargarListasDesplegables();
+                CargarListasDesplegables(oProducto.ID_CATEGORIA, oProducto.ID_MARCA);
                 return View(oProducto);
             }
         }
@@ -124,6 +126,7 @@ namespace Presentacion.Controllers
         {
             try
             {
+                // OPTIMIZACIÓN: Solo buscamos el producto específico en lugar de cargar toda la base de datos
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
                 Producto productoAEditar = lista.FirstOrDefault(p => p.ID_PRODUCTO == id);
@@ -134,9 +137,7 @@ namespace Presentacion.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // ✅ CORRECCIÓN: Le pasamos tanto la Categoría como la Marca actual
                 CargarListasDesplegables(productoAEditar.ID_CATEGORIA, productoAEditar.ID_MARCA);
-
                 return View(productoAEditar);
             }
             catch (Exception ex)
@@ -163,6 +164,7 @@ namespace Presentacion.Controllers
                 }
                 else
                 {
+                    // Si no sube imagen, aseguramos que sea null para que la lógica de negocio no la sobreescriba en blanco
                     oProducto.IMAGEN = null;
                 }
 
@@ -199,22 +201,18 @@ namespace Presentacion.Controllers
             }
         }
 
-        // Agregamos un parámetro opcional idCategoriaActual para saber qué producto estamos editando
-        // --- MÉTODOS AUXILIARES ---
-
-        // Ahora recibe tanto la categoría como la marca actual (si las hay)
+        // ==========================================
+        // 🔧 MÉTODOS AUXILIARES
+        // ==========================================
         private void CargarListasDesplegables(int? idCategoriaActual = null, int? idMarcaActual = null)
         {
             try
             {
-                // 1. Cargar Marcas (AHORA CON FILTRO)
                 List<SelectListItem> listaMarcas = new List<SelectListItem>();
                 var marcas = _logicaMarca.Listar();
 
                 foreach (var marca in marcas)
                 {
-                    // Mostramos la marca SÓLO si está ACTIVA 
-                    // O si es la marca actual del producto que estamos editando
                     if (marca.ESTADO == true || (idMarcaActual.HasValue && marca.ID_MARCA == idMarcaActual.Value))
                     {
                         listaMarcas.Add(new SelectListItem
@@ -226,7 +224,6 @@ namespace Presentacion.Controllers
                 }
                 ViewBag.Marcas = listaMarcas;
 
-                // 2. Cargar Categorías
                 List<SelectListItem> listaCategorias = new List<SelectListItem>();
                 var categorias = _logicaCategoria.Listar();
 
@@ -255,27 +252,20 @@ namespace Presentacion.Controllers
             List<Producto> lista = new List<Producto>();
             foreach (DataRow row in dt.Rows)
             {
+                // Protegemos contra posibles valores nulos (DBNull) en la BD para evitar crasheos
                 lista.Add(new Producto
                 {
-                    ID_PRODUCTO = Convert.ToInt32(row["ID_PRODUCTO"]),
-                    ID_MARCA = Convert.ToInt32(row["ID_MARCA"]),
-
-                    // AGREGADO: ID_CATEGORIA
-                    // Usamos el operador "as" o DBNull para que no truene si viene nulo de la BD
+                    ID_PRODUCTO = row["ID_PRODUCTO"] != DBNull.Value ? Convert.ToInt32(row["ID_PRODUCTO"]) : 0,
+                    ID_MARCA = row["ID_MARCA"] != DBNull.Value ? Convert.ToInt32(row["ID_MARCA"]) : 0,
                     ID_CATEGORIA = row["ID_CATEGORIA"] != DBNull.Value ? Convert.ToInt32(row["ID_CATEGORIA"]) : 0,
-
-                    MODELO = row["MODELO"].ToString(),
-                    DESCRIPCION = row["DESCRIPCION"].ToString(),
-
-                    // AGREGADO: CARACTERÍSTICAS
+                    MODELO = row["MODELO"]?.ToString() ?? "",
+                    DESCRIPCION = row["DESCRIPCION"]?.ToString() ?? "",
                     CARACTERISTICAS = row.Table.Columns.Contains("CARACTERISTICAS") && row["CARACTERISTICAS"] != DBNull.Value
                                         ? row["CARACTERISTICAS"].ToString()
                                         : "",
-
-                    PRECIO = Convert.ToDecimal(row["PRECIO"]),
-                    EXISTENCIAS = Convert.ToInt32(row["EXISTENCIAS"]),
-                    ESTADO = Convert.ToBoolean(row["ESTADO"]),
-                    // FECHA_CREACION = Convert.ToDateTime(row["FECHA_CREACION"]) 
+                    PRECIO = row["PRECIO"] != DBNull.Value ? Convert.ToDecimal(row["PRECIO"]) : 0m,
+                    EXISTENCIAS = row["EXISTENCIAS"] != DBNull.Value ? Convert.ToInt32(row["EXISTENCIAS"]) : 0,
+                    ESTADO = row["ESTADO"] != DBNull.Value && Convert.ToBoolean(row["ESTADO"])
                 });
             }
             return lista;
