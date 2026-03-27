@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using LogicaNegocio;
 using Entidades;
+using Presentacion.Reportes; // El namespace de tu nueva carpeta
+using QuestPDF.Fluent;
 
 namespace Presentacion.Controllers
 {
@@ -51,6 +53,39 @@ namespace Presentacion.Controllers
                 return User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrador")
                        ? View(new List<Producto>())
                        : View("Tienda", new List<Producto>());
+            }
+        }
+
+        [AllowAnonymous]
+        public ActionResult FiltrarPorNombre(string nombre)
+        {
+            try
+            {
+                // Si el usuario borra todo y da clic en buscar, podrías redirigir al Index normal
+                if (string.IsNullOrEmpty(nombre))
+                {
+                    return RedirectToAction("Index");
+                }
+
+                DataTable dt = _logicaProducto.BuscarProductoPorNombre(nombre);
+                List<Producto> lista = ConvertirDataTableALista(dt);
+
+                ViewBag.BusquedaActual = nombre; // Esto mantiene el texto en el buscador
+                CargarListasDesplegables();
+
+                if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Vendedor") || User.IsInRole("Auditor")))
+                {
+                    return View("Index", lista);
+                }
+                else
+                {
+                    return View("Tienda", lista);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al filtrar: " + ex.Message;
+                return RedirectToAction("Index");
             }
         }
 
@@ -270,5 +305,32 @@ namespace Presentacion.Controllers
             }
             return lista;
         }
-    }
+
+        [HttpGet]
+        public IActionResult DescargarPdf()
+        {
+            try
+            {
+                // 1. Obtenemos los datos (lista completa ya que no hay filtro aún)
+                DataTable dt = _logicaProducto.ListarProductos();
+                List<Producto> lista = ConvertirDataTableALista(dt);
+
+                // 2. Si la lista es nula, inicializamos para evitar errores
+                if (lista == null) lista = new List<Producto>();
+
+                // 3. Generamos el reporte (crearemos esta clase a continuación)
+                var documento = new ProductoReporte(lista);
+
+                // 4. Convertimos a bytes y retornamos el stream
+                byte[] pdfBytes = documento.GeneratePdf();
+                var stream = new MemoryStream(pdfBytes);
+
+                return File(stream, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al generar reporte de inventario: " + ex.Message);
+            }
+        }
+        }
 }
