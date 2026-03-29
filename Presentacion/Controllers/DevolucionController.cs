@@ -4,11 +4,11 @@ using LogicaNegocio;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq; // <-- ¡ESTA ES LA LIBRERÍA QUE FALTABA!
+using System.Linq;
 
 namespace Presentacion.Controllers
 {
-    [AllowAnonymous]
+    // Bloqueamos todo el controlador por defecto solo para estos roles
     [Authorize(Roles = "Administrador,Vendedor")]
     public class DevolucionController : Controller
     {
@@ -33,43 +33,22 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 2. GET: Muestra el formulario para crear devolución
-        // ========================================================
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View(new Devolucion());
-        }
-
-        // ========================================================
-        // 3. POST: El cliente envía su reporte
-        // ========================================================
-        // ========================================================
-        // 3. POST: El cliente envía su reporte
+        // 2. POST: El cliente envía su reporte (Accesible para todos)
         // ========================================================
         [HttpPost]
-        public IActionResult Create([FromBody] DevolucionRequest request) // Usamos una clase pequeña para recibir el JSON
+        [AllowAnonymous] // <-- Solo este método es público para que el cliente reporte
+        public IActionResult Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE)
         {
             try
             {
-                // Validación de seguridad básica
-                if (request == null || request.ID_DETALLE_PEDIDO <= 0)
+                if (ID_DETALLE_PEDIDO <= 0)
                 {
-                    return Json(new { exito = false, mensaje = "Datos inválidos enviados al servidor." });
+                    return Json(new { exito = false, mensaje = "ID de producto inválido." });
                 }
 
-                // Llamamos a tu lógica
-                bool respuesta = _logicaDevolucion.Crear(request.ID_DETALLE_PEDIDO, request.MOTIVO_CLIENTE, out string mensajeRespuesta);
+                bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, out string mensajeRespuesta);
 
-                if (respuesta)
-                {
-                    // Devolvemos JSON para que Javascript lo atrape sin recargar la página
-                    return Json(new { exito = true, mensaje = mensajeRespuesta });
-                }
-                else
-                {
-                    return Json(new { exito = false, mensaje = mensajeRespuesta });
-                }
+                return Json(new { exito = respuesta, mensaje = mensajeRespuesta });
             }
             catch (Exception ex)
             {
@@ -78,14 +57,13 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 4. POST: El Admin aprueba o rechaza (NUEVO)
+        // 3. POST: El Admin aprueba o rechaza 
         // ========================================================
         [HttpPost]
         public IActionResult Procesar(Devolucion devolucionAdmin)
         {
             try
             {
-                // Obtenemos el ID del Admin que está conectado actualmente.
                 var claimId = User.Claims.FirstOrDefault(c => c.Type == "IdUsuario")?.Value;
                 if (claimId != null)
                 {
@@ -93,7 +71,6 @@ namespace Presentacion.Controllers
                 }
                 else
                 {
-                    // Si por alguna razón no hay sesión, le ponemos un usuario por defecto
                     devolucionAdmin.ID_USUARIO_AUTORIZA = 1;
                 }
 
@@ -118,14 +95,13 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 5. GET: Detalles de la Devolución (SOLO LECTURA)
+        // 4. GET: Detalles de la Devolución (SOLO LECTURA)
         // ========================================================
         [HttpGet]
         public IActionResult Details(int id)
         {
             try
             {
-                // Traemos todas y filtramos por el ID 
                 var devolucion = _logicaDevolucion.Listar().FirstOrDefault(d => d.ID_DEVOLUCION == id);
 
                 if (devolucion == null)
@@ -142,13 +118,5 @@ namespace Presentacion.Controllers
                 return RedirectToAction("Index");
             }
         }
-    }
-
-    // CLASE AUXILIAR: Pon esto al final de tu archivo DevolucionController.cs, 
-    // antes de la última llave }
-    public class DevolucionRequest
-    {
-        public int ID_DETALLE_PEDIDO { get; set; }
-        public string MOTIVO_CLIENTE { get; set; }
     }
 }

@@ -1,86 +1,117 @@
 ﻿@model IEnumerable<Entidades.Producto>
 
 @{
-    ViewData["Title"] = "YuNet Store - Catálogo";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Catálogo de Equipos";
 }
 
 <style>
     /* ==========================================
-                   1. GRID FLUIDO (Catálogo a pantalla completa)
-                   ========================================== */
+           VARIABLES NEÓN (Heredadas del Home / Pedidos)
+           ========================================== */
+    :root {
+        --neon-blue-base: #00D4FF;
+        --neon-blue-glow: rgba(0, 212, 255, 0.4);
+        --neon-blue-tint: rgba(0, 212, 255, 0.1);
+        --neon-green: #00FF7F;
+        --neon-red: #ff3366;
+        --neon-yellow: #ffcc00;
+        --neon-purple: #C6C3F2;
+    }
+
+    /* ==========================================
+           GRID FLUIDO Y TARJETAS NEÓN
+           ========================================== */
     .grilla-fluida {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Tarjetas un poco más grandes para la tienda */
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
         gap: 2rem;
     }
 
-    /* Diseño Tech/Mobile Store Premium */
-    .tech-card {
-        background: var(--bg-card, #1C1C24);
-        border: 1px solid rgba(198, 195, 242, 0.1);
+    /* Calcado de tu .order-card */
+    .neon-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 16px;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         overflow: hidden;
         display: flex;
         flex-direction: column;
         height: 100%;
         position: relative;
+        color: var(--text-main);
     }
 
-        .tech-card:hover {
-            border-color: rgba(198, 195, 242, 0.5);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        .neon-card:hover {
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 10px 30px var(--neon-blue-glow);
             transform: translateY(-8px);
         }
 
     .tech-img-box {
         height: 220px;
-        background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%);
+        background-color: transparent;
+        border-bottom: 1px solid var(--border-color);
         padding: 2rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.4s;
+    }
+
+    .neon-card:hover .tech-img-box {
+        background-color: var(--neon-blue-tint);
+        border-bottom-color: rgba(0, 212, 255, 0.2);
     }
 
     .tech-img {
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+        filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3));
         transition: transform 0.5s ease;
     }
 
-    .tech-card:hover .tech-img {
+    .neon-card:hover .tech-img {
         transform: scale(1.12);
     }
 
-    .badge-premium {
+    /* Badges calcados de tu .status-badge */
+    .neon-badge {
         position: absolute;
         top: 15px;
         right: 15px;
-        /* Colores por defecto del badge de advertencia */
-        background: rgba(255, 193, 7, 0.15);
-        color: #ffc107;
-        padding: 6px 14px;
-        border-radius: 20px;
+        font-weight: 700;
         font-size: 0.75rem;
-        font-weight: bold;
+        padding: 0.5em 1.2em;
+        border-radius: 8px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        z-index: 10;
         backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 193, 7, 0.3);
-        /* LAS DOS LÍNEAS MÁGICAS: */
-        z-index: 10; /* Obliga a la etiqueta a estar siempre por encima de la foto */
-        white-space: nowrap; /* Evita que el texto se rompa y deforme la etiqueta */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* Una pequeña sombra para que resalte más */
     }
 
-    .btn-tech {
-        background: linear-gradient(135deg, #20C997 0%, #16a085 100%);
-        color: #13131A;
-        border: none;
+        .neon-badge.agotado {
+            color: var(--neon-red);
+            background-color: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+        }
+
+        .neon-badge.alerta {
+            color: var(--neon-yellow);
+            background-color: rgba(255, 204, 0, 0.1);
+            border: 1px solid var(--neon-yellow);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+        }
+
+    /* Botón calcado de tu .action-btn.complete */
+    .btn-neon-cart {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
         border-radius: 10px;
         font-weight: 700;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
         width: 100%;
         padding: 10px;
         text-transform: uppercase;
@@ -88,129 +119,119 @@
         letter-spacing: 0.5px;
     }
 
-        .btn-tech:hover:not(:disabled) {
-            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.4);
+        .btn-neon-cart:hover:not(:disabled) {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background-color: rgba(0, 255, 127, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
             transform: scale(1.02);
         }
 
-        .btn-tech:disabled {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted, #6c757d);
+        .btn-neon-cart:disabled {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
             cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
+            opacity: 0.7;
         }
 
-    /* Toasts */
+    /* Buscador con estilo Neón */
+    .search-neon {
+        background-color: var(--bg-main);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        transition: all 0.3s;
+    }
+
+        .search-neon:focus-within {
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 0 15px var(--neon-blue-glow);
+        }
+
+        .search-neon input {
+            background-color: transparent !important;
+            color: var(--text-main) !important;
+            border: none;
+            box-shadow: none !important;
+        }
+
+            .search-neon input::placeholder {
+                color: var(--text-muted);
+            }
+
+    /* Toasts dinámicos */
     #toastContainer {
         position: fixed;
         bottom: 20px;
         right: 20px;
         z-index: 9999;
     }
-
-    .yunet-toast {
-        min-width: 280px;
-        background: #1C1C24;
-        border-left: 4px solid #20C997;
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        margin-top: 12px;
-        transform: translateX(150%);
-        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        display: flex;
-        align-items: center;
-    }
-
-        .yunet-toast.show {
-            transform: translateX(0);
-        }
 </style>
 
-<div class="container mt-4 pb-5">
+<div class="container-fluid container-xl py-4 pb-5">
 
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(45deg, #13131A, #1C1C24); border: 1px solid rgba(198, 195, 242, 0.1);">
-                <div class="position-relative z-index-1">
-                    <span class="badge mb-2" style="background: rgba(32, 201, 151, 0.2); color: #20C997;">Nuevos Ingresos</span>
-                    <h2 class="fw-bold text-white mb-2">Descubre tu próximo <span style="color: #C6C3F2;">Smartphone</span></h2>
-                    <p style="color: var(--text-muted, #adb5bd); max-width: 500px;">Explora nuestra selección de terminales premium. La mejor tecnología al alcance de tu mano con garantía total.</p>
-                </div>
-                <div class="position-absolute rounded-circle" style="width: 300px; height: 300px; background: radial-gradient(circle, rgba(198,195,242,0.1) 0%, transparent 70%); top: -100px; right: -50px;"></div>
-                <div class="position-absolute rounded-circle" style="width: 200px; height: 200px; background: radial-gradient(circle, rgba(32,201,151,0.1) 0%, transparent 70%); bottom: -50px; right: 200px;"></div>
-            </div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <div class="premium-label mb-1" style="color: var(--neon-blue-base); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Tienda en línea</div>
+            <h2 class="h3 mb-1 fw-bold" style="color: var(--text-main);">Catálogo de Equipos</h2>
+            <p class="mb-0" style="color: var(--text-muted);">Descubre nuestra selección de terminales premium. La mejor tecnología al alcance de tu mano.</p>
+        </div>
+
+        <div class="search-neon d-flex align-items-center rounded-3 px-3 py-2" style="max-width: 400px; width: 100%;">
+            <i class="bi bi-search" style="color: var(--neon-blue-base);"></i>
+            <input type="text" class="form-control ms-2 py-1 px-0" placeholder="Buscar por marca o modelo...">
         </div>
     </div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-3 rounded-4" style="background-color: var(--bg-card, #1C1C24); border: 1px solid rgba(255,255,255,0.05);">
-        <div class="mb-3 mb-md-0">
-            <h5 class="fw-bold mb-0 text-white d-flex align-items-center">
-                <i class="bi bi-grid-fill me-2" style="color: #C6C3F2;"></i> Catálogo de Equipos
-            </h5>
-        </div>
-        <div class="input-group shadow-sm" style="max-width: 400px; border-radius: 10px; overflow: hidden;">
-            <span class="input-group-text bg-dark border-0 text-muted"><i class="bi bi-search"></i></span>
-            <input type="text" class="form-control bg-dark border-0 text-white shadow-none" placeholder="Buscar por marca o modelo...">
-        </div>
-    </div>
+    <div id="toastContainer"></div>
 
     <div class="grilla-fluida">
         @foreach (var item in Model)
         {
-            // Solo verificamos que el producto esté activo. Dejamos pasar los que tienen 0 existencias.
             if (item.ESTADO)
             {
                 string modeloJs = item.MODELO.Replace("'", "\\'");
 
-                <div class="tech-card">
+                <div class="neon-card">
 
-                    @* 1. LÓGICA DE BADGES (Etiquetas superiores) *@
+                    @* LÓGICA DE BADGES (Usa las clases Neón) *@
                     @if (item.EXISTENCIAS <= 0)
                     {
-                        // Si no hay stock, mostramos etiqueta roja
-                        <span class="badge-premium" style="background: rgba(220, 53, 69, 0.15); color: #dc3545; border-color: rgba(220, 53, 69, 0.3);">
-                            ¡Agotado!
-                        </span>
+                        <span class="neon-badge agotado">¡Agotado!</span>
                     }
                     else if (item.EXISTENCIAS <= 5)
                     {
-                        // Si queda poco, mostramos la etiqueta amarilla que ya tenías
-                        <span class="badge-premium">¡Últimas @item.EXISTENCIAS unidades!</span>
+                        <span class="neon-badge alerta">¡Últimas @item.EXISTENCIAS!</span>
                     }
 
                     <div class="tech-img-box">
                         <img src="@Url.Action("VerImagen", "Producto", new { id = item.ID_PRODUCTO })"
                              alt="@item.MODELO" class="tech-img @(item.EXISTENCIAS <= 0 ? "opacity-50" : "")"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                        <i class="bi bi-phone" style="font-size: 5rem; color: rgba(255,255,255,0.05); display: none;"></i>
+                        <i class="bi bi-phone" style="font-size: 5rem; color: var(--border-color); display: none;"></i>
                     </div>
 
                     <div class="card-body p-4 d-flex flex-column flex-grow-1">
-                        <h5 class="fw-bold mb-1 text-white text-truncate" title="@item.MODELO">
+                        <h5 class="fw-bold mb-1 text-truncate" title="@item.MODELO" style="color: var(--neon-blue-base);">
                             @item.MODELO
                         </h5>
-                        <small class="mb-3" style="color: var(--text-muted, #adb5bd);">Envío gratis disponible</small>
+                        <small class="mb-3" style="color: var(--text-muted);">Envío gratis disponible</small>
 
                         <div class="mt-auto d-flex flex-column gap-3">
-                            <span class="fw-bold fs-4" style="color: #20C997;">
-                                $@item.PRECIO.ToString("N2")
+                            <span class="fw-bold fs-4" style="color: var(--text-main); letter-spacing: 0.5px;">
+                                C$ @item.PRECIO.ToString("N2")
                             </span>
 
-                            @* 2. LÓGICA DEL BOTÓN ESTILO AMAZON *@
+                            @* BOTÓN DE CARRITO *@
                             @if (item.EXISTENCIAS > 0)
                             {
-                                // Si hay inventario, botón verde funcional
-                                <button class="btn btn-tech" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs')">
+                                <button class="btn-neon-cart" onclick="agregarAlCarrito(@item.ID_PRODUCTO, '@modeloJs')">
                                     <i class="bi bi-cart-plus me-2"></i> Añadir al Carrito
                                 </button>
                             }
                             else
                             {
-                                // Si es 0, botón gris bloqueado
-                                <button class="btn btn-tech" disabled style="background: rgba(255, 255, 255, 0.05); color: #6c757d; cursor: not-allowed; opacity: 0.8;">
+                                <button class="btn-neon-cart" disabled>
                                     <i class="bi bi-x-circle me-2"></i> Sin Inventario
                                 </button>
                             }
@@ -222,16 +243,12 @@
     </div>
 </div>
 
-<div id="toastContainer"></div>
-
 @section Scripts {
     <script>
         function agregarAlCarrito(idProducto, modelo) {
-            // 1. Usamos FormData para que ASP.NET entienda los datos perfectamente
             let formData = new FormData();
-            formData.append("idProducto", idProducto); // Este nombre debe coincidir con el parámetro en tu Controller
+            formData.append("idProducto", idProducto);
 
-            // 2. Petición real al Controlador (AJAX / Fetch)
             fetch('/Carrito/Agregar', {
                 method: 'POST',
                 body: formData
@@ -242,50 +259,45 @@
             })
             .then(data => {
                 if (data.success) {
-                    // 2. Mostramos tu notificación visual (Toast)
-                    mostrarNotificacion(`¡<strong>${modelo}</strong> agregado a tu carrito!`);
+                    // Notificación usando el estilo de alerta de tus Pedidos
+                    mostrarNotificacionExito(`Producto <strong style="color: var(--neon-blue-base);">${modelo}</strong> agregado al carrito.`);
 
-                    // 3. Efecto visual divertido en el nav
                     let iconoNav = document.querySelector('.bi-cart3');
                     if(iconoNav) {
                         iconoNav.classList.add('bi-cart-fill');
                         iconoNav.classList.remove('bi-cart3');
-                        iconoNav.style.color = '#20C997';
+                        iconoNav.style.color = 'var(--neon-green)';
+                        iconoNav.style.filter = 'drop-shadow(0 0 10px rgba(0, 255, 127, 0.5))';
+
                         setTimeout(() => {
                             iconoNav.classList.remove('bi-cart-fill');
                             iconoNav.classList.add('bi-cart3');
                             iconoNav.style.color = '';
+                            iconoNav.style.filter = '';
                         }, 1000);
                     }
 
-                    // 4. Recargamos el HTML del carrito y lo abrimos
                     actualizarYAbrirOffcanvas();
 
                 } else {
-                    // Si algo falla en tu lógica (ej. no hay stock o error de validación)
-                    mostrarNotificacion(`Aviso: ${data.message}`, true);
+                    mostrarNotificacionError(data.message || 'Error al agregar al carrito.');
                 }
             })
             .catch(error => {
                 console.error("Error en la petición:", error);
-                mostrarNotificacion("Ocurrió un error al conectar con el servidor.", true);
+                mostrarNotificacionError("Ocurrió un error al conectar con el servidor.");
             });
         }
 
-        // Función para traer el HTML actualizado del carrito y mostrar el panel
         function actualizarYAbrirOffcanvas() {
-            // Nota: Si el método ObtenerResumen no existe en tu controlador,
-            // esta función dará error silencioso en consola pero el producto sí se guardará.
             fetch('/Carrito/ObtenerResumen')
                 .then(response => response.text())
                 .then(html => {
-                    // Inyecta el HTML en el contenedor del layout
                     let contenedor = document.getElementById('contenedorCarrito');
                     if(contenedor) {
                         contenedor.innerHTML = html;
                     }
 
-                    // Abrimos el Offcanvas de Bootstrap 5
                     let offcanvasElement = document.getElementById('offcanvasCarrito');
                     if(offcanvasElement) {
                         let bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
@@ -295,27 +307,42 @@
                 .catch(error => console.error("Error actualizando el offcanvas:", error));
         }
 
-        function mostrarNotificacion(mensaje, esError = false) {
+        // Calqué la misma estructura HTML de las alertas que usaste en Pedidos
+        function mostrarNotificacionExito(mensaje) {
             const container = document.getElementById("toastContainer");
-            const toast = document.createElement("div");
+            const toastHtml = `
+                <div class="alert shadow-lg alert-dismissible fade show mb-2" style="background-color: var(--bg-card); border: 1px solid var(--neon-green); border-left: 4px solid var(--neon-green); color: var(--text-main); box-shadow: 0 0 15px rgba(0, 255, 127, 0.2);">
+                    <i class="bi bi-check-circle-fill me-2 fs-5 align-middle" style="color: var(--neon-green);"></i>
+                    <span class="align-middle">${mensaje}</span>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>`;
 
-            // Cambiamos el color e icono dependiendo si es un éxito o un error
-            let color = esError ? "#E83E8C" : "#20C997";
-            let icono = esError ? "bi-x-circle-fill" : "bi-check-circle-fill";
+            insertarYDestruirToast(container, toastHtml);
+        }
 
-            toast.className = "yunet-toast";
-            toast.style.borderLeftColor = color;
-            toast.innerHTML = `<i class="bi ${icono} me-3 fs-4" style="color: ${color};"></i> <span style="font-size: 0.95rem;">${mensaje}</span>`;
+        function mostrarNotificacionError(mensaje) {
+            const container = document.getElementById("toastContainer");
+            const toastHtml = `
+                <div class="alert shadow-lg alert-dismissible fade show mb-2" style="background-color: var(--bg-card); border: 1px solid var(--neon-red); border-left: 4px solid var(--neon-red); color: var(--text-main); box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle" style="color: var(--neon-red);"></i>
+                    <span class="align-middle">${mensaje}</span>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>`;
 
+            insertarYDestruirToast(container, toastHtml);
+        }
+
+        function insertarYDestruirToast(container, html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const toast = tempDiv.firstElementChild;
             container.appendChild(toast);
 
-            // Animación de entrada
-            setTimeout(() => toast.classList.add("show"), 10);
-
-            // Animación de salida y destrucción del elemento
             setTimeout(() => {
-                toast.classList.remove("show");
-                setTimeout(() => toast.remove(), 400);
+                if (toast.parentNode) {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 200);
+                }
             }, 3500);
         }
     </script>

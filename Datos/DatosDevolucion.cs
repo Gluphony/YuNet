@@ -98,6 +98,7 @@ namespace Datos
         }
 
         // 3. PROCESAR DEVOLUCIÓN (Para el Admin)
+        // 3. PROCESAR DEVOLUCIÓN (Para el Admin)
         public bool ProcesarAdmin(Devolucion devolucion)
         {
             bool respuesta = false;
@@ -114,19 +115,21 @@ namespace Datos
                     cmd.Parameters.AddWithValue("@Estado_Dispositivo_Recibido", devolucion.ESTADO_DISPOSITIVO_RECIBIDO ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Accion_Tomada", devolucion.ACCION_TOMADA ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@Regresar_Inventario", devolucion.REGRESAR_INVENTARIO);
-
-                    // Asegúrate de enviar el nuevo estado (ej: 'Aprobado', 'Rechazado')
                     cmd.Parameters.AddWithValue("@Estado_Reporte", devolucion.ESTADO_REPORTE ?? (object)DBNull.Value);
 
                     conexion.Open();
-                    int filasAfectadas = cmd.ExecuteNonQuery();
 
-                    if (filasAfectadas > 0)
-                        respuesta = true;
+                    // Simplemente ejecutamos el comando. 
+                    // Si el SP falla, SQL Server lanzará un error que será atrapado por el "catch" abajo.
+                    cmd.ExecuteNonQuery();
+
+                    // Si llegamos a esta línea sin errores, el SP fue un éxito.
+                    respuesta = true;
                 }
             }
             catch (Exception ex)
             {
+                // Solo entraremos aquí si SQL lanza un error real (ej. foreign key, timeout, rollback en el SP)
                 throw new Exception("Error al procesar la devolución: " + ex.Message);
             }
 

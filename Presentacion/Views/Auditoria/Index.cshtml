@@ -4,59 +4,216 @@
 }
 
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0 text-dark">Auditoría del Sistema</h3>
-        <p class="text-muted mb-0">Registro histórico de acciones y eventos</p>
-    </div>
+<style>
+    /* =========================================
+           ESTILOS DEL DARK THEME (Basado en tus fotos)
+           ========================================= */
+    body {
+        background-color: #0b0f19; /* Fondo principal oscuro */
+        color: #e2e8f0;
+    }
+
+    /* Textos y Acentos */
+    .text-cyan {
+        color: #00d4ff !important;
+    }
+
+    .text-muted-dark {
+        color: #829ab1 !important;
+    }
+
+    /* Tarjetas personalizadas */
+    .custom-card {
+        background-color: #1a202c; /* Fondo de tarjeta */
+        border: 1px solid #2d3748;
+        border-top: 3px solid #00d4ff; /* Borde superior neón */
+        border-radius: 0.5rem;
+    }
+
+    /* Inputs de Formulario (Dark) */
+    .form-control-dark {
+        background-color: #0b0f19;
+        border: 1px solid #2d3748;
+        color: #e2e8f0;
+    }
+
+        .form-control-dark:focus {
+            background-color: #0b0f19;
+            border-color: #00d4ff;
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+        }
+    /* Icono del calendario en blanco para inputs type date */
+    ::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+
+    /* Botones personalizados */
+    .btn-cyan {
+        background-color: transparent;
+        border: 1px solid #00d4ff;
+        color: #00d4ff;
+        transition: all 0.3s;
+    }
+
+        .btn-cyan:hover {
+            background-color: #00d4ff;
+            color: #0b0f19;
+        }
+
+    .btn-outline-danger-dark {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        color: #ff6b81;
+    }
+
+        .btn-outline-danger-dark:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+    /* Tabla y DataTables Dark Mode Fixes */
+    .custom-table {
+        color: #e2e8f0;
+        border-color: #2d3748;
+    }
+
+        .custom-table thead th {
+            background-color: transparent;
+            color: #829ab1;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #2d3748;
+            font-weight: 600;
+            padding-bottom: 1rem;
+        }
+
+        .custom-table tbody td {
+            background-color: transparent !important;
+            border-bottom: 1px solid #2d3748;
+            vertical-align: middle;
+            padding: 1rem 0.5rem;
+        }
+
+    /* Arreglos para la paginación y búsqueda de DataTables en Dark Mode */
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        background-color: #0b0f19;
+        border: 1px solid #2d3748;
+        color: white;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .page-item.active .page-link {
+        background-color: #00d4ff;
+        border-color: #00d4ff;
+        color: #0b0f19;
+    }
+
+    .page-item .page-link {
+        background-color: #1a202c;
+        border-color: #2d3748;
+        color: #e2e8f0;
+    }
+
+    /* Badges translúcidos */
+    .badge-glass {
+        border-radius: 50rem;
+        padding: 0.4em 0.8em;
+        font-weight: 500;
+        border: 1px solid transparent;
+    }
+
+    .glass-success {
+        background: rgba(25, 135, 84, 0.15);
+        color: #4ade80;
+        border-color: rgba(74, 222, 128, 0.3);
+    }
+
+    .glass-warning {
+        background: rgba(255, 193, 7, 0.15);
+        color: #fbbf24;
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .glass-danger {
+        background: rgba(220, 53, 69, 0.15);
+        color: #f87171;
+        border-color: rgba(248, 113, 113, 0.3);
+    }
+
+    .glass-info {
+        background: rgba(13, 202, 240, 0.15);
+        color: #38bdf8;
+        border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .glass-secondary {
+        background: rgba(108, 117, 125, 0.15);
+        color: #94a3b8;
+        border-color: rgba(148, 163, 184, 0.3);
+    }
+</style>
+
+<div class="mb-4 pt-3">
+    <h6 class="text-cyan fw-bold mb-1 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">MÓDULO DE SEGURIDAD</h6>
+    <h2 class="fw-bold mb-0 text-white">Listado de Auditoría</h2>
+    <p class="text-muted-dark mb-0">Historial de acciones y eventos realizados en el sistema</p>
 </div>
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
+<div class="card custom-card shadow-sm mb-4">
+    <div class="card-body p-4">
         <form asp-controller="Auditoria" method="post" class="row align-items-end">
             <div class="col-md-3 mb-3 mb-md-0">
-                <label class="form-label small fw-bold text-secondary">Fecha Inicio</label>
-                <input type="date" class="form-control" name="fechaInicio" value="@ViewBag.FechaInicio" required>
+                <label class="form-label small fw-bold text-muted-dark">Fecha Inicio</label>
+                <input type="date" class="form-control form-control-dark" name="fechaInicio" value="@ViewBag.FechaInicio" required>
             </div>
             <div class="col-md-3 mb-3 mb-md-0">
-                <label class="form-label small fw-bold text-secondary">Fecha Fin</label>
-                <input type="date" class="form-control" name="fechaFin" value="@ViewBag.FechaFin" required>
+                <label class="form-label small fw-bold text-muted-dark">Fecha Fin</label>
+                <input type="date" class="form-control form-control-dark" name="fechaFin" value="@ViewBag.FechaFin" required>
             </div>
 
-            <div class="col-md-6 d-flex gap-2">
-                <button type="submit" asp-action="FiltrarPorFecha" class="btn btn-primary w-50">
-                    <i class="bi bi-funnel"></i> Filtrar Registros
+            <div class="col-md-6 d-flex gap-3 justify-content-end">
+                <button type="submit" asp-action="FiltrarPorFecha" class="btn btn-cyan d-flex align-items-center gap-2 px-4">
+                    <i class="bi bi-search"></i> Filtrar Registros
                 </button>
 
-                <button type="submit" asp-action="ExportarPDF" class="btn btn-danger w-50">
-                    <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
+                <button type="submit" asp-action="ExportarPDF" class="btn btn-outline-danger-dark d-flex align-items-center gap-2 px-4">
+                    <i class="bi bi-filetype-pdf"></i> Exportar PDF
                 </button>
             </div>
         </form>
 
         @if (ViewBag.Error != null)
         {
-            <div class="text-danger mt-3 small fw-bold">
-                <i class="bi bi-exclamation-triangle"></i> @ViewBag.Error
+            <div class="alert alert-danger mt-3 mb-0 d-flex align-items-center bg-danger bg-opacity-10 border-danger text-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
             </div>
         }
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table id="tablaAuditoria" class="table table-hover table-striped w-100 align-middle">
-                <thead class="table-dark">
+<div class="card custom-card shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3 text-cyan">
+            <i class="bi bi-arrow-repeat me-2"></i>
+            <span class="fw-bold">Registros de Actividad</span>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table id="tablaAuditoria" class="table custom-table w-100">
+                <thead>
                     <tr>
-                        <th># ID</th>
-                        <th>Fecha y Hora</th>
-                        <th>Usuario</th>
-                        <th>Acción</th>
-                        <th>Tabla</th>
-                        <th>Detalle</th>
-                        <th>IP</th>
+                        <th style="width: 8%"># ID</th>
+                        <th style="width: 15%">FECHA Y HORA</th>
+                        <th style="width: 15%">USUARIO</th>
+                        <th style="width: 12%">ACCIÓN</th>
+                        <th style="width: 15%">TABLA</th>
+                        <th style="width: 25%">DETALLE</th>
+                        <th style="width: 10%">IP</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,9 +222,12 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="text-muted small">@item.ID_AUDITORIA</td>
-                                <td>@item.FECHA_REGISTRO.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                                <td class="fw-bold text-primary">@item.NOMBRE_USUARIO</td>
+                                <td class="text-muted-dark fw-bold">#@item.ID_AUDITORIA</td>
+                                <td class="text-light">
+                                    <div class="small">@item.FECHA_REGISTRO.ToString("dd MMM, yyyy")</div>
+                                    <div class="text-cyan small">@item.FECHA_REGISTRO.ToString("HH:mm:ss")</div>
+                                </td>
+                                <td class="fw-bold text-white">@item.NOMBRE_USUARIO</td>
                                 <td>
                                     @{
                                         string accionFiltro = (item.ACCION ?? "").ToUpper();
@@ -75,28 +235,28 @@
 
                                     @if (accionFiltro == "INSERT")
                                     {
-                                        <span class="badge bg-success">Creación</span>
+                                        <span class="badge-glass glass-success"><i class="bi bi-plus-circle me-1"></i> Creación</span>
                                     }
                                     else if (accionFiltro == "UPDATE")
                                     {
-                                        <span class="badge bg-warning text-dark">Edición</span>
+                                        <span class="badge-glass glass-warning"><i class="bi bi-pencil-square me-1"></i> Edición</span>
                                     }
                                     else if (accionFiltro == "DELETE")
                                     {
-                                        <span class="badge bg-danger">Eliminación</span>
+                                        <span class="badge-glass glass-danger"><i class="bi bi-trash3 me-1"></i> Eliminación</span>
                                     }
                                     else if (accionFiltro == "LOGIN")
                                     {
-                                        <span class="badge bg-info text-dark">Acceso</span>
+                                        <span class="badge-glass glass-info"><i class="bi bi-box-arrow-in-right me-1"></i> Acceso</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">@(string.IsNullOrEmpty(item.ACCION) ? "Desconocida" : item.ACCION)</span>
+                                        <span class="badge-glass glass-secondary">@(string.IsNullOrEmpty(item.ACCION) ? "Desconocida" : item.ACCION)</span>
                                     }
                                 </td>
-                                <td><code>@item.TABLA_AFECTADA</code></td>
-                                <td class="small">@item.DETALLE_ACTIVIDAD</td>
-                                <td class="small text-muted">@item.DIRECCION_IP</td>
+                                <td><code class="text-cyan bg-dark px-2 py-1 rounded border border-secondary">@item.TABLA_AFECTADA</code></td>
+                                <td class="small text-light">@item.DETALLE_ACTIVIDAD</td>
+                                <td class="small text-muted-dark">@item.DIRECCION_IP</td>
                             </tr>
                         }
                     }
@@ -108,7 +268,6 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
@@ -118,9 +277,33 @@
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                "order": [[0, "desc"]],
-                "pageLength": 10
+                "order": [[0, "desc"]], // Ordena por el ID de forma descendente (los más nuevos primero)
+                "pageLength": 10,
+                // Quitar los bordes feos de DataTables por defecto
+                "dom": "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row mt-3'<'col-sm-12 col-md-5 text-muted-dark small'i><'col-sm-12 col-md-7'p>>"
             });
+        });
+
+                $("#btnExportar").click(function() {
+            // Crear un formulario temporal
+            var form = $('<form></form>');
+            form.attr("method", "post");
+            form.attr("action", "/Auditoria/ExportarPDF"); // Ajusta a tu Ruta/Controlador
+
+            // Obtener valores de tus inputs actuales
+            var fechaInicio = $("input[name='fechaInicio']").val();
+            var fechaFin = $("input[name='fechaFin']").val();
+
+            // Añadir los campos al formulario temporal
+            form.append('<input type="hidden" name="fechaInicio" value="' + fechaInicio + '" />');
+            form.append('<input type="hidden" name="fechaFin" value="' + fechaFin + '" />');
+
+            // Enviarlo
+            $(document.body).append(form);
+            form.submit();
+            form.remove();
         });
     </script>
 }

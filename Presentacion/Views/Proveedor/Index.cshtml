@@ -3,45 +3,134 @@
     ViewData["Title"] = "Gestión de Proveedores";
 }
 
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+@section Styles {
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <style>
+        /* ==========================================
+                   ADAPTACIÓN DE DATATABLES AL TEMA YUNET
+                   ========================================== */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: var(--text-main) !important;
+            margin-bottom: 1rem;
+            margin-top: 0.5rem;
+        }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0 text-dark">Proveedores</h3>
-        <p class="text-muted mb-0">Administración del catálogo de proveedores</p>
+            .dataTables_wrapper .dataTables_filter input {
+                background-color: var(--hover-bg);
+                border: 1px solid var(--border-color);
+                color: var(--text-main);
+                border-radius: 8px;
+                padding: 0.4rem 0.8rem;
+                transition: all 0.3s ease;
+            }
+
+                .dataTables_wrapper .dataTables_filter input:focus {
+                    outline: none;
+                    border-color: var(--tech-primary);
+                    box-shadow: 0 0 0 3px var(--tech-glow);
+                    background-color: var(--bg-card);
+                }
+
+            .dataTables_wrapper .dataTables_length select {
+                background-color: var(--hover-bg);
+                border: 1px solid var(--border-color);
+                color: var(--text-main);
+                border-radius: 6px;
+                padding: 0.2rem 1rem 0.2rem 0.5rem;
+            }
+
+        /* Paginación */
+        .page-item.active .page-link {
+            background-color: var(--tech-primary);
+            border-color: var(--tech-primary);
+            box-shadow: 0 4px 10px var(--tech-glow);
+        }
+
+        .page-link {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+            .page-link:hover {
+                background-color: var(--hover-bg);
+                color: var(--tech-accent);
+            }
+
+        /* Tabla YuNet */
+        .table-yunet th {
+            background-color: var(--hover-bg) !important;
+            color: var(--text-muted) !important;
+            border-bottom: 2px solid var(--border-color) !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+        }
+
+        .table-yunet td {
+            background-color: transparent !important;
+            color: var(--text-main) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 1rem;
+        }
+
+        .table-yunet tbody tr {
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+            .table-yunet tbody tr:hover {
+                background-color: var(--hover-bg) !important;
+            }
+    </style>
+}
+
+<div class="container-fluid px-0 mb-4 mt-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--text-main);">
+                <i class="bi bi-truck me-2" style="color: var(--tech-primary);"></i>Proveedores
+            </h2>
+            <p class="mb-0" style="color: var(--text-muted);">Administración del catálogo de socios comerciales y distribuidores</p>
+        </div>
+        <a href="/Proveedor/Crear" class="btn text-white click-anim shadow" style="background: linear-gradient(135deg, var(--tech-primary) 0%, var(--tech-accent) 100%); border: none; border-radius: 10px; padding: 0.6rem 1.2rem; font-weight: 600;">
+            <i class="bi bi-plus-lg me-2"></i>Nuevo Proveedor
+        </a>
     </div>
-    <a href="/Proveedor/Crear" class="btn btn-primary shadow-sm">
-        <i class="bi bi-plus-lg me-1"></i> Nuevo Proveedor
-    </a>
 </div>
 
 @if (TempData["MensajeExito"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert" style="background-color: rgba(25, 135, 84, 0.1); color: #198754; border-radius: 12px;">
         <i class="bi bi-check-circle-fill me-2"></i> @TempData["MensajeExito"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 @if (TempData["MensajeError"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 12px;">
         <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["MensajeError"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
+<div class="card shadow-lg border-0" style="background-color: var(--bg-card); border-radius: 15px;">
+    <div class="card-body p-4">
         <div class="table-responsive">
-            <table id="tablaProveedores" class="table table-hover table-striped w-100 align-middle">
-                <thead class="table-dark">
+            <table id="tablaProveedores" class="table table-yunet align-middle w-100">
+                <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="rounded-start">ID</th>
                         <th>Razón Social</th>
                         <th>Contacto</th>
                         <th>Correo</th>
                         <th>Estado</th>
-                        <th class="text-center">Acciones</th>
+                        <th class="text-center rounded-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,34 +139,51 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="text-muted fw-bold">@item.ID_PROVEEDOR</td>
-                                <td class="fw-bold text-dark">@item.RAZON_SOCIAL</td>
-                                <td>@item.NOMBRE_CONTACTO</td>
-                                <td><a href="mailto:@item.CORREO" class="text-decoration-none">@item.CORREO</a></td>
+                                <td style="color: var(--text-muted); font-weight: 600;">#@item.ID_PROVEEDOR</td>
+                                <td class="fw-bold" style="color: var(--text-main);">@item.RAZON_SOCIAL</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-circle shadow-sm me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                            @(string.IsNullOrEmpty(item.NOMBRE_CONTACTO) ? "?" : item.NOMBRE_CONTACTO.Substring(0, 1).ToUpper())
+                                        </div>
+                                        @item.NOMBRE_CONTACTO
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="mailto:@item.CORREO" class="text-decoration-none" style="color: var(--tech-accent);">
+                                        <i class="bi bi-envelope me-1"></i>@item.CORREO
+                                    </a>
+                                </td>
                                 <td>
                                     @if (item.ESTADO)
                                     {
-                                        <span class="badge bg-success">Activo</span>
+                                        <span class="badge" style="background-color: rgba(25, 135, 84, 0.15); color: #20c997; padding: 0.5rem 0.8rem; border-radius: 8px;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Activo
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">Inactivo</span>
+                                        <span class="badge" style="background-color: rgba(220, 53, 69, 0.15); color: #ea868f; padding: 0.5rem 0.8rem; border-radius: 8px;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inactivo
+                                        </span>
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <a href="/Proveedor/Editar/@item.ID_PROVEEDOR" class="btn btn-sm btn-outline-primary" title="Editar">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="/Proveedor/Editar/@item.ID_PROVEEDOR" class="btn btn-sm click-anim" style="background-color: var(--hover-bg); color: var(--tech-primary); border: 1px solid var(--border-color); border-radius: 8px;" title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
 
-                                    @if (item.ESTADO)
-                                    {
-                                        <form action="/Proveedor/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar este proveedor?');">
-                                            <input type="hidden" name="id" value="@item.ID_PROVEEDOR" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Desactivar">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    }
+                                        @if (item.ESTADO)
+                                        {
+                                            <form action="/Proveedor/Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar este proveedor?');">
+                                                <input type="hidden" name="id" value="@item.ID_PROVEEDOR" />
+                                                <button type="submit" class="btn btn-sm click-anim" style="background-color: var(--hover-bg); color: #ea868f; border: 1px solid var(--border-color); border-radius: 8px;" title="Desactivar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -99,8 +205,13 @@
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                "order": [[1, "asc"]], // Ordenar por Razón Social alfabéticamente
-                "pageLength": 10
+                "order": [[1, "asc"]],
+                "pageLength": 10,
+                "dom": '<"row align-items-center justify-content-between mb-3"<"col-md-auto"l><"col-md-auto"f>>rt<"row align-items-center justify-content-between mt-3"<"col-md-auto"i><"col-md-auto"p>>',
+                "drawCallback": function() {
+                    // Re-aplicar clases de animación a los botones al paginar
+                    $('.paginate_button').addClass('click-anim');
+                }
             });
         });
     </script>

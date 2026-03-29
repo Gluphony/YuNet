@@ -5,135 +5,205 @@
 }
 
 <style>
+    /* VARIABLES GLOBALES Y UTILITARIAS (Mantenemos tu paleta neón para compatibilidad) */
     :root {
         --neon-blue: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.3);
         --neon-green: #00FF7F;
         --neon-red: #FF3366;
-        /* Asumiendo variables de tu layout general */
+        --neon-yellow: #FFCC00;
+        --neon-yellow-glow: rgba(255, 204, 0, 0.2);
+        /* Paleta base del diseño limpio */
         --bg-main: #0f0f1a;
         --bg-card: #1a1a2e;
         --border-color: #2a2a4a;
         --text-main: #ffffff;
         --text-muted: #8b8b9f;
+        --hover-bg: rgba(0, 212, 255, 0.05);
+        --tech-accent: #00D4FF; /* Usamos el neón azul como acento principal */
+        --tech-glow: rgba(0, 212, 255, 0.2);
     }
 
-    /* Card Principal */
+    /* Tarjeta principal */
     .dev-card {
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-color) !important;
-        border-top: 4px solid var(--neon-blue) !important;
-        border-radius: 16px;
-        transition: all 0.4s ease;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    /* Botón de Acción Principal */
-    .btn-neon-add {
-        background: var(--neon-blue);
-        color: #000 !important;
-        font-weight: 700;
-        border: none;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 15px var(--neon-blue-glow);
+    /* Encabezado azul de la tarjeta */
+    .dev-card-header {
+        border-bottom: 2px solid var(--tech-accent);
+        padding: 1rem 1.5rem;
     }
 
-        .btn-neon-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px var(--neon-blue-glow);
-            opacity: 0.9;
-        }
-
-    /* Estilos de Tabla */
-    .table-neon {
-        color: var(--text-main);
+    /* Tabla Personalizada Adaptada */
+    .table-custom {
+        margin-bottom: 0;
+        --bs-table-bg: transparent;
     }
 
-        .table-neon thead th {
-            border-bottom: 2px solid var(--border-color) !important;
-            color: var(--text-muted) !important;
-            font-size: 0.75rem;
+        .table-custom th {
+            color: var(--text-muted);
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            background-color: transparent;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
         }
 
-        .table-neon tbody tr {
-            transition: all 0.3s ease;
+        .table-custom td {
+            color: var(--text-main);
+            vertical-align: middle;
             border-bottom: 1px solid var(--border-color);
+            background-color: transparent;
+            padding: 1rem 1.5rem;
         }
 
-            .table-neon tbody tr:hover {
-                background-color: rgba(0, 212, 255, 0.03) !important;
-                box-shadow: inset 4px 0 0 var(--neon-blue);
+        .table-custom tbody tr {
+            transition: all 0.3s ease;
+        }
+
+            .table-custom tbody tr:hover td {
+                background-color: var(--hover-bg);
+                box-shadow: inset 4px 0 0 var(--tech-accent);
             }
 
-    /* Badges de Inventario / Estado */
-    .badge-stock-yes {
-        background: rgba(0, 255, 127, 0.1) !important;
-        color: var(--neon-green) !important;
-        border: 1px solid var(--neon-green) !important;
-        box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
-    }
-
-    .badge-stock-no {
-        background: rgba(255, 51, 102, 0.1) !important;
-        color: var(--neon-red) !important;
-        border: 1px solid var(--neon-red) !important;
-        box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
-    }
-
-    .badge-pendiente {
-        background: rgba(255, 193, 7, 0.1) !important;
-        color: #ffc107 !important;
-        border: 1px solid #ffc107 !important;
-        box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
-    }
-
+    /* Estilo para IMEI */
     .imei-tag {
-        color: var(--neon-blue);
+        color: var(--tech-accent);
         font-family: 'Courier New', Courier, monospace;
         font-weight: bold;
+        font-size: 0.85rem;
     }
 
-    .action-btn {
+    /* Botones de acción (el engranaje y ver detalles) */
+    .btn-action {
         width: 35px;
         height: 35px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 10px;
-        background: var(--bg-main);
+        background-color: var(--bg-main);
+        color: var(--tech-accent);
         border: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+        .btn-action:hover {
+            background-color: var(--tech-accent);
+            color: #0F172A; /* Contraste oscuro para el hover cyan */
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--tech-glow);
+        }
+
+    /* Badges de estado */
+    .badge-pending {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid #f59e0b;
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge-approved {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--neon-green);
+        border: 1px solid var(--neon-green);
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge-rejected {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--neon-red);
+        border: 1px solid var(--neon-red);
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Inputs del Modal adaptables */
+    .input-custom {
+        background-color: var(--bg-main);
         color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+
+        .input-custom:focus {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            border-color: var(--tech-accent);
+            box-shadow: 0 0 0 4px var(--tech-glow);
+        }
+
+        .input-custom option {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
+
+    /* Botón Guardar del Modal */
+    .btn-save-modal {
+        background-color: var(--tech-accent);
+        color: #0F172A;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 20px;
         transition: all 0.3s ease;
     }
 
-        .action-btn:hover {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue-glow);
+        .btn-save-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--tech-glow);
+            color: #0F172A;
+        }
+
+    /* Switch Neón y Panel de Stock */
+    .form-check-input:checked {
+        background-color: var(--tech-accent);
+        border-color: var(--tech-accent);
+        box-shadow: 0 0 10px var(--tech-glow);
+    }
+
+    .stock-panel {
+        background-color: rgba(255, 204, 0, 0.05);
+        border: 1px dashed rgba(255, 204, 0, 0.3);
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+
+        .stock-panel.active {
+            border-style: solid;
+            border-color: var(--neon-yellow);
+            box-shadow: 0 0 15px var(--neon-yellow-glow);
         }
 </style>
 
-<div class="container-fluid py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <div class="premium-label mb-1" style="color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Módulo de Post-Venta</div>
-            <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">Listado de Devoluciones</h2>
-            <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Historial de dispositivos devueltos en el sistema</p>
-        </div>
+<div class="container-fluid px-lg-5 py-4">
 
-        @if (User.IsInRole("Administrador") || User.IsInRole("Jefe de Almacen"))
-        {
-            <a href="@Url.Action("Create", "Devolucion")" class="btn btn-neon-add px-4 py-2">
-                <i class="bi bi-arrow-return-left me-2"></i> Nueva Devolución
-            </a>
-        }
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
+        <div>
+            <h6 class="text-uppercase fw-bold mb-1" style="color: var(--tech-accent); letter-spacing: 1px; font-size: 0.85rem;">Módulo de Post-Venta</h6>
+            <h2 class="fw-bold mb-1" style="color: var(--text-main);">Listado de Devoluciones</h2>
+            <p class="mb-0 text-muted">Historial de dispositivos devueltos en el sistema</p>
+        </div>
     </div>
 
     @if (TempData["MensajeExito"] != null)
     {
-        <div class="alert shadow-lg border-0 mb-4 d-flex align-items-center" style="background-color: rgba(0, 255, 127, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); border-radius: 12px;">
+        <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center" style="background-color: rgba(0, 255, 127, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); border-radius: 12px;">
             <i class="bi bi-check-circle-fill fs-5 me-3"></i>
             <div>@TempData["MensajeExito"]</div>
         </div>
@@ -141,145 +211,173 @@
 
     @if (ViewBag.Error != null || TempData["MensajeError"] != null)
     {
-        <div class="alert shadow-lg border-0 mb-4 d-flex align-items-center" style="background-color: rgba(255, 51, 102, 0.1); color: var(--neon-red); border: 1px solid var(--neon-red); border-radius: 12px;">
+        <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center" style="background-color: rgba(255, 51, 102, 0.1); color: var(--neon-red); border: 1px solid var(--neon-red); border-radius: 12px;">
             <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
             <div>@(ViewBag.Error ?? TempData["MensajeError"])</div>
         </div>
     }
 
-    <div class="card dev-card">
-        <div class="card-header py-4 px-4 bg-transparent border-bottom border-secondary border-opacity-10">
-            <h6 class="m-0 fw-bold" style="color: var(--neon-blue);">
-                <i class="bi bi-arrow-repeat me-2"></i>Registros de Devolución
-            </h6>
+    <div class="dev-card overflow-hidden">
+        <div class="dev-card-header d-flex align-items-center">
+            <i class="bi bi-arrow-repeat me-2 fs-5" style="color: var(--tech-accent);"></i>
+            <span class="fw-bold" style="color: var(--tech-accent);">Registros de Devolución</span>
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-neon table-hover align-middle mb-0">
-                    <thead class="bg-main">
-                        <tr>
-                            <th class="ps-4 py-3">Info. Devolución</th>
-                            <th class="py-3">Producto / IMEI</th>
-                            <th class="py-3">Motivo Cliente</th>
-                            <th class="py-3 text-center">Estado Reporte</th>
-                            <th class="pe-4 py-3 text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Count > 0)
-                        {
-                            foreach (var dev in Model)
-                            {
-                                <tr>
-                                    <td class="ps-4 py-4">
-                                        <div class="fw-bold text-main">#@dev.ID_DEVOLUCION</div>
-                                        <div class="text-muted small">Doc: @dev.FACTURA_ORIGINAL</div>
-                                        <div style="font-size: 0.75rem; color: var(--neon-blue);">@dev.FECHA_DEVOLUCION.ToString("dd MMM, yyyy")</div>
-                                    </td>
-                                    <td class="py-4">
-                                        <div class="fw-semibold text-main">@dev.PRODUCTO_NOMBRE</div>
-                                        <div class="imei-tag small">@dev.IMEI</div>
-                                    </td>
-                                    <td class="py-4">
-                                        <div class="text-truncate text-main small mb-1" style="max-width: 200px;" title="@dev.MOTIVO_CLIENTE">
-                                            @dev.MOTIVO_CLIENTE
-                                        </div>
-                                    </td>
-                                    <td class="py-4 text-center">
-                                        @if (dev.ESTADO_REPORTE == "Pendiente")
-                                        {
-                                            <span class="badge badge-pendiente rounded-pill px-3 py-2"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
-                                        }
-                                        else if (dev.ESTADO_REPORTE == "Aprobado")
-                                        {
-                                            <span class="badge badge-stock-yes rounded-pill px-3 py-2"><i class="bi bi-check-lg me-1"></i> Aprobado</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-stock-no rounded-pill px-3 py-2"><i class="bi bi-x-lg me-1"></i> Rechazado</span>
-                                        }
-                                    </td>
-                                    <td class="pe-4 py-4 text-end">
-                                        @if (dev.ESTADO_REPORTE == "Pendiente")
-                                        {
-                                            <button type="button" class="action-btn" style="color: var(--neon-blue); border-color: var(--neon-blue);"
-                                                    onclick="abrirModalAdmin(@dev.ID_DEVOLUCION)" title="Procesar Reporte">
-                                                <i class="bi bi-gear-fill"></i>
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <a href="@Url.Action("Details", "Devolucion", new { id = dev.ID_DEVOLUCION })" class="action-btn" title="Ver Detalles">
-                                                <i class="bi bi-search"></i>
-                                            </a>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Info. Devolución</th>
+                        <th>Producto / IMEI</th>
+                        <th>Motivo Cliente</th>
+                        <th class="text-center">Estado Reporte</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var dev in Model)
                         {
                             <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="py-5">
-                                        <i class="bi bi-box-arrow-in-left display-1 opacity-10 mb-3" style="color: var(--neon-blue);"></i>
-                                        <h5 class="text-muted">No hay registros de devoluciones</h5>
-                                        <p class="text-muted small">Cuando se procesen retornos, aparecerán en este listado.</p>
+                                <td class="ps-4">
+                                    <div class="fw-bold fs-6" style="color: var(--text-main);">#@dev.ID_DEVOLUCION</div>
+                                    <div class="text-muted" style="font-size: 0.85rem;">Doc: @dev.FACTURA_ORIGINAL</div>
+                                    <div style="color: var(--tech-accent); font-size: 0.85rem;">@dev.FECHA_DEVOLUCION.ToString("dd MMM, yyyy")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" style="color: var(--text-main);">@dev.PRODUCTO_NOMBRE</div>
+                                    <div class="imei-tag">@dev.IMEI</div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px; color: var(--text-main); font-size: 0.9rem;" title="@dev.MOTIVO_CLIENTE">
+                                        @dev.MOTIVO_CLIENTE
                                     </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (dev.ESTADO_REPORTE == "Pendiente")
+                                    {
+                                        <span class="badge-pending"><i class="bi bi-hourglass-split me-1"></i> Pendiente</span>
+                                    }
+                                    else if (dev.ESTADO_REPORTE == "Aprobado")
+                                    {
+                                        <span class="badge-approved"><i class="bi bi-check-lg me-1"></i> Aprobado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-rejected"><i class="bi bi-x-lg me-1"></i> Rechazado</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (dev.ESTADO_REPORTE == "Pendiente")
+                                    {
+                                        <button type="button" class="btn-action" onclick="abrirModalAdmin(@dev.ID_DEVOLUCION)" title="Procesar Reporte">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Details", "Devolucion", new { id = dev.ID_DEVOLUCION })" class="btn-action" title="Ver Detalles">
+                                            <i class="bi bi-search"></i>
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="bi bi-box-arrow-in-left display-1 opacity-50" style="color: var(--tech-accent);"></i>
+                                </div>
+                                <h5 class="fw-bold" style="color: var(--text-main);">No hay devoluciones</h5>
+                                <p class="text-muted">No se han registrado reportes de devolución todavía.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="modalProcesarAdmin" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: #1a1a2e; border: 1px solid var(--neon-blue); border-radius: 12px;">
-            <div class="modal-header border-bottom border-secondary">
-                <h5 class="modal-title text-light"><i class="bi bi-gear-wide-connected me-2 text-info"></i> Procesar Devolución</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem;">
+                <h5 class="modal-title fw-bold d-flex align-items-center" style="color: var(--text-main);">
+                    <i class="bi bi-gear-fill me-2" style="color: var(--tech-accent);"></i> Procesamiento de Retorno
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1); opacity: 0.5;"></button>
             </div>
 
             <form action="@Url.Action("Procesar", "Devolucion")" method="post">
-                <div class="modal-body text-light">
+                <div class="modal-body p-4">
                     <input type="hidden" id="adminIdDevolucion" name="ID_DEVOLUCION" />
 
-                    <div class="mb-3">
-                        <label class="form-label text-info small fw-bold">1. Decisión del Reporte</label>
-                        <select class="form-select bg-dark text-light border-secondary" name="ESTADO_REPORTE" required>
-                            <option value="">-- Selecciona una acción --</option>
-                            <option value="Aprobado">Aprobar Devolución</option>
-                            <option value="Rechazado">Rechazar Devolución</option>
-                        </select>
-                    </div>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold" style="color: var(--tech-accent); font-size: 0.9rem;">1. Decisión del Reporte</label>
+                            <select class="form-select input-custom py-2" name="ESTADO_REPORTE" required>
+                                <option value="">-- Selecciona una acción --</option>
+                                <option value="Aprobado">Aprobar Devolución</option>
+                                <option value="Rechazado">Rechazar Devolución</option>
+                            </select>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-info small fw-bold">2. Estado del Dispositivo Recibido</label>
-                        <input type="text" class="form-control bg-dark text-light border-secondary" name="ESTADO_DISPOSITIVO_RECIBIDO" placeholder="Ej: Rayado, Intacto, Roto..." required />
-                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="color: var(--tech-accent); font-size: 0.9rem;">2. Estado del Equipo Recibido</label>
+                            <select class="form-select input-custom py-2" name="ESTADO_DISPOSITIVO_RECIBIDO" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Nuevo/Sellado">Nuevo / Sellado</option>
+                                <option value="Abierto/Completo">Abierto / Accesorios Completos</option>
+                                <option value="Uso Leve">Signos de uso leve</option>
+                                <option value="Dañado">Dañado / Golpeado</option>
+                                <option value="Falla Tecnica">Falla Técnica de Fábrica</option>
+                            </select>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-info small fw-bold">3. Acción Tomada (Notas)</label>
-                        <textarea class="form-control bg-dark text-light border-secondary" name="ACCION_TOMADA" rows="2" placeholder="Ej: Se realiza reembolso y se contacta proveedor..."></textarea>
-                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="color: var(--tech-accent); font-size: 0.9rem;">3. Acción Tomada</label>
+                            <select class="form-select input-custom py-2" name="ACCION_TOMADA" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Cambio Fisico">Cambio Físico</option>
+                                <option value="Nota de Credito">Nota de Crédito</option>
+                                <option value="Reembolso">Reembolso</option>
+                                <option value="Garantia">Envío a Servicio Técnico</option>
+                            </select>
+                        </div>
 
-                    <div class="form-check mt-4 p-3 border border-secondary rounded" style="background: rgba(0, 255, 127, 0.05);">
-                        <input class="form-check-input ms-1" type="checkbox" id="checkInventario" name="REGRESAR_INVENTARIO" value="true">
-                        <input type="hidden" name="REGRESAR_INVENTARIO" value="false">
-                        <label class="form-check-label ms-2 fw-bold text-light" for="checkInventario">
-                            ¿Reingresar al stock disponible?
-                        </label>
-                        <div class="ms-2 small text-muted">Marca esto solo si el producto se puede volver a vender.</div>
+                        <div class="col-12 mt-4">
+                            <div id="panelStock" class="stock-panel p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 fs-3" id="stockIcon" style="color: var(--text-muted);">
+                                        <i class="bi bi-box-arrow-in-down"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold" style="color: var(--text-main);">Regresar a Inventario</h6>
+                                        <p class="mb-0 text-muted small">¿El equipo está apto para volver a venderse?</p>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch fs-4 m-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="checkInventario" name="REGRESAR_INVENTARIO" value="true">
+                                    <input type="hidden" name="REGRESAR_INVENTARIO" value="false">
+                                </div>
+                            </div>
+
+                            <div id="stockWarning" class="alert mt-3 d-none mb-0" style="background: rgba(255, 204, 0, 0.1); border: 1px solid var(--neon-yellow); color: var(--neon-yellow); border-radius: 8px; font-size: 0.85rem;">
+                                <i class="bi bi-cpu-fill me-2"></i> <strong>SISTEMA:</strong> Al aprobar, se ejecutará el Trigger para sumar existencias y liberar el IMEI.
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top border-secondary">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-neon-add px-4">Guardar Decisión</button>
+
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color); padding: 1.25rem 1.5rem;">
+                    <button type="button" class="btn text-light" data-bs-dismiss="modal" style="border: 1px solid var(--border-color); background-color: transparent;">Cancelar</button>
+                    <button type="submit" class="btn btn-save-modal"><i class="bi bi-save me-2"></i>Guardar Decisión</button>
                 </div>
             </form>
         </div>
@@ -292,9 +390,32 @@
             // Inyectamos el ID de la fila en el formulario oculto
             document.getElementById('adminIdDevolucion').value = idDevolucion;
 
-            // Abrimos el modal mágicamente
+            // Reiniciar el formulario por si se había abierto antes
+            document.getElementById('checkInventario').checked = false;
+            document.getElementById('stockWarning').classList.add('d-none');
+            document.getElementById('panelStock').classList.remove('active');
+            document.getElementById('stockIcon').style.color = "var(--text-muted)";
+
+            // Abrimos el modal
             var modal = new bootstrap.Modal(document.getElementById('modalProcesarAdmin'));
             modal.show();
         }
+
+        // Lógica visual para el switch del inventario
+        document.getElementById('checkInventario').addEventListener('change', function() {
+            const warning = document.getElementById('stockWarning');
+            const panel = document.getElementById('panelStock');
+            const icon = document.getElementById('stockIcon');
+
+            if(this.checked) {
+                warning.classList.remove('d-none');
+                panel.classList.add('active');
+                icon.style.color = "var(--neon-yellow)";
+            } else {
+                warning.classList.add('d-none');
+                panel.classList.remove('active');
+                icon.style.color = "var(--text-muted)";
+            }
+        });
     </script>
 }

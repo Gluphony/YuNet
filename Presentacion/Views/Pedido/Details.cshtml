@@ -327,7 +327,7 @@
     <script>
         let modalReporteBootstrap;
 
-        // Función global para que el botón "onclick" la encuentre
+        // Función global para abrir el modal
         function abrirModalReporte(idDetallePedido) {
             document.getElementById('txtIdDetallePedidoReporte').value = idDetallePedido;
             document.getElementById('cboMotivoReporte').selectedIndex = 0;
@@ -356,11 +356,10 @@
 
                 const motivoCompleto = motivo + " - " + detalle;
 
-                // Ahora sí, enviamos el ID_DETALLE_PEDIDO correcto que tu base de datos espera
-              const dataEnvio = {
-            ID_DETALLE_PEDIDO: parseInt(idDetallePedido),
-            MOTIVO_CLIENTE: motivoCompleto
-          };
+                // EL TRUCO ESTÁ AQUÍ: Usamos FormData para que MVC lo lea nativamente
+                const formData = new FormData();
+                formData.append('ID_DETALLE_PEDIDO', idDetallePedido);
+                formData.append('MOTIVO_CLIENTE', motivoCompleto);
 
                 const btnEnviar = document.getElementById('btnEnviarReporte');
                 const textoOriginal = btnEnviar.innerHTML;
@@ -368,14 +367,11 @@
                 btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
                 btnEnviar.disabled = true;
 
-                // Hacemos la petición al backend
-                     fetch('/Devolucion/Create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json' // Le decimos al servidor que es JSON
-            },
-            body: JSON.stringify(dataEnvio)
-        })
+                // Hacemos la petición enviando FormData (SIN headers json)
+                fetch('/Devolucion/Create', {
+                    method: 'POST',
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.exito) {
@@ -383,13 +379,15 @@
                         if (modalReporteBootstrap) {
                             modalReporteBootstrap.hide();
                         }
+                        // Opcional: recargar la página para ver el cambio
+                        // window.location.reload();
                     } else {
                         alert('❌ Hubo un problema: ' + data.mensaje);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ocurrió un error al intentar enviar el reporte.');
+                    alert('Ocurrió un error al conectar con el servidor.');
                 })
                 .finally(() => {
                     btnEnviar.innerHTML = textoOriginal;
@@ -399,4 +397,4 @@
 
         });
     </script>
-}
+    }

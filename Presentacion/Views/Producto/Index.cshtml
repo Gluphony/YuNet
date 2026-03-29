@@ -318,15 +318,15 @@
 
     @* Cambia "Filtrar" por "FiltrarPorNombre" *@
     <form asp-action="FiltrarPorNombre" method="get" class="d-flex gap-2">
-        <div class="input-group">
+       @*  <div class="input-group">
             <span class="input-group-text border-0" ...>
                 <i class="bi bi-search"></i>
-            </span>
+            </span> *@
             @* El atributo 'name' debe ser "nombre" para que coincida con el parámetro del controlador *@
-            <input type="text" id="txtBuscar" name="nombre" value="@ViewBag.BusquedaActual"
+           @*  <input type="text" id="txtBuscar" name="nombre" value="@ViewBag.BusquedaActual"
                    class="form-control custom-input border-start-0" placeholder="Buscar marca..." ...>
-        </div>
-        <button type="submit" class="btn btn-neon px-3">Buscar</button>
+        </div> *@
+      @*   <button type="submit" class="btn btn-neon px-3">Buscar</button> *@
     </form>
 
     <div class="yunet-table-container">
