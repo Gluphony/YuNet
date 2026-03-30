@@ -122,17 +122,68 @@ namespace Presentacion.Controllers
         {
             try
             {
+                // ==========================================
+                // 1. VALIDACIONES EN C# (Backend)
+                // ==========================================
+
+                // A. Validar longitud de la contraseña
+                if (string.IsNullOrEmpty(Clave) || Clave.Length < 5)
+                {
+                    ViewBag.Error = "La contraseña debe tener al menos 5 caracteres.";
+                    ViewBag.NombreTemp = Nombre;
+                    ViewBag.CorreoTemp = Correo;
+                    return View(); // Regresa a la vista mostrando el error
+                }
+
+                // B. Validar formato de correo según el rol
+                // Ajusta los números 1, 2, 3, 4 según los IDs reales de tus roles
+                string terminacionEsperada = Id_Rol switch
+                {
+                    1 => ".admin@yunet.com",
+                    2 => ".usuario@yunet.com",
+                    3 => ".vendedor@yunet.com",
+                    4 => ".auditor@yunet.com",
+                    _ => ""
+                };
+
+                if (string.IsNullOrEmpty(terminacionEsperada) || (Correo != null && !Correo.EndsWith(terminacionEsperada)))
+                {
+                    ViewBag.Error = $"Formato de correo inválido. Para este rol, el correo debe terminar en '{terminacionEsperada}'.";
+                    ViewBag.NombreTemp = Nombre;
+                    ViewBag.CorreoTemp = Correo;
+                    return View(); // Regresa a la vista mostrando el error
+                }
+
+                // ==========================================
+                // 2. EJECUCIÓN EN BASE DE DATOS
+                // ==========================================
                 bool respuesta = _logicaUsuario.InsertarUsuario(Nombre, Correo, Clave, Id_Rol);
 
                 if (respuesta)
                 {
+                    // Si todo sale bien, lo mandamos al Login ("Index")
                     ViewBag.Exito = "¡Cuenta creada con éxito! Ahora puedes iniciar sesión.";
                     return View("Index");
+                }
+                else
+                {
+                    // Por si la BD devuelve falso sin lanzar excepción
+                    ViewBag.Error = "No se pudo registrar el usuario. Verifique los datos.";
+                    ViewBag.NombreTemp = Nombre;
+                    ViewBag.CorreoTemp = Correo;
                 }
             }
             catch (Exception ex)
             {
+                // ==========================================
+                // 3. CAPTURA DE ERRORES DE SQL (RAISERROR)
+                // ==========================================
+                // Si hay un error en la BD (ej. correo duplicado), lo atrapamos aquí
                 ViewBag.Error = ex.Message;
+
+                // Mantenemos los datos escritos por el usuario (menos la contraseña por seguridad)
+                ViewBag.NombreTemp = Nombre;
+                ViewBag.CorreoTemp = Correo;
             }
 
             return View();

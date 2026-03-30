@@ -104,12 +104,12 @@
             <p>Ingrese su correo para generar una nueva contraseña</p>
         </div>
 
-        @if (TempData["Error"] != null)
+        @if (ViewBag.Error != null || TempData["Error"] != null)
         {
-            <div class="error-msg">@TempData["Error"]</div>
+            <div class="error-msg">@(ViewBag.Error ?? TempData["Error"])</div>
         }
 
-        <form asp-controller="Login" asp-action="RestablecerClave" method="post">
+        <form action="/Login/RestablecerClave" method="POST">
             <input type="email" name="Correo" class="form-control" placeholder="usuario@yunet.com" required />
             <input type="password" name="NuevaClave" class="form-control" placeholder="Nueva Contraseña" required />
 

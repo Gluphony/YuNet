@@ -56,6 +56,21 @@ namespace Presentacion.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult ObtenerImeisDisponibles(int idProducto)
+        {
+            try
+            {
+                // Asegurate de llamar a tu capa lógica correspondiente
+                List<UnidadExistencia> lista = _logicaProducto.ListarImeisDisponibles(idProducto);
+                return Json(new { success = true, data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         [AllowAnonymous]
         public ActionResult FiltrarPorNombre(string nombre)
         {

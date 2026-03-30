@@ -103,67 +103,73 @@ namespace Presentacion.Controllers
             {
                 bool respuesta = _logicaUsuario.InsertarUsuario(Nombre, Correo, Clave, Id_Rol);
                 if (respuesta)
+                {
+                    // Guardamos el mensaje de éxito para cuando la página se recargue
                     TempData["Exito"] = "Usuario registrado correctamente.";
+                    return Json(new { success = true });
+                }
+                return Json(new { success = false, message = "No se pudo registrar el usuario." });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                // Devolvemos el error de la base de datos en formato JSON
+                return Json(new { success = false, message = ex.Message });
             }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult Editar(int Id_Usuario, string Nombre, string Correo, int Id_Rol, string Estado)
-        {
-            try
-            {
-                // CORREGIDO: Ahora jala el ID real del usuario conectado, no el "1" quemado
-                int idLogueado = ObtenerIdUsuarioActual();
-                bool boolEstado = (Estado == "1" || Estado == "true" || Estado == "True");
-
-                bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, boolEstado, idLogueado);
-
-                if (respuesta)
-                    TempData["Exito"] = "Usuario actualizado correctamente.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-            return RedirectToAction("Index");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Desactivar(int Id_Usuario)
+        public IActionResult Editar(int Id_Usuario, string Nombre, string Correo, int Id_Rol, bool Estado)
         {
             try
             {
-                int idActual = ObtenerIdUsuarioActual();
+                // 1. OBTENER EL ID DEL USUARIO LOGUEADO DESDE LOS CLAIMS
+                // Buscamos el claim donde guardaste el ID al momento del Login (usualmente NameIdentifier)
+                var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                if (EsElUltimoAdministradorActivo(Id_Usuario))
-                {
-                    TempData["Error"] = "Operación denegada: No puedes desactivar a este usuario porque es el único Administrador activo.";
-                    return RedirectToAction("Index");
-                }
+                // Lo convertimos a entero de forma segura. Si por alguna razón no lo encuentra, asignará 0.
+                int idUsuarioLogueado = string.IsNullOrEmpty(claimId) ? 0 : int.Parse(claimId);
 
-                bool respuesta = _logicaUsuario.DesactivarUsuario(Id_Usuario, idActual);
+                // 2. PASAR EL SEXTO PARÁMETRO AL MÉTODO DE LÓGICA
+                bool respuesta = _logicaUsuario.EditarUsuario(Id_Usuario, Nombre, Correo, Id_Rol, Estado, idUsuarioLogueado);
 
                 if (respuesta)
                 {
-                    if (Id_Usuario == idActual)
-                    {
-                        await HttpContext.SignOutAsync();
-                        return RedirectToAction("Index", "Login");
-                    }
-                    TempData["Exito"] = "Usuario desactivado correctamente.";
+                    TempData["Exito"] = "Usuario actualizado correctamente.";
+                    return Json(new { success = true });
                 }
+                return Json(new { success = false, message = "No se pudo actualizar el usuario." });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                return Json(new { success = false, message = ex.Message });
             }
-            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Desactivar(int Id_Usuario)
+        {
+            try
+            {
+                // 1. Sacamos el ID del que está logueado desde los Claims
+                var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int idLogueado = string.IsNullOrEmpty(claimId) ? 0 : int.Parse(claimId);
+
+                // 2. Llamamos a la lógica
+                bool respuesta = _logicaUsuario.DesactivarUsuario(Id_Usuario, idLogueado);
+
+                if (respuesta)
+                {
+                    return Json(new { success = true, message = "Usuario desactivado correctamente." });
+                }
+                return Json(new { success = false, message = "No se pudo realizar la operación." });
+            }
+            catch (Exception ex)
+            {
+                // El mensaje que viene del THROW de SQL llegará aquí
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

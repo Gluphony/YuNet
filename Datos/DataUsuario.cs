@@ -109,7 +109,7 @@ namespace Datos
         }
 
         // 6. DESACTIVAR USUARIO (Borrado Lógico)
-        public bool DesactivarUsuario(int idUsuario, int idUsuarioLogueado) // <-- 1. Agregamos el parámetro
+        public bool DesactivarUsuario(int idUsuario, int idUsuarioLogueado)
         {
             bool respuesta = false;
             using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
@@ -120,17 +120,23 @@ namespace Datos
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
-
-                    // <-- 2. Lo enviamos a SQL Server
-                    cmd.Parameters.AddWithValue("@Id_Usuario_Logueado", idUsuarioLogueado);
+                    // IMPORTANTE: Nombre igual al del SQL
+                    cmd.Parameters.AddWithValue("@IdUsuarioLogueado", idUsuarioLogueado);
 
                     conexion.Open();
-                    cmd.ExecuteNonQuery();
-                    respuesta = true;
+                    int filasAfectadas = cmd.ExecuteNonQuery();
+
+                    // Si afectó filas, todo salió al cien
+                    respuesta = filasAfectadas > 0;
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Capturamos el THROW del SQL (como el del auto-bloqueo)
+                    throw new Exception(sqlEx.Message);
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error al desactivar el usuario: " + ex.Message);
+                    throw new Exception("Error al conectar con la DB: " + ex.Message);
                 }
             }
             return respuesta;

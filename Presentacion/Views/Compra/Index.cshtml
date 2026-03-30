@@ -1,0 +1,390 @@
+﻿@model IEnumerable<Entidades.Compra>
+@{
+    ViewData["Title"] = "Entrada de Mercadería";
+}
+
+<style>
+    /* ==========================================
+               ESTILOS NEÓN Y TABLAS
+        ========================================== */
+    .btn-neon {
+        background: transparent;
+        color: var(--neon-blue-base, #00D4FF) !important;
+        border: 1px solid var(--neon-blue-base, #00D4FF);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 10px 20px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon:hover {
+            background: var(--neon-blue-base, #00D4FF);
+            color: #FFF !important;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+    [data-theme="dark"] .btn-neon:hover {
+        color: #000 !important;
+    }
+
+    .yunet-table-container {
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.3s ease;
+    }
+
+    [data-theme="dark"] .yunet-table-container {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .yunet-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: var(--text-muted);
+    }
+
+        .yunet-table thead tr {
+            background-color: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .yunet-table th {
+            color: var(--text-main);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            padding: 1rem 1.5rem;
+        }
+
+        .yunet-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+            .yunet-table tbody tr:hover {
+                background-color: rgba(0, 212, 255, 0.05);
+                box-shadow: inset 3px 0 0 var(--neon-blue-base, #00D4FF);
+            }
+
+        .yunet-table td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: var(--text-main);
+        }
+
+    .custom-input {
+        background-color: var(--bg-main) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 8px !important;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--neon-blue-base, #00D4FF) !important;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4) !important;
+            outline: none;
+        }
+
+        .custom-input::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.6;
+        }
+
+    /* Estilo para las cajitas individuales de IMEI y Factura */
+    .imei-box {
+        text-align: center;
+        font-family: monospace;
+        letter-spacing: 2px;
+        font-weight: bold;
+    }
+
+    .factura-box {
+        font-family: monospace;
+        letter-spacing: 1px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="container-fluid container-xl mt-4 px-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 fw-bold mb-1" style="color: var(--text-main);">
+                <i class="bi bi-box-arrow-in-down me-2" style="color: var(--tech-accent); text-shadow: 0 0 10px var(--tech-glow);"></i>
+                Registro de Compras
+            </h2>
+            <p class="mb-0 small" style="color: var(--text-muted);">Ingreso de nuevas unidades y serialización (IMEI)</p>
+        </div>
+        <button class="btn-neon" data-bs-toggle="modal" data-bs-target="#modalNuevaCompra">
+            <i class="bi bi-plus-lg"></i> Nueva Entrada
+        </button>
+    </div>
+
+    <div class="yunet-table-container">
+        <table class="yunet-table mb-0">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Proveedor</th>
+                    <th>Factura Prov.</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.FECHA_COMPRA.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="fw-bold">Proveedor #@item.ID_PROVEEDOR</td>
+                            <td><span class="badge border border-info text-info" style="font-family: monospace;">@item.NUMERO_FACTURA_PROV</span></td>
+                            <td class="text-end fw-bold text-success">$@item.TOTAL_COMPRA.ToString("N2")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>No hay registros de compras recientes.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevaCompra" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.2);">
+
+            <div class="modal-header px-4 py-3 relative overflow-hidden" style="border-bottom: 1px solid var(--border-color);">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--tech-accent), transparent);"></div>
+                <h5 class="modal-title fw-bold" style="color: var(--text-main);">
+                    <i class="bi bi-cart-plus me-2" style="color: var(--tech-accent);"></i> Registrar Entrada de Stock
+                </h5>
+                <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal" style="filter: invert(1) grayscale(100%) brightness(200%);"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="formCompra">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); letter-spacing: 1px;">Proveedor</label>
+                            <select id="cbProveedor" class="form-select custom-input" required>
+                                <option value="">Seleccione Proveedor...</option>
+                                @if (ViewBag.Proveedores != null)
+                                {
+                                    foreach (System.Data.DataRow prov in ((System.Data.DataTable)ViewBag.Proveedores).Rows)
+                                    {
+                                        <option value="@prov["ID_PROVEEDOR"]">@prov["RAZON_SOCIAL"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); letter-spacing: 1px;">No. Factura Proveedor</label>
+                            <input type="text" id="txtFactura" class="form-control custom-input factura-box"
+                                   placeholder="Ej: FAC-9982" maxlength="50"
+                                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9\-]/g, '');" required />
+                            <div class="form-text small opacity-75 mt-1" style="color: var(--text-muted);"><i class="bi bi-info-circle"></i> Solo letras, números y guiones.</div>
+                        </div>
+
+                        <div class="col-12"><hr style="border-color: var(--border-color);"></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); letter-spacing: 1px;">Producto a Ingresar</label>
+                            <select id="cbProducto" class="form-select custom-input" required>
+                                <option value="">Seleccione Producto...</option>
+                                @if (ViewBag.Productos != null)
+                                {
+                                    foreach (System.Data.DataRow prod in ((System.Data.DataTable)ViewBag.Productos).Rows)
+                                    {
+                                        <option value="@prod["ID_PRODUCTO"]">@prod["MODELO"]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); letter-spacing: 1px;">Cantidad</label>
+                            <input type="number" id="txtCantidad" class="form-control custom-input text-center fw-bold" value="0" min="1"
+                                   onkeypress="return event.charCode >= 48 && event.charCode <= 57" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); letter-spacing: 1px;">Costo de Compra al Proveedor ($)</label>
+                            <input type="number" id="txtCosto" class="form-control custom-input" step="0.01" min="0"
+                                   onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46" required />
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label small fw-bold text-uppercase d-flex justify-content-between" style="color: var(--tech-accent); letter-spacing: 1px;">
+                                <span>Registro de IMEIs</span>
+                                <span id="imeiCounter" class="badge bg-secondary">0 / 0</span>
+                            </label>
+
+                            <div class="p-3 rounded" style="background-color: rgba(0,0,0,0.1); border: 1px dashed var(--border-color);">
+                                <div id="contenedorImeis" class="row g-2">
+                                    <div class="col-12 text-center text-muted small py-3">
+                                        <i class="bi bi-upc-scan fs-2 d-block mb-2 opacity-50"></i>
+                                        Ingrese la <b>Cantidad</b> arriba para generar los espacios.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer px-4 py-3" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn fw-bold me-2" style="color: var(--text-muted);" data-bs-dismiss="modal">CANCELAR</button>
+                <button type="button" id="btnGuardarCompra" class="btn-neon">
+                    <i class="bi bi-save2"></i> PROCESAR ENTRADA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const txtCantidad = document.getElementById('txtCantidad');
+            const contenedorImeis = document.getElementById('contenedorImeis');
+            const imeiCounter = document.getElementById('imeiCounter');
+
+            // 1. GENERADOR DINÁMICO DE CAJAS PARA IMEI
+            txtCantidad.addEventListener('input', function() {
+                const cantidad = parseInt(this.value) || 0;
+                contenedorImeis.innerHTML = '';
+
+                if(cantidad > 0) {
+                    imeiCounter.innerText = `0 / ${cantidad}`;
+                    imeiCounter.className = 'badge bg-warning text-dark';
+
+                    for(let i = 0; i < cantidad; i++) {
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-md-6 col-lg-4';
+
+                        colDiv.innerHTML = `
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-transparent text-muted border-secondary">#${i+1}</span>
+                                <input type="text" class="form-control custom-input imei-input imei-box"
+                                       placeholder="15 dígitos..." maxlength="15"
+                                       onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                            </div>
+                        `;
+                        contenedorImeis.appendChild(colDiv);
+                    }
+
+                    // 2. LÓGICA DE AUTO-SALTO Y CONTEO
+                    const inputs = document.querySelectorAll('.imei-input');
+                    inputs.forEach((input, index) => {
+                        input.addEventListener('input', function() {
+
+                            let llenos = Array.from(inputs).filter(inp => inp.value.length === 15).length;
+                            imeiCounter.innerText = `${llenos} / ${cantidad}`;
+
+                            if (llenos === cantidad) {
+                                imeiCounter.className = 'badge bg-success';
+                            } else {
+                                imeiCounter.className = 'badge bg-warning text-dark';
+                            }
+
+                            if(this.value.length === 15 && index < inputs.length - 1) {
+                                inputs[index + 1].focus();
+                            }
+                        });
+                    });
+                } else {
+                    imeiCounter.innerText = `0 / 0`;
+                    imeiCounter.className = 'badge bg-secondary';
+                    contenedorImeis.innerHTML = `
+                        <div class="col-12 text-center text-muted small py-3">
+                            <i class="bi bi-upc-scan fs-2 d-block mb-2 opacity-50"></i>
+                            Ingrese la <b>Cantidad</b> arriba para generar los espacios.
+                        </div>`;
+                }
+            });
+
+            // 3. ACCIÓN DE GUARDAR COMPRA
+            document.getElementById('btnGuardarCompra').addEventListener('click', function() {
+
+                const cantidadEsperada = parseInt(txtCantidad.value) || 0;
+                const imeiInputs = document.querySelectorAll('.imei-input');
+
+                const arrayImeis = Array.from(imeiInputs).map(inp => inp.value.trim()).filter(val => val !== '');
+                const facturaTexto = document.getElementById('txtFactura').value.trim();
+
+                const data = {
+                    idProveedor: document.getElementById('cbProveedor').value,
+                    factura: facturaTexto,
+                    idProducto: document.getElementById('cbProducto').value,
+                    cantidad: cantidadEsperada,
+                    costo: parseFloat(document.getElementById('txtCosto').value) || 0,
+                    listaImeis: arrayImeis.join(',')
+                };
+
+                // Validaciones
+                if(!data.idProveedor || !data.idProducto || !data.factura) {
+                    Swal.fire("Error", "Faltan datos del proveedor, producto o factura.", "warning"); return;
+                }
+
+                // Validación estricta de la factura (Mínimo 3 caracteres)
+                if(facturaTexto.length < 3) {
+                    Swal.fire("Error", "El número de factura es muy corto (Mínimo 3 caracteres).", "warning"); return;
+                }
+
+                if(data.cantidad <= 0 || data.costo <= 0) {
+                    Swal.fire("Error", "La cantidad y el costo deben ser mayores a cero.", "warning"); return;
+                }
+
+                if(arrayImeis.length !== data.cantidad) {
+                    Swal.fire("Incompleto", `Debe llenar las ${data.cantidad} cajas de IMEI.`, "warning"); return;
+                }
+
+                const imeisInvalidos = arrayImeis.filter(imei => !/^\d{15}$/.test(imei));
+                if (imeisInvalidos.length > 0) {
+                    Swal.fire({
+                        title: 'Formato Incorrecto',
+                        html: `Todos los IMEIs deben tener <b>exactamente 15 números</b>.<br>Por favor, revisa las cajas.`,
+                        icon: 'error',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-main)'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: '¿Confirmar Ingreso?',
+                    text: `Se ingresarán ${data.cantidad} unidades al inventario con la factura ${data.factura}.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--tech-primary)',
+                    cancelButtonColor: 'transparent',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    customClass: { cancelButton: 'border border-secondary text-muted' }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post('@Url.Action("GuardarCompra", "Compra")', data, function(res) {
+                            if(res.success) {
+                                Swal.fire("¡Éxito!", res.message, "success").then(() => location.reload());
+                            } else {
+                                Swal.fire("Error en BD", res.message, "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

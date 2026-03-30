@@ -160,6 +160,8 @@
             <p>Complete los datos para solicitar acceso a YuNet</p>
         </div>
 
+        <div id="js-error-container"></div>
+
         @if (ViewBag.Error != null)
         {
             <div class="alert-neon animate__animated animate__shakeX">
@@ -168,27 +170,36 @@
             </div>
         }
 
-        <form action="/Login/Registro" method="POST">
+        <form id="formRegistro" action="/Login/Registro" method="POST">
             @Html.AntiForgeryToken()
 
             <div class="form-floating-custom">
-                <input type="text" name="Nombre" placeholder="Nombre completo" required autocomplete="off">
+                <input type="text" name="Nombre" placeholder="Nombre completo"
+                       value="@ViewBag.NombreTemp"
+                       pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                       title="El nombre solo debe contener letras y espacios. No se permiten números ni caracteres especiales."
+                       required autocomplete="off">
                 <i class="bi bi-person icon-left"></i>
             </div>
 
             <div class="form-floating-custom">
-                <input type="email" name="Correo" placeholder="usuario@yunet.com" required autocomplete="off">
+                <input type="email" name="Correo" placeholder="usuario@yunet.com"
+                       value="@ViewBag.CorreoTemp"
+                       required autocomplete="off" id="inputCorreo">
                 <i class="bi bi-envelope icon-left"></i>
             </div>
 
             <div class="form-floating-custom">
-                <input type="password" name="Clave" placeholder="Contraseña" required>
+                <input type="password" name="Clave" placeholder="Contraseña" required id="inputClave">
                 <i class="bi bi-shield-lock icon-left"></i>
             </div>
 
             <div class="form-floating-custom">
-                <select name="Id_Rol" required>
-                    <option value="2">Usuario</option>
+                <select name="Id_Rol" required id="selectRol">
+                    <option value="1">Administrador</option>
+                    <option value="2" selected>Usuario</option>
+                    <option value="3">Vendedor</option>
+                    <option value="4">Auditor</option>
                 </select>
                 <i class="bi bi-person-badge icon-left"></i>
             </div>
@@ -205,10 +216,54 @@
                     <i class="bi bi-box-arrow-left me-2"></i> Salir
                 </a>
             </div>
-
         </form>
 
     </div>
 
+    <script>
+        document.getElementById('formRegistro').addEventListener('submit', function (e) {
+
+            // 1. Obtener los valores de los inputs
+            const clave = document.getElementById('inputClave').value;
+            const correo = document.getElementById('inputCorreo').value.trim();
+            const idRol = document.getElementById('selectRol').value;
+            const errorContainer = document.getElementById('js-error-container');
+
+            // Limpiar errores previos
+            errorContainer.innerHTML = '';
+            let errorMsg = '';
+
+            // 2. Validar longitud de contraseña
+            if (clave.length < 5) {
+                errorMsg = "La contraseña debe tener al menos 5 caracteres.";
+            }
+            // 3. Validar formato del correo basado en el rol
+            else {
+                let terminacionEsperada = "";
+                switch (idRol) {
+                    case "1": terminacionEsperada = ".admin@yunet.com"; break;
+                    case "2": terminacionEsperada = ".usuario@yunet.com"; break;
+                    case "3": terminacionEsperada = ".vendedor@yunet.com"; break;
+                    case "4": terminacionEsperada = ".auditor@yunet.com"; break;
+                }
+
+                if (!correo.endsWith(terminacionEsperada)) {
+                    errorMsg = `Formato de correo inválido. Para este rol, el correo debe terminar en '${terminacionEsperada}'.`;
+                }
+            }
+
+            // 4. Si hay error, detenemos el envío e inyectamos la alerta visual
+            if (errorMsg !== '') {
+                e.preventDefault(); // Evita que la página recargue y envíe el formulario
+
+                errorContainer.innerHTML = `
+                    <div class="alert-neon animate__animated animate__shakeX">
+                        <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                        <div>${errorMsg}</div>
+                    </div>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>

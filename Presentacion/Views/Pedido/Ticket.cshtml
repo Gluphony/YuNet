@@ -8,8 +8,8 @@
 
 <style>
     /* ==========================================
-               VARIABLES NEÓN Y TEMAS (Basado en el Home)
-               ========================================== */
+                   VARIABLES NEÓN Y TEMAS (Basado en el Home)
+                   ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -17,6 +17,8 @@
         --neon-red-base: #ff4d4d;
         --neon-red-glow: rgba(255, 77, 77, 0.4);
         --neon-red-tint: rgba(255, 77, 77, 0.1);
+        --neon-yellow: #ffcc00;
+        --neon-green: #00FF7F;
     }
 
     /* Diseño de la Tarjeta Ticket */
@@ -74,6 +76,23 @@
             transform: translateY(-2px);
         }
 
+    /* NUEVO: Botón Amarillo para IMEI */
+    .btn-neon-warning {
+        background: transparent;
+        color: var(--neon-yellow) !important;
+        border: 1px solid var(--neon-yellow);
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-neon-warning:hover {
+            background: var(--neon-yellow);
+            color: #000 !important;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
     .btn-outline-custom {
         background: transparent;
         color: var(--text-main);
@@ -104,15 +123,15 @@
         }
 
     /* ==========================================
-           ESTILOS PARA LA TABLA DEL TICKET
-           ========================================== */
+                   ESTILOS PARA LA TABLA DEL TICKET
+                   ========================================== */
     .table-ticket {
         background-color: transparent !important;
         color: var(--text-main) !important;
     }
 
         .table-ticket thead th {
-            background-color: var(--neon-blue-tint) !important; /* Le da un toque neón al encabezado */
+            background-color: var(--neon-blue-tint) !important;
             color: var(--neon-blue-base) !important;
             border-bottom: 2px dashed var(--border-color) !important;
         }
@@ -122,19 +141,19 @@
         }
 
         .table-ticket tbody td {
-            background-color: transparent !important; /* Elimina el fondo blanco rebelde */
+            background-color: transparent !important;
             color: var(--text-main) !important;
-            border-bottom: 1px dashed var(--border-color) !important; /* Línea punteada estilo ticket */
+            border-bottom: 1px dashed var(--border-color) !important;
         }
 
-    /* Para la sección de los totales */
     .ticket-totales {
-        background-color: rgba(0, 0, 0, 0.2); /* Un fondo sutilmente más oscuro para resaltar el total */
+        background-color: rgba(0, 0, 0, 0.2);
         border-radius: 8px;
     }
+
     /* ==========================================
-               ESTILOS DE IMPRESIÓN (Blanco y Negro)
-               ========================================== */
+                   ESTILOS DE IMPRESIÓN (Blanco y Negro)
+                   ========================================== */
     @@media print {
         body {
             background-color: white !important;
@@ -199,6 +218,7 @@
         <div>@TempData["MensajeExito"]</div>
     </div>
 }
+
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <div class="ticket-card mb-4" id="seccionTicket">
@@ -224,7 +244,7 @@
                                 <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Descripción</th>
                                 <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Precio Unit.</th>
                                 <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Importe</th>
-                                <th scope="col" class="pb-3 text-uppercase text-center d-print-none" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Garantía</th>
+                                <th scope="col" class="pb-3 text-uppercase text-center d-print-none" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody style="border-bottom: 1px dashed rgba(255,255,255,0.2);">
@@ -249,15 +269,24 @@
                                         <td class="py-3 text-end fw-bold" style="background-color: transparent; color: var(--text-main); width: 15%;">@item.SUBTOTAL.ToString("C")</td>
 
                                         <td class="py-3 text-center d-print-none" style="background-color: transparent; width: 20%;">
+
+                                            @if (User.IsInRole("Administrador") && (item.IMEI_VENDIDO == "N/A" || string.IsNullOrWhiteSpace(item.IMEI_VENDIDO)))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-neon-warning mb-2 btn-asignar-imei w-100"
+                                                        data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                    <i class="bi bi-upc-scan"></i> Asignar IMEI
+                                                </button>
+                                            }
+
                                             @if (item.Tiene_Devolucion)
                                             {
-                                                <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base); font-size: 0.85rem; padding: 0.4em 0.8em; box-shadow: 0 0 5px var(--neon-blue-glow);">
+                                                <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base); font-size: 0.85rem; padding: 0.4em 0.8em; box-shadow: 0 0 5px var(--neon-blue-glow); display: block;">
                                                     @item.ESTADO_REPORTE
                                                 </span>
                                             }
                                             else
                                             {
-                                                <button type="button" class="btn btn-sm btn-neon-danger"
+                                                <button type="button" class="btn btn-sm btn-neon-danger w-100 mt-1"
                                                         onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@item.PRODUCTO.Replace("'", "\\'")')">
                                                     <i class="bi bi-exclamation-circle me-1"></i> Reportar
                                                 </button>
@@ -265,7 +294,6 @@
                                         </td>
                                     </tr>
                                 }
-
                             }
                             else if (ViewBag.Error == null)
                             {
@@ -325,17 +353,16 @@
                     </p>
 
                     <input type="hidden" id="inputDetalleDevolucion" name="ID_DETALLE_DEVOLUCION" value="" />
-
-                    <div class="mb-3 mt-4">
-                        <label for="motivoCliente" class="form-label" style="color: var(--neon-blue-base);">Motivo de la devolución</label>
-                        <textarea class="form-control" id="motivoCliente" name="MOTIVO_CLIENTE" rows="4" required
+                    <input type="hidden" id="idDetalleReporte" /> <div class="mb-3 mt-4">
+                        <label for="motivoReporte" class="form-label" style="color: var(--neon-blue-base);">Motivo de la devolución</label>
+                        <textarea class="form-control" id="motivoReporte" name="MOTIVO_CLIENTE" rows="4" required
                                   style="background-color: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); resize: none;"
                                   placeholder="Ej: La pantalla vino rota, no enciende..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px dashed rgba(255,255,255,0.1);">
                     <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-neon-danger px-4">
+                    <button type="button" class="btn btn-neon-danger px-4" onclick="enviarReporteAjax(event)">
                         Enviar Reporte
                     </button>
                 </div>
@@ -343,41 +370,123 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
-        // Función para abrir el modal y poner los datos (Esta ya la tenías, te la dejo de referencia)
+        // ============================================
+        // 1. FUNCIONES PARA EL REPORTE (DEVOLUCIÓN)
+        // ============================================
         function abrirModalReporte(idDetalle, producto) {
             document.getElementById('idDetalleReporte').value = idDetalle;
-            document.getElementById('nombreProductoReporte').innerText = producto;
+            document.getElementById('lblProductoReporte').innerText = producto;
             var modal = new bootstrap.Modal(document.getElementById('modalReporte'));
             modal.show();
         }
 
-        // NUEVO: Función para enviar el reporte por AJAX
-        function enviarReporteAjax() {
+        function enviarReporteAjax(event) {
+            event.preventDefault(); // Evitamos que el formulario haga POST tradicional
+
             var idDetalle = document.getElementById('idDetalleReporte').value;
             var motivo = document.getElementById('motivoReporte').value;
 
-            if(motivo.trim() === '') {
-                alert('Por favor, escribe un motivo.');
+            if (motivo.trim() === '') {
+                Swal.fire("Atención", "Por favor, escribe un motivo para la devolución.", "warning");
                 return;
             }
 
-            // Enviamos los datos al controlador
             $.post('/Devolucion/Create', {
                 ID_DETALLE_PEDIDO: idDetalle,
                 MOTIVO_CLIENTE: motivo
             }, function (response) {
                 if (response.exito) {
-                    alert('¡Éxito! ' + response.mensaje);
-                    // Recargamos la página para que el botón rojo cambie al estado "Pendiente"
-                    location.reload();
+                    Swal.fire("¡Éxito!", response.mensaje, "success").then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert('Error: ' + response.mensaje);
+                    Swal.fire("Error", response.mensaje, "error");
                 }
-            }).fail(function() {
-                alert('Ocurrió un error de conexión al enviar el reporte.');
+            }).fail(function () {
+                Swal.fire("Error de Conexión", "Ocurrió un error al enviar el reporte.", "error");
             });
         }
+
+        // ============================================
+        // 2. NUEVO: FUNCIÓN PARA ASIGNAR IMEI (ADMIN)
+        // ============================================
+        document.querySelectorAll('.btn-asignar-imei').forEach(boton => {
+            boton.addEventListener('click', function () {
+                const idDetalle = this.getAttribute('data-iddetalle');
+
+                Swal.fire({
+                    title: '<i class="bi bi-upc-scan" style="color: var(--neon-yellow);"></i> Asignar IMEI',
+                    html: '<p style="color: var(--text-muted); font-size: 0.9rem;">Digitá o escaneá el número de serie / IMEI para entregar este dispositivo:</p>',
+                    input: 'text',
+                    inputPlaceholder: 'Ej. 359123456789012',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--neon-green)',
+                    cancelButtonColor: 'var(--neon-red)',
+                    confirmButtonText: '<i class="bi bi-check-lg"></i> Asignar y Despachar',
+                    cancelButtonText: 'Cancelar',
+                    customClass: {
+                        popup: 'border border-secondary rounded-4 shadow-lg',
+                        input: 'bg-transparent text-white border-secondary text-center fw-bold fs-5'
+                    },
+                    inputAttributes: {
+                        maxlength: '15', // Bloquea el teclado para no escribir más de 15
+                        oninput: "this.value = this.value.replace(/[^0-9]/g, '')" // Borra letras al instante
+                    },
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return '¡El IMEI no puede estar vacío!';
+                        }
+                        // Verifica que sean exactamente 15 números
+                        const regexSoloNumeros = /^[0-9]{15}$/;
+                        if (!regexSoloNumeros.test(value.trim())) {
+                            return '¡El IMEI debe tener exactamente 15 números (sin letras ni espacios)!';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const imeiDigitado = result.value;
+
+                        // Petición AJAX al controlador
+                        fetch('@Url.Action("AsignarImei", "Pedido")', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `idDetallePedido=${idDetalle}&imei=${encodeURIComponent(imeiDigitado)}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: "¡Asignado!",
+                                    text: data.message,
+                                    icon: "success",
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-main)',
+                                    confirmButtonColor: 'var(--neon-blue-base)'
+                                }).then(() => location.reload()); // Recarga para ver el cambio
+                            } else {
+                                Swal.fire({
+                                    title: "Error al asignar",
+                                    text: data.message,
+                                    icon: "error",
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-main)',
+                                    confirmButtonColor: 'var(--neon-red)'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire("Error de Red", "No se pudo comunicar con el servidor.", "error");
+                        });
+                    }
+                });
+            });
+        });
     </script>
 }

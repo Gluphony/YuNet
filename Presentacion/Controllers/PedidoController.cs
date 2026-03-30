@@ -95,10 +95,33 @@ public ActionResult Historial()
         }
 
         // ==========================================
-        // GET: Pedido/Ticket/5 (La vista de factura)
+        // NUEVO: POST PARA ASIGNAR IMEI (AJAX)
         // ==========================================
-        // ==========================================
-        // GET: Pedido/Ticket/5 (La vista de factura)
+        [HttpPost]
+        public IActionResult AsignarImei(int idDetallePedido, string imei)
+        {
+            try
+            {
+                // Instanciamos la lógica
+                LogicaDetallePedido logica = new LogicaDetallePedido();
+
+                // Ejecutamos la función
+                bool respuesta = logica.AsignarImeiDespacho(idDetallePedido, imei);
+
+                if (respuesta)
+                {
+                    // Si todo sale al cien, le mandamos el OK al SweetAlert
+                    return Json(new { success = true, message = $"IMEI {imei} asignado y descontado del inventario correctamente." });
+                }
+
+                return Json(new { success = false, message = "No se pudo asignar el IMEI por un problema interno." });
+            }
+            catch (Exception ex)
+            {
+                // Si el SQL bota el error (ej. "El IMEI ya fue vendido"), cae aquí y se lo mandamos a la vista
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
         // ==========================================
         public ActionResult Ticket(int id)
         {

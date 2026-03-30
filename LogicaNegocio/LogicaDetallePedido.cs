@@ -54,6 +54,33 @@ namespace LogicaNegocio
             return _dataDetalle.InsertarDetalle(oDetalle, idUsuarioSesion);
         }
 
+        public bool AsignarImeiDespacho(int idDetallePedido, string imei)
+        {
+            // 1. Limpiamos espacios en blanco
+            string imeiLimpio = imei?.Trim();
+
+            // 2. Validaciones Anti-Dedazos y Anti-Hackers
+            if (string.IsNullOrWhiteSpace(imeiLimpio))
+            {
+                throw new Exception("El número de IMEI es obligatorio.");
+            }
+
+            if (imeiLimpio.Length != 15)
+            {
+                throw new Exception($"El IMEI debe tener exactamente 15 dígitos. Ingresaste {imeiLimpio.Length}.");
+            }
+
+            // Usamos una expresión regular para asegurar que TODOS los 15 caracteres sean números
+            if (!System.Text.RegularExpressions.Regex.IsMatch(imeiLimpio, @"^\d{15}$"))
+            {
+                throw new Exception("El IMEI no es válido. Solo se permiten números, sin letras ni guiones.");
+            }
+
+            // 3. Pasamos la orden a la capa de Datos
+            DataDetallePedido _datosDetalle = new DataDetallePedido();
+            return _datosDetalle.AsignarImeiDespacho(idDetallePedido, imeiLimpio);
+        }
+
         // 2. LISTAR TICKET (Para imprimir)
         public List<DetallePedido> ListarTicket(int idPedido)
         {

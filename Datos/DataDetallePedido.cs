@@ -43,7 +43,39 @@ namespace Datos
             }
             return respuesta;
         }
+        // ==============================================================================
+        // NUEVO: ASIGNAR IMEI EN DESPACHO
+        // ==============================================================================
+        public bool AsignarImeiDespacho(int idDetallePedido, string imei)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("Venta.Sp_AsignarImei_Despacho", conexion))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Id_Detalle_Pedido", idDetallePedido);
+                        cmd.Parameters.AddWithValue("@Imei", imei);
 
+                        conexion.Open();
+                        // Ejecutamos la asignación
+                        respuesta = cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Atrapa los THROW del SQL (ej. "El IMEI ya fue vendido")
+                    throw new Exception(sqlEx.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error al conectar con la base de datos: " + ex.Message);
+                }
+            }
+            return respuesta;
+        }
         // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
         // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
         public List<DetallePedido> ListarTicket(int idPedido)

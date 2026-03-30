@@ -6,8 +6,8 @@
 
 <style>
     /* ==========================================
-               VARIABLES Y ESTILOS BASE
-               ========================================== */
+           VARIABLES Y ESTILOS BASE
+           ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -193,6 +193,9 @@
                                     <i class="bi bi-box-seam"></i> Ver Productos
                                 </a>
 
+                                <button type="button" class="btn btn-customer btn-report" onclick="abrirModalReporte('@item.ID_PEDIDO')">
+                                    <i class="bi bi-exclamation-triangle"></i> Reportar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -213,6 +216,16 @@
     }
 </div>
 
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;">
+
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: bold;">
+                    <i class="bi bi-exclamation-triangle" style="color: var(--neon-red);"></i> Reportar Problema
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
             <div class="modal-body p-4">
                 <form id="formReporte">
@@ -243,11 +256,12 @@
             </div>
 
             <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-customer" data-bs-dismiss="modal" style="color: var(--text-muted); border: 1px solid var(--border-color);">Cancelar</button>
+                <button type="button" class="btn btn-customer" data-bs-dismiss="modal" style="color: var(--text-muted); border: 1px solid var(--border-color); background: transparent;">Cancelar</button>
                 <button type="button" class="btn btn-customer" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
                     <i class="bi bi-send-fill me-1"></i> Enviar Reporte
                 </button>
             </div>
+
         </div>
     </div>
 </div>
@@ -257,14 +271,14 @@
         // Declaramos la variable global para el modal
         let modalReporteBootstrap;
 
-        // Función global para que el botón "onclick" la pueda encontrar en el HTML
+        // Función global para abrir el modal
         function abrirModalReporte(idPedido) {
             // Llenamos los campos del modal
             document.getElementById('txtIdPedidoReporte').value = idPedido;
             document.getElementById('cboMotivoReporte').selectedIndex = 0;
             document.getElementById('txtDetalleReporte').value = '';
 
-            // Si el modal no ha sido instanciado, lo instanciamos
+            // Instanciamos el modal si no existe
             if (!modalReporteBootstrap) {
                 const modalEl = document.getElementById('modalReporte');
                 modalReporteBootstrap = new bootstrap.Modal(modalEl);
@@ -293,7 +307,7 @@
                         }
                     });
                 });
-            }); // <-- ¡AQUÍ FALTABA CERRAR EL FOREACH CORRECTAMENTE!
+            });
 
             // --- LÓGICA DE ENVIAR REPORTE ---
             document.getElementById('btnEnviarReporte').addEventListener('click', function () {
@@ -306,11 +320,9 @@
                     return;
                 }
 
-                // Juntamos el motivo principal y el detalle para enviarlo a tu C#
+                // Juntamos el motivo principal y el detalle
                 const motivoCompleto = motivo + " - " + detalle;
 
-                // En tu C# el método Create recibe ID_DETALLE_PEDIDO.
-                // Asegúrate de que en tu Base de Datos tenga sentido enviar el ID del PEDIDO general a esta variable.
                 const formData = new FormData();
                 formData.append("ID_DETALLE_PEDIDO", idPedido);
                 formData.append("MOTIVO_CLIENTE", motivoCompleto);
@@ -318,37 +330,43 @@
                 const btnEnviar = document.getElementById('btnEnviarReporte');
                 const textoOriginal = btnEnviar.innerHTML;
 
-                // Cambiamos el texto para mostrar que está cargando
+                // Mostramos estado de carga
                 btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
                 btnEnviar.disabled = true;
 
-                // Hacemos la petición al backend
+                // Petición al backend
                 fetch('/Devolucion/Create', {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    // Verificamos que la respuesta sea un JSON válido
+                    if (!response.ok) {
+                        throw new Error('Error en la red o en el servidor');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.exito) {
                         alert('✅ ¡Reporte enviado! Nos pondremos en contacto contigo pronto.');
                         if (modalReporteBootstrap) {
-                            modalReporteBootstrap.hide(); // Cerramos el modal
+                            modalReporteBootstrap.hide();
                         }
                     } else {
-                        alert('❌ Hubo un problema: ' + data.mensaje);
+                        alert('❌ Hubo un problema: ' + (data.mensaje || 'Error desconocido.'));
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ocurrió un error al intentar enviar el reporte.');
+                    alert('Ocurrió un error al intentar enviar el reporte. Verifica la consola para más detalles.');
                 })
                 .finally(() => {
-                    // Regresamos el botón a la normalidad
+                    // Restauramos el botón
                     btnEnviar.innerHTML = textoOriginal;
                     btnEnviar.disabled = false;
                 });
             });
 
-        }); // <-- ¡Y AQUÍ FALTABA CERRAR EL DOMContentLoaded!
+        });
     </script>
 }

@@ -44,7 +44,12 @@ namespace LogicaNegocio
 
             return _datosProductos.DesactivarProducto(idProducto);
         }
-
+        public List<UnidadExistencia> ListarImeisDisponibles(int idProducto)
+        {
+            // Podrías poner validaciones aquí si quisieras, 
+            // pero como solo es una consulta, lo mandamos directo a la capa de datos.
+            return _datosProductos.ListarImeisDisponibles(idProducto);
+        }
         // 5. OBTENER IMAGEN
         public byte[] ObtenerImagenProducto(int idProducto)
         {

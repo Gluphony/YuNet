@@ -170,6 +170,42 @@ namespace Datos
             return imagen;
         }
 
+        public List<UnidadExistencia> ListarImeisDisponibles(int idProducto)
+        {
+            List<UnidadExistencia> lista = new List<UnidadExistencia>();
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+                {
+                    SqlCommand cmd = new SqlCommand("Inventario.Sp_ListarImeisDisponibles", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id_Producto", idProducto);
+
+                    conexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new UnidadExistencia
+                            {
+                                ID_UNIDAD = Convert.ToInt32(dr["ID_UNIDAD"]),
+                                ID_PRODUCTO = Convert.ToInt32(dr["ID_PRODUCTO"]),
+                                IMEI = dr["IMEI"].ToString(),
+                                ESTADO_FISICO = dr["ESTADO_FISICO"].ToString(),
+                                FECHA_INGRESO = Convert.ToDateTime(dr["FECHA_INGRESO"]),
+                                VENDIDO = Convert.ToBoolean(dr["VENDIDO"])
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener IMEIs: " + ex.Message);
+            }
+            return lista;
+        }
+
         public DataTable ListarProductoPorCategoria(int idCategoria)
         {
             DataTable tabla = new DataTable();

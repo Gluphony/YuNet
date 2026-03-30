@@ -16,8 +16,8 @@
 
 <style>
     /* ==========================================
-                   VARIABLES NEÓN
-                   ========================================== */
+                       VARIABLES NEÓN
+                       ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -32,8 +32,8 @@
     }
 
     /* ==========================================
-                   ESTILOS DE TARJETAS NEÓN
-                   ========================================== */
+                       ESTILOS DE TARJETAS NEÓN
+                       ========================================== */
     .info-card {
         background-color: var(--bg-card) !important;
         border: 1px solid var(--border-color);
@@ -230,7 +230,13 @@
                                                     <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: rgba(255, 255, 255, 0.05); color: var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                         <i class="bi bi-box"></i>
                                                     </div>
-                                                    <span style="color: var(--text-main); font-weight: 500;">@item.PRODUCTO</span>
+                                                    <div>
+                                                        <span style="color: var(--text-main); font-weight: 500; display: block;">@item.PRODUCTO</span>
+                                                        @if (item.IMEI_VENDIDO != "N/A" && !string.IsNullOrWhiteSpace(item.IMEI_VENDIDO))
+                                                        {
+                                                            <small style="color: var(--neon-blue-base); font-size: 0.8rem; letter-spacing: 0.5px;">IMEI/Serie: @item.IMEI_VENDIDO</small>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td class="text-center py-3" style="color: var(--text-muted); background-color: transparent;">
@@ -243,6 +249,17 @@
                                                 C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))
                                             </td>
                                             <td class="text-center py-3" style="background-color: transparent;">
+
+                                                @if (User.IsInRole("Administrador") && (item.IMEI_VENDIDO == "N/A" || string.IsNullOrWhiteSpace(item.IMEI_VENDIDO)))
+                                                {
+                                                    <button type="button" class="btn btn-sm text-dark fw-bold btn-asignar-imei mb-2"
+                                                            style="background-color: var(--neon-yellow); box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);"
+                                                            data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                        <i class="bi bi-upc-scan me-1"></i> Asignar IMEI
+                                                    </button>
+                                                    <br />
+                                                }
+
                                                 <button type="button" class="btn btn-report" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO)">
                                                     <i class="bi bi-exclamation-triangle"></i> Reportar
                                                 </button>
@@ -395,6 +412,77 @@
                 });
             });
 
+            // ========================================================
+            // NUEVA LÓGICA: ASIGNAR IMEI CON SWEETALERT (SOLO ADMIN)
+            // ========================================================
+            document.querySelectorAll('.btn-asignar-imei').forEach(boton => {
+                boton.addEventListener('click', function () {
+                    const idDetalle = this.getAttribute('data-iddetalle');
+
+                    Swal.fire({
+                        title: '<i class="bi bi-upc-scan" style="color: var(--neon-blue-base);"></i> Asignar IMEI',
+                        html: '<p style="color: var(--text-muted); font-size: 0.9rem;">Digitá o escaneá el número de serie / IMEI para este dispositivo:</p>',
+                        input: 'text',
+                        inputPlaceholder: 'Ej. 359123456789012',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-main)',
+                        showCancelButton: true,
+                        confirmButtonColor: 'var(--neon-green)',
+                        cancelButtonColor: 'var(--neon-red)',
+                        confirmButtonText: '<i class="bi bi-check-lg"></i> Guardar',
+                        cancelButtonText: 'Cancelar',
+                        customClass: {
+                            popup: 'border border-secondary rounded-4 shadow-lg',
+                            input: 'bg-transparent text-white border-secondary'
+                        },
+                        inputValidator: (value) => {
+                            if (!value || value.trim().length < 5) {
+                                return '¡Necesitás ingresar un IMEI válido (mínimo 5 caracteres)!';
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const imeiDigitado = result.value;
+
+                            // Mandamos el dato al Controlador usando Form URL Encoded
+                            // OJO: Revisá que el controlador en la ruta se llame igual que el tuyo (Pedido o Pedidos)
+                            fetch('@Url.Action("AsignarImei", "Pedido")', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `idDetallePedido=${idDetalle}&imei=${encodeURIComponent(imeiDigitado)}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: "¡Listo!",
+                                        text: data.message,
+                                        icon: "success",
+                                        background: 'var(--bg-card)',
+                                        color: 'var(--text-main)',
+                                        confirmButtonColor: 'var(--neon-blue-base)'
+                                    }).then(() => location.reload()); // Recargamos para ver el IMEI en pantalla
+                                } else {
+                                    Swal.fire({
+                                        title: "No se pudo asignar",
+                                        text: data.message,
+                                        icon: "error",
+                                        background: 'var(--bg-card)',
+                                        color: 'var(--text-main)',
+                                        confirmButtonColor: 'var(--neon-red)'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire("Error de Red", "No se pudo comunicar con el servidor.", "error");
+                            });
+                        }
+                    });
+                });
+            });
+
         });
     </script>
-    }
+}
