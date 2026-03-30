@@ -29,19 +29,36 @@ namespace LogicaNegocio
         }
 
         // 2. CAMBIAR CONTRASEÑA
-        public bool CambiarClave(int idUsuario, string nuevaClave)
+        //public bool CambiarClave(int idUsuario, string nuevaClave)
+        //{
+        //    if (idUsuario <= 0)
+        //        throw new ArgumentException("El ID del usuario no es válido.");
+
+        //    if (string.IsNullOrWhiteSpace(nuevaClave))
+        //        throw new ArgumentException("La nueva contraseña no puede estar vacía.");
+
+        //    // REGLA DE NEGOCIO: Puedes forzar una longitud mínima de seguridad aquí
+        //    if (nuevaClave.Length < 6)
+        //        throw new ArgumentException("La contraseña debe tener al menos 6 caracteres por seguridad.");
+
+        //    return _datosSeguridad.CambiarClave(idUsuario, nuevaClave);
+        //}
+
+        public bool CambiarClave(string correo, string nuevaClave)
         {
-            if (idUsuario <= 0)
-                throw new ArgumentException("El ID del usuario no es válido.");
+            // Validamos que el correo no sea nulo o vacío
+            if (string.IsNullOrWhiteSpace(correo))
+                throw new ArgumentException("El correo electrónico es requerido.");
 
             if (string.IsNullOrWhiteSpace(nuevaClave))
                 throw new ArgumentException("La nueva contraseña no puede estar vacía.");
 
-            // REGLA DE NEGOCIO: Puedes forzar una longitud mínima de seguridad aquí
-            if (nuevaClave.Length < 6)
+            // REGLA DE NEGOCIO: Longitud mínima de seguridad
+            if (nuevaClave.Length < 5)
                 throw new ArgumentException("La contraseña debe tener al menos 6 caracteres por seguridad.");
 
-            return _datosSeguridad.CambiarClave(idUsuario, nuevaClave);
+            // Enviamos el correo a la capa de datos
+            return _datosSeguridad.CambiarClave(correo, nuevaClave);
         }
     }
 }

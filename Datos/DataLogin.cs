@@ -39,7 +39,32 @@ namespace Datos
         }
 
         // 2. CAMBIAR CONTRASEÑA
-        public bool CambiarClave(int idUsuario, string nuevaClave)
+        //public bool CambiarClave(int idUsuario, string nuevaClave)
+        //{
+        //    bool respuesta = false;
+        //    using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+        //    {
+        //        try
+        //        {
+        //            SqlCommand cmd = new SqlCommand("Seguridad.Sp_CambiarClave", conexion);
+        //            cmd.CommandType = CommandType.StoredProcedure;
+
+        //            cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+        //            cmd.Parameters.AddWithValue("@NuevaClave", nuevaClave ?? (object)DBNull.Value);
+
+        //            conexion.Open();
+        //            cmd.ExecuteNonQuery();
+        //            respuesta = true;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            throw new Exception("Error al cambiar la contraseña: " + ex.Message);
+        //        }
+        //    }
+        //    return respuesta;
+        //}
+
+        public bool CambiarClave(string correo, string nuevaClave)
         {
             bool respuesta = false;
             using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
@@ -49,12 +74,17 @@ namespace Datos
                     SqlCommand cmd = new SqlCommand("Seguridad.Sp_CambiarClave", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+                    // Cambiamos @Id_Usuario por @Correo y pasamos el string 'correo'
+                    cmd.Parameters.AddWithValue("@Correo", correo ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@NuevaClave", nuevaClave ?? (object)DBNull.Value);
 
                     conexion.Open();
-                    cmd.ExecuteNonQuery();
-                    respuesta = true;
+
+                    // ExecuteNonQuery devolverá el número de filas afectadas
+                    int filasAfectadas = cmd.ExecuteNonQuery();
+
+                    // Es buena práctica asegurar que al menos una fila se actualizó
+                    respuesta = filasAfectadas > 0;
                 }
                 catch (Exception ex)
                 {

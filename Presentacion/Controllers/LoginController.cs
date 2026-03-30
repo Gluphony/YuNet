@@ -149,24 +149,51 @@ namespace Presentacion.Controllers
         {
             try
             {
-                bool exito = _logicaUsuario.RestablecerClave(Correo, NuevaClave);
+                // CAMBIO: Se cambió _logicaUsuario.RestablecerClave por .CambiarClave
+                bool exito = _logicaSeguridad.CambiarClave(Correo, NuevaClave);
 
                 if (exito)
                 {
-                    ViewBag.Exito = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
-                    return View("Index");
+                    // Usamos TempData para que el mensaje sobreviva al redireccionamiento
+                    TempData["Exito"] = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
+                    return RedirectToAction("Index", "Login"); // Es mejor redireccionar al Login
                 }
                 else
                 {
-                    TempData["Error"] = "El correo ingresado no pertenece a ningún usuario activo.";
+                    ViewBag.Error = "El correo ingresado no pertenece a ningún usuario activo.";
                 }
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                ViewBag.Error = ex.Message;
             }
 
             return View();
         }
+
+        //[HttpPost]
+        //public IActionResult RestablecerClave(string Correo, string NuevaClave)
+        //{
+        //    try
+        //    {
+        //        bool exito = _logicaUsuario.RestablecerClave(Correo, NuevaClave);
+
+        //        if (exito)
+        //        {
+        //            ViewBag.Exito = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
+        //            return View("Index");
+        //        }
+        //        else
+        //        {
+        //            TempData["Error"] = "El correo ingresado no pertenece a ningún usuario activo.";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TempData["Error"] = ex.Message;
+        //    }
+
+        //    return View();
+        //}
     }
 }
