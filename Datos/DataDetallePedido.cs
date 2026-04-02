@@ -44,7 +44,10 @@ namespace Datos
             return respuesta;
         }
         // ==============================================================================
-        // NUEVO: ASIGNAR IMEI EN DESPACHO
+        // NUEVO: ASIGNAR IMEI EN DESPACHO (Arreglado el Error Fantasma y Múltiples)
+        // ==============================================================================
+        // ==============================================================================
+        // OPCIÓN A: ASIGNAR IMEI EN DESPACHO (Un solo registro a la vez)
         // ==============================================================================
         public bool AsignarImeiDespacho(int idDetallePedido, string imei)
         {
@@ -56,28 +59,38 @@ namespace Datos
                     using (SqlCommand cmd = new SqlCommand("Venta.Sp_AsignarImei_Despacho", conexion))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Enviamos los 2 parámetros que espera SQL
                         cmd.Parameters.AddWithValue("@Id_Detalle_Pedido", idDetallePedido);
                         cmd.Parameters.AddWithValue("@Imei", imei);
 
                         conexion.Open();
-                        // Ejecutamos la asignación
-                        respuesta = cmd.ExecuteNonQuery() > 0;
+
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                int exito = Convert.ToInt32(dr["Exito"]);
+                                if (exito == 1)
+                                {
+                                    respuesta = true;
+                                }
+                                else
+                                {
+                                    // Si SQL arroja los THROW (Ej: "Ya se asignaron todos"), lo capturamos
+                                    throw new Exception(dr["Mensaje"].ToString());
+                                }
+                            }
+                        }
                     }
-                }
-                catch (SqlException sqlEx)
-                {
-                    // Atrapa los THROW del SQL (ej. "El IMEI ya fue vendido")
-                    throw new Exception(sqlEx.Message);
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error al conectar con la base de datos: " + ex.Message);
+                    throw new Exception(ex.Message);
                 }
             }
             return respuesta;
         }
-        // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
-        // 2. LISTAR TICKET (Para imprimir la factura/comprobante)
         public List<DetallePedido> ListarTicket(int idPedido)
         {
             var olista = new List<DetallePedido>();

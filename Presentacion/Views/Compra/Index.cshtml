@@ -148,7 +148,9 @@
                     {
                         <tr>
                             <td>@item.FECHA_COMPRA.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td class="fw-bold">Proveedor #@item.ID_PROVEEDOR</td>
+                            <td class="fw-bold" style="color: var(--text-main);">
+                                <i class="bi bi-building me-2 text-muted"></i>@item.PROVEEDOR_NOMBRE
+                            </td>
                             <td><span class="badge border border-info text-info" style="font-family: monospace;">@item.NUMERO_FACTURA_PROV</span></td>
                             <td class="text-end fw-bold text-success">$@item.TOTAL_COMPRA.ToString("N2")</td>
                         </tr>

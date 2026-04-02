@@ -8,8 +8,8 @@
 
 <style>
     /* ==========================================
-                   VARIABLES NEÓN Y TEMAS (Basado en el Home)
-                   ========================================== */
+           VARIABLES TEMA OSCURO (Por defecto)
+        ========================================== */
     :root {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
@@ -19,6 +19,30 @@
         --neon-red-tint: rgba(255, 77, 77, 0.1);
         --neon-yellow: #ffcc00;
         --neon-green: #00FF7F;
+        --bg-card: #0F172A;
+        --bg-accordion: rgba(255, 255, 255, 0.02);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --text-main: #F8FAFC;
+        --text-muted: #94A3B8;
+        --row-hover: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ==========================================
+           VARIABLES TEMA CLARO (Adaptativo)
+        ========================================== */
+    [data-bs-theme="light"], body.light-mode {
+        --neon-blue-base: #0096c7;
+        --neon-blue-glow: rgba(0, 150, 199, 0.2);
+        --neon-blue-tint: rgba(0, 150, 199, 0.1);
+        --neon-red-base: #e6004c;
+        --neon-yellow: #e6a800;
+        --neon-green: #00b359;
+        --bg-card: #ffffff;
+        --bg-accordion: #f8f9fa;
+        --border-color: rgba(0, 0, 0, 0.08);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --row-hover: rgba(0, 0, 0, 0.02);
     }
 
     /* Diseño de la Tarjeta Ticket */
@@ -31,7 +55,6 @@
         color: var(--text-main);
     }
 
-        /* Borde luminoso superior */
         .ticket-card::before {
             content: '';
             position: absolute;
@@ -59,7 +82,6 @@
             transform: translateY(-2px);
         }
 
-    /* Botón Neón Rojo (Para Reportar) */
     .btn-neon-danger {
         background: transparent;
         color: var(--neon-red-base) !important;
@@ -67,16 +89,16 @@
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.3s ease;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
     }
 
         .btn-neon-danger:hover {
             background: var(--neon-red-base);
             color: #fff !important;
             box-shadow: 0 0 15px var(--neon-red-glow);
-            transform: translateY(-2px);
         }
 
-    /* NUEVO: Botón Amarillo para IMEI */
     .btn-neon-warning {
         background: transparent;
         color: var(--neon-yellow) !important;
@@ -84,13 +106,14 @@
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.3s ease;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
     }
 
         .btn-neon-warning:hover {
             background: var(--neon-yellow);
             color: #000 !important;
             box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
-            transform: translateY(-2px);
         }
 
     .btn-outline-custom {
@@ -108,7 +131,6 @@
             background-color: var(--neon-blue-tint);
         }
 
-    /* Caja del Total Neón */
     .total-box {
         background-color: var(--neon-blue-tint);
         border: 1px solid rgba(0, 212, 255, 0.3);
@@ -122,9 +144,7 @@
             box-shadow: 0 0 20px var(--neon-blue-glow);
         }
 
-    /* ==========================================
-                   ESTILOS PARA LA TABLA DEL TICKET
-                   ========================================== */
+    /* Estilos Tabla */
     .table-ticket {
         background-color: transparent !important;
         color: var(--text-main) !important;
@@ -136,61 +156,104 @@
             border-bottom: 2px dashed var(--border-color) !important;
         }
 
-        .table-ticket tbody tr {
-            background-color: transparent !important;
-        }
-
         .table-ticket tbody td {
             background-color: transparent !important;
             color: var(--text-main) !important;
             border-bottom: 1px dashed var(--border-color) !important;
         }
 
-    .ticket-totales {
-        background-color: rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
+    /* FLECHITA ANIMADA */
+    .btn-toggle-accordion {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+        padding: 0;
+        cursor: pointer;
+    }
+
+        .btn-toggle-accordion:hover {
+            background-color: var(--row-hover);
+            color: var(--text-main);
+            transform: scale(1.05);
+        }
+
+        .btn-toggle-accordion i {
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+        }
+
+        .btn-toggle-accordion:not(.collapsed) {
+            background-color: var(--neon-blue-tint);
+            color: var(--neon-blue-base);
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 0 10px var(--neon-blue-glow);
+            transform: scale(1.1);
+        }
+
+            .btn-toggle-accordion:not(.collapsed) i {
+                transform: rotate(180deg);
+            }
+
+    .accordion-row-open {
+        background-color: var(--bg-accordion);
+        border-bottom: 1px dashed var(--border-color);
     }
 
     /* ==========================================
-                   ESTILOS DE IMPRESIÓN (Blanco y Negro)
-                   ========================================== */
+           ESTILOS DE IMPRESIÓN
+        ========================================== */
     @@media print {
-        body {
-            background-color: white !important;
-        }
+        body
 
-        .d-print-none {
+    {
+        background-color: white !important;
+    }
+
+    .d-print-none {
+        display: none !important;
+    }
+
+    .ticket-card {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+        background-color: white !important;
+    }
+
+        .ticket-card::before {
             display: none !important;
         }
 
-        .ticket-card {
-            box-shadow: none !important;
-            border: 1px solid #000 !important;
-            background-color: white !important;
+        .ticket-card * {
+            color: black !important;
         }
 
-            .ticket-card::before {
-                display: none !important;
-            }
+    .total-box {
+        background-color: transparent !important;
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
 
-            .ticket-card * {
-                color: black !important;
-            }
+    .table-ticket thead th {
+        background-color: transparent !important;
+        color: black !important;
+        border-bottom: 2px solid black !important;
+    }
 
-        .total-box {
-            background-color: transparent !important;
-            border: 1px solid #000 !important;
-            box-shadow: none !important;
-        }
     }
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <div>
         <h2 class="h3 mb-0" style="color: var(--text-main); font-weight: 700;">
-            <i class="bi bi-receipt-cutoff me-2" style="color: var(--neon-blue-base);"></i>Detalle del Pedido
+            <i class="bi bi-receipt-cutoff me-2" style="color: var(--neon-blue-base);"></i>Gestión de Ticket
         </h2>
-        <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Revisión de artículos y totales</p>
+        <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Despacho de artículos y totales</p>
     </div>
 
     <div>
@@ -203,32 +266,16 @@
     </div>
 </div>
 
-@if (ViewBag.Error != null)
-{
-    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center d-print-none" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: 8px; border-left: 4px solid #dc3545 !important;">
-        <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
-        <div>@ViewBag.Error</div>
-    </div>
-}
-
-@if (TempData["MensajeExito"] != null)
-{
-    <div class="alert shadow-sm border-0 mb-4 d-flex align-items-center d-print-none" style="background-color: rgba(0, 212, 255, 0.1); color: var(--neon-blue-base); border-radius: 8px; border-left: 4px solid var(--neon-blue-base) !important;">
-        <i class="bi bi-check-circle-fill fs-5 me-3"></i>
-        <div>@TempData["MensajeExito"]</div>
-    </div>
-}
-
 <div class="row justify-content-center">
     <div class="col-lg-10">
         <div class="ticket-card mb-4" id="seccionTicket">
 
-            <div class="card-header p-4 text-center" style="background-color: transparent; border-bottom: 1px dashed rgba(255,255,255,0.2);">
+            <div class="card-header p-4 text-center" style="background-color: transparent; border-bottom: 1px dashed var(--border-color);">
                 <h4 class="fw-bold mb-1" style="color: var(--text-main); text-transform: uppercase; letter-spacing: 1px;">Tu Empresa POS</h4>
                 <p class="mb-0" style="color: var(--text-muted); font-size: 0.9rem;">Ticket de Venta / Comprobante</p>
                 @if (Model != null && Model.Any())
                 {
-                    <div class="mt-3 d-inline-block px-4 py-2" style="background-color: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div class="mt-3 d-inline-block px-4 py-2" style="background-color: var(--bg-accordion); border-radius: 8px; border: 1px solid var(--border-color);">
                         <span style="color: var(--text-muted); font-size: 0.85rem;">Pedido No.</span>
                         <strong style="color: var(--neon-blue-base); font-size: 1.2rem; text-shadow: 0 0 8px var(--neon-blue-glow);" class="ms-1">#@ViewBag.NumeroPedido</strong>
                     </div>
@@ -237,68 +284,143 @@
 
             <div class="card-body p-4">
                 <div class="table-responsive">
-                    <table class="table table-borderless align-middle mb-0">
-                        <thead style="border-bottom: 1px solid var(--border-color);">
+                    <table class="table table-borderless align-middle mb-0 table-ticket">
+                        <thead>
                             <tr>
-                                <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Cant.</th>
-                                <th scope="col" class="pb-3 text-uppercase" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Descripción</th>
-                                <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Precio Unit.</th>
-                                <th scope="col" class="pb-3 text-uppercase text-end" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Importe</th>
-                                <th scope="col" class="pb-3 text-uppercase text-center d-print-none" style="font-size: 0.75rem; color: var(--neon-blue-base); letter-spacing: 0.5px;">Acciones</th>
+                                <th scope="col" class="pb-3 text-uppercase" style="width: 10%;">Cant.</th>
+                                <th scope="col" class="pb-3 text-uppercase" style="width: 45%;">Descripción</th>
+                                <th scope="col" class="pb-3 text-uppercase text-end" style="width: 15%;">Precio Unit.</th>
+                                <th scope="col" class="pb-3 text-uppercase text-end" style="width: 15%;">Importe</th>
+                                <th scope="col" class="pb-3 text-uppercase text-center d-print-none" style="width: 15%;">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody style="border-bottom: 1px dashed rgba(255,255,255,0.2);">
+                        <tbody>
                             @if (Model != null && Model.Any())
                             {
                                 @foreach (var item in Model)
                                 {
-                                    <tr>
-                                        <td class="py-3 fw-bold" style="background-color: transparent; color: var(--text-main); width: 10%;">@item.CANTIDAD</td>
+                                    // Lógica para dividir los IMEIs agrupados
+                                    int cantidad = item.CANTIDAD;
+                                    string imeisGuardados = (item.IMEI_VENDIDO != null && item.IMEI_VENDIDO != "N/A") ? item.IMEI_VENDIDO : "";
+                                    string[] listaImeisAsignados = string.IsNullOrWhiteSpace(imeisGuardados) ? new string[0] : imeisGuardados.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                                        <td class="py-3" style="background-color: transparent; color: var(--text-main); width: 40%;">
-                                            <span class="d-block fw-bold">@item.PRODUCTO</span>
+                                    <tr style="border-bottom: 1px solid var(--row-hover);">
+                                        <td class="py-3 fw-bold fs-5">@item.CANTIDAD</td>
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center">
+                                                @if (cantidad > 1)
+                                                {
+                                                    <button class="btn-toggle-accordion collapsed me-3 d-print-none" type="button" data-bs-toggle="collapse" data-bs-target="#col_@item.ID_DETALLE_PEDIDO">
+                                                        <i class="bi bi-chevron-down"></i>
+                                                    </button>
+                                                }
+                                                <div>
+                                                    <span class="d-block fw-bold fs-6">@item.PRODUCTO</span>
 
-                                            @if (item.IMEI_VENDIDO != "N/A" && !string.IsNullOrWhiteSpace(item.IMEI_VENDIDO))
-                                            {
-                                                <small style="color: var(--neon-blue-base); font-size: 0.8rem; letter-spacing: 0.5px;">IMEI/Serie: @item.IMEI_VENDIDO</small>
-                                            }
+                                                    <div class="d-print-none">
+                                                        @if (cantidad == 1 && listaImeisAsignados.Length == 1)
+                                                        {
+                                                            <small style="color: var(--neon-blue-base);">IMEI: @listaImeisAsignados[0]</small>
+                                                        }
+                                                        else if (cantidad > 1)
+                                                        {
+                                                            <small style="color: var(--text-muted);"><span style="color: var(--neon-blue-base); fw-bold">@listaImeisAsignados.Length</span> de @cantidad despachados</small>
+                                                        }
+                                                    </div>
+
+                                                    <div class="d-none d-print-block">
+                                                        @if (listaImeisAsignados.Length > 0)
+                                                        {
+                                                            <small style="color: black;">IMEI(s): @imeisGuardados</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
-
-                                        <td class="py-3 text-end" style="background-color: transparent; color: var(--text-muted); width: 15%;">@item.PRECIO_UNITARIO.ToString("C")</td>
-
-                                        <td class="py-3 text-end fw-bold" style="background-color: transparent; color: var(--text-main); width: 15%;">@item.SUBTOTAL.ToString("C")</td>
-
-                                        <td class="py-3 text-center d-print-none" style="background-color: transparent; width: 20%;">
-
-                                            @if (User.IsInRole("Administrador") && (item.IMEI_VENDIDO == "N/A" || string.IsNullOrWhiteSpace(item.IMEI_VENDIDO)))
+                                        <td class="py-3 text-end" style="color: var(--text-muted);">@item.PRECIO_UNITARIO.ToString("C")</td>
+                                        <td class="py-3 text-end fw-bold">@item.SUBTOTAL.ToString("C")</td>
+                                        <td class="py-3 text-center d-print-none">
+                                            @if (cantidad == 1)
                                             {
-                                                <button type="button" class="btn btn-sm btn-neon-warning mb-2 btn-asignar-imei w-100"
-                                                        data-iddetalle="@item.ID_DETALLE_PEDIDO">
-                                                    <i class="bi bi-upc-scan"></i> Asignar IMEI
-                                                </button>
-                                            }
-
-                                            @if (item.Tiene_Devolucion)
-                                            {
-                                                <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base); font-size: 0.85rem; padding: 0.4em 0.8em; box-shadow: 0 0 5px var(--neon-blue-glow); display: block;">
-                                                    @item.ESTADO_REPORTE
-                                                </span>
+                                                if (listaImeisAsignados.Length == 0)
+                                                {
+                                                    <button type="button" class="btn btn-neon-warning w-100 btn-asignar-imei" data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                        <i class="bi bi-upc-scan"></i> Asignar
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base);">Asignado</span>
+                                                }
                                             }
                                             else
                                             {
-                                                <button type="button" class="btn btn-sm btn-neon-danger w-100 mt-1"
-                                                        onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@item.PRODUCTO.Replace("'", "\\'")')">
-                                                    <i class="bi bi-exclamation-circle me-1"></i> Reportar
-                                                </button>
+                                                if (listaImeisAsignados.Length == cantidad)
+                                                {
+                                                    <span class="badge" style="background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border: 1px solid var(--neon-blue-base); font-size: 0.8rem; padding: 0.4em 0.6em;">
+                                                        <i class="bi bi-check2-all me-1"></i> Completado
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-custom" data-bs-toggle="collapse" data-bs-target="#col_@item.ID_DETALLE_PEDIDO" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
+                                                        <i class="bi bi-eye"></i> Ver Unidades
+                                                    </button>
+                                                }
                                             }
                                         </td>
                                     </tr>
+
+                                    @if (cantidad > 1)
+                                    {
+                                        <tr id="col_@item.ID_DETALLE_PEDIDO" class="collapse d-print-none">
+                                            <td colspan="5" class="p-0 border-0">
+                                                <div class="accordion-row-open p-3 p-md-4 m-2 rounded" style="border: 1px dashed var(--border-color);">
+                                                    @for (int i = 0; i < cantidad; i++)
+                                                    {
+                                                        bool tieneImei = i < listaImeisAsignados.Length;
+                                                        string imeiActual = tieneImei ? listaImeisAsignados[i] : "";
+
+                                                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color: var(--border-color) !important;">
+                                                            <div>
+                                                                <span style="color: var(--text-main); font-weight: 500;">Unidad #@(i + 1)</span>
+                                                                @if (tieneImei)
+                                                                {
+                                                                    <span class="badge ms-2" style="background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);">
+                                                                        <i class="bi bi-check-circle me-1"></i> IMEI: @imeiActual
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge ms-2 text-muted" style="background: transparent; border: 1px dashed var(--text-muted);">Pendiente</span>
+                                                                }
+                                                            </div>
+                                                            <div>
+                                                                @if (!tieneImei)
+                                                                {
+                                                                    <button type="button" class="btn btn-neon-warning btn-asignar-imei" data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                                        <i class="bi bi-upc-scan"></i> Asignar
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button" class="btn btn-neon-danger ms-2" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@imeiActual')">
+                                                                        <i class="bi bi-exclamation-circle"></i> Reportar
+                                                                    </button>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
                             }
-                            else if (ViewBag.Error == null)
+                            else
                             {
                                 <tr>
-                                    <td colspan="5" class="text-center py-5" style="background-color: transparent;">
+                                    <td colspan="5" class="text-center py-5">
                                         <i class="bi bi-cart-x fs-2 mb-2 d-block" style="color: var(--neon-blue-base); opacity: 0.5;"></i>
                                         <span style="color: var(--text-muted);">No hay detalles para este pedido.</span>
                                     </td>
@@ -310,154 +432,158 @@
 
                 <div class="row justify-content-end mt-4">
                     <div class="col-md-6 col-lg-5">
-                        <div class="d-flex justify-content-between mb-2 px-2">
-                            <span style="color: var(--text-muted);">Subtotal:</span>
-                            <span style="color: var(--text-main); font-weight: 500;">@totalPedido.ToString("C")</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 px-2">
-                            <span style="color: var(--text-muted);">Impuestos (0%):</span>
-                            <span style="color: var(--text-main); font-weight: 500;">$0.00</span>
-                        </div>
                         <div class="d-flex justify-content-between p-3 total-box mt-2">
-                            <span class="fw-bold text-uppercase" style="color: var(--text-main); letter-spacing: 1px;">Total:</span>
+                            <span class="fw-bold text-uppercase" style="color: var(--text-main); letter-spacing: 1px;">Total Venta:</span>
                             <span class="fw-bold fs-4" style="color: var(--neon-blue-base); text-shadow: 0 0 10px var(--neon-blue-glow);">@totalPedido.ToString("C")</span>
                         </div>
                     </div>
                 </div>
-
-            </div>
-
-            <div class="card-footer text-center py-4" style="background-color: transparent; border-top: none;">
-                <p class="mb-1 fw-bold fs-5" style="color: var(--text-main);">¡Gracias por tu compra!</p>
-                <small style="color: var(--text-muted); opacity: 0.8;">Por favor conserva este ticket para cualquier aclaración o devolución.</small>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-            <div class="modal-header" style="border-bottom: 1px dashed rgba(255,255,255,0.1);">
-                <h5 class="modal-title fw-bold" id="modalReporteLabel" style="color: var(--neon-red-base); text-shadow: 0 0 8px var(--neon-red-glow);">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: var(--neon-red-base);">
                     <i class="bi bi-shield-exclamation me-2"></i>Reportar Problema
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
             </div>
+            <div class="modal-body p-4">
+                <form id="formReporte">
+                    <input type="hidden" id="txtIdDetallePedidoReporte" />
+                    <input type="hidden" id="txtImeiReporte" />
 
-            <form asp-controller="Devolucion" asp-action="Create" method="post">
-                <div class="modal-body p-4">
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">
-                        Estás a punto de reportar el producto:<br />
-                        <strong id="lblProductoReporte" style="color: var(--text-main); display: block; margin-top: 5px;"></strong>
-                    </p>
-
-                    <input type="hidden" id="inputDetalleDevolucion" name="ID_DETALLE_DEVOLUCION" value="" />
-                    <input type="hidden" id="idDetalleReporte" /> <div class="mb-3 mt-4">
-                        <label for="motivoReporte" class="form-label" style="color: var(--neon-blue-base);">Motivo de la devolución</label>
-                        <textarea class="form-control" id="motivoReporte" name="MOTIVO_CLIENTE" rows="4" required
-                                  style="background-color: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); resize: none;"
-                                  placeholder="Ej: La pantalla vino rota, no enciende..."></textarea>
+                    <div class="alert mb-4" style="background-color: var(--icon-bg); border: 1px solid var(--border-color); color: var(--text-muted);">
+                        Reportando falla en la unidad <strong style="color: var(--neon-blue-base);" id="lblImeiReporte"></strong>.
                     </div>
-                </div>
-                <div class="modal-footer" style="border-top: 1px dashed rgba(255,255,255,0.1);">
-                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-neon-danger px-4" onclick="enviarReporteAjax(event)">
-                        Enviar Reporte
-                    </button>
-                </div>
-            </form>
+
+                    <div class="mb-3 mt-4">
+                        <label class="form-label" style="color: var(--neon-blue-base);">Motivo exacto</label>
+                        <textarea class="form-control" id="motivoReporte" rows="4" required
+                                  style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); resize: none;"
+                                  placeholder="Ej: Equipo rayado, no enciende..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-neon-danger px-4" id="btnEnviarReporte">Enviar Reporte</button>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // ============================================
-        // 1. FUNCIONES PARA EL REPORTE (DEVOLUCIÓN)
-        // ============================================
-        function abrirModalReporte(idDetalle, producto) {
-            document.getElementById('idDetalleReporte').value = idDetalle;
-            document.getElementById('lblProductoReporte').innerText = producto;
-            var modal = new bootstrap.Modal(document.getElementById('modalReporte'));
-            modal.show();
+        let modalReporteBootstrap;
+
+        // ==========================================
+        // 0. MANTENER EL ACORDEÓN ABIERTO AL RECARGAR
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", function () {
+            const acordeonId = sessionStorage.getItem('acordeonAbierto');
+            if (acordeonId) {
+                const acordeonElement = document.getElementById(acordeonId);
+                if (acordeonElement) {
+                    acordeonElement.classList.add('show'); // Lo abrimos
+
+                    // Buscamos la flechita y la giramos también
+                    const botonFlecha = document.querySelector(`[data-bs-target="#${acordeonId}"]`);
+                    if (botonFlecha) {
+                        botonFlecha.classList.remove('collapsed');
+                    }
+                }
+                sessionStorage.removeItem('acordeonAbierto'); // Limpiamos la memoria
+            }
+        });
+
+        // ==========================================
+        // 1. REPORTE AJAX
+        // ==========================================
+        function abrirModalReporte(idDetalle, imei) {
+            document.getElementById('txtIdDetallePedidoReporte').value = idDetalle;
+            document.getElementById('txtImeiReporte').value = imei;
+            document.getElementById('lblImeiReporte').innerText = `IMEI: ${imei}`;
+            document.getElementById('motivoReporte').value = '';
+
+            if (!modalReporteBootstrap) {
+                modalReporteBootstrap = new bootstrap.Modal(document.getElementById('modalReporte'));
+            }
+            modalReporteBootstrap.show();
         }
 
-        function enviarReporteAjax(event) {
-            event.preventDefault(); // Evitamos que el formulario haga POST tradicional
-
-            var idDetalle = document.getElementById('idDetalleReporte').value;
-            var motivo = document.getElementById('motivoReporte').value;
+        document.getElementById('btnEnviarReporte').addEventListener('click', function () {
+            const idDetalle = document.getElementById('txtIdDetallePedidoReporte').value;
+            const imei = document.getElementById('txtImeiReporte').value;
+            const motivo = document.getElementById('motivoReporte').value;
 
             if (motivo.trim() === '') {
                 Swal.fire("Atención", "Por favor, escribe un motivo para la devolución.", "warning");
                 return;
             }
 
-            $.post('/Devolucion/Create', {
-                ID_DETALLE_PEDIDO: idDetalle,
-                MOTIVO_CLIENTE: motivo
-            }, function (response) {
-                if (response.exito) {
-                    Swal.fire("¡Éxito!", response.mensaje, "success").then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire("Error", response.mensaje, "error");
-                }
-            }).fail(function () {
-                Swal.fire("Error de Conexión", "Ocurrió un error al enviar el reporte.", "error");
-            });
-        }
+            const formData = new FormData();
+            formData.append('ID_DETALLE_PEDIDO', idDetalle);
+            formData.append('MOTIVO_CLIENTE', `[Unidad: ${imei}] ${motivo}`);
 
-        // ============================================
-        // 2. NUEVO: FUNCIÓN PARA ASIGNAR IMEI (ADMIN)
-        // ============================================
+            fetch('/Devolucion/Create', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.exito) {
+                    Swal.fire("¡Éxito!", data.mensaje, "success").then(() => location.reload());
+                } else {
+                    Swal.fire("Error", data.mensaje, "error");
+                }
+            });
+        });
+
+        // ==========================================
+        // 2. ASIGNACIÓN IMEI (SWEETALERT CON FORMDATA)
+        // ==========================================
         document.querySelectorAll('.btn-asignar-imei').forEach(boton => {
             boton.addEventListener('click', function () {
                 const idDetalle = this.getAttribute('data-iddetalle');
 
                 Swal.fire({
-                    title: '<i class="bi bi-upc-scan" style="color: var(--neon-yellow);"></i> Asignar IMEI',
-                    html: '<p style="color: var(--text-muted); font-size: 0.9rem;">Digitá o escaneá el número de serie / IMEI para entregar este dispositivo:</p>',
+                    title: '<i class="bi bi-upc-scan" style="color: var(--neon-blue-base);"></i> Escanear IMEI',
+                    html: '<p style="color: var(--text-muted);">Escanée o digite los 15 dígitos del dispositivo:</p>',
                     input: 'text',
                     inputPlaceholder: 'Ej. 359123456789012',
+
+                    // BLOQUEO EN TIEMPO REAL (15 dígitos y solo números)
+                    inputAttributes: {
+                        maxlength: "15",
+                        oninput: "this.value = this.value.replace(/[^0-9]/g, '')"
+                    },
+
                     background: 'var(--bg-card)',
                     color: 'var(--text-main)',
                     showCancelButton: true,
                     confirmButtonColor: 'var(--neon-green)',
                     cancelButtonColor: 'var(--neon-red)',
-                    confirmButtonText: '<i class="bi bi-check-lg"></i> Asignar y Despachar',
+                    confirmButtonText: '<i class="bi bi-check-lg"></i> Asignar',
                     cancelButtonText: 'Cancelar',
-                    customClass: {
-                        popup: 'border border-secondary rounded-4 shadow-lg',
-                        input: 'bg-transparent text-white border-secondary text-center fw-bold fs-5'
-                    },
-                    inputAttributes: {
-                        maxlength: '15', // Bloquea el teclado para no escribir más de 15
-                        oninput: "this.value = this.value.replace(/[^0-9]/g, '')" // Borra letras al instante
-                    },
+                    customClass: { input: 'bg-transparent text-main border-secondary text-center fs-5 fw-bold tracking-widest' },
                     inputValidator: (value) => {
-                        if (!value) {
-                            return '¡El IMEI no puede estar vacío!';
-                        }
-                        // Verifica que sean exactamente 15 números
-                        const regexSoloNumeros = /^[0-9]{15}$/;
-                        if (!regexSoloNumeros.test(value.trim())) {
-                            return '¡El IMEI debe tener exactamente 15 números (sin letras ni espacios)!';
-                        }
+                        const val = value ? value.trim() : '';
+                        if (!/^\d{15}$/.test(val)) return '¡El IMEI debe estar completo (15 dígitos)!';
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        const imeiDigitado = result.value;
+                        const imeiDigitado = result.value.trim();
 
-                        // Petición AJAX al controlador
+                        // ENVIAMOS CON FORMDATA
+                        const formData = new FormData();
+                        formData.append('idDetallePedido', idDetalle);
+                        formData.append('imei', imeiDigitado);
+
                         fetch('@Url.Action("AsignarImei", "Pedido")', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: `idDetallePedido=${idDetalle}&imei=${encodeURIComponent(imeiDigitado)}`
+                            body: formData
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -468,22 +594,21 @@
                                     icon: "success",
                                     background: 'var(--bg-card)',
                                     color: 'var(--text-main)',
-                                    confirmButtonColor: 'var(--neon-blue-base)'
-                                }).then(() => location.reload()); // Recarga para ver el cambio
+                                    timer: 1500, // Se cierra solo rápido
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // Guardamos el acordeón abierto antes de recargar
+                                    sessionStorage.setItem('acordeonAbierto', 'col_' + idDetalle);
+                                    location.reload();
+                                });
                             } else {
                                 Swal.fire({
-                                    title: "Error al asignar",
-                                    text: data.message,
-                                    icon: "error",
-                                    background: 'var(--bg-card)',
-                                    color: 'var(--text-main)',
-                                    confirmButtonColor: 'var(--neon-red)'
+                                    title: "Rechazado", text: data.message, icon: "error",
+                                    background: 'var(--bg-card)', color: 'var(--text-main)'
                                 });
                             }
                         })
-                        .catch(error => {
-                            Swal.fire("Error de Red", "No se pudo comunicar con el servidor.", "error");
-                        });
+                        .catch(() => Swal.fire("Error", "No se pudo conectar con el servidor.", "error"));
                     }
                 });
             });

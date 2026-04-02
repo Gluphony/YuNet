@@ -6,27 +6,50 @@
 
 <style>
     /* ==========================================
-                           VARIABLES NEÓN (Heredadas del Home)
-                           ========================================== */
+           VARIABLES GLOBALES (MODO CLARO POR DEFECTO)
+        ========================================== */
     :root {
+        --bg-main: #F4F7FE;
+        --bg-card: #FFFFFF;
+        --text-main: #2B3674;
+        --text-muted: #707EAE;
+        --border-color: #E2E8F0;
+        --neon-blue-base: #008bba;
+        --neon-blue-glow: rgba(0, 139, 186, 0.2);
+        --neon-blue-tint: rgba(0, 139, 186, 0.05);
+        --neon-green: #00a651;
+        --neon-red: #d90043;
+        --neon-yellow: #d48b00;
+        --neon-purple: #8e44ad;
+        --btn-close-filter: none;
+    }
+
+    /* ==========================================
+           VARIABLES MODO OSCURO (Adaptativo)
+        ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, body.dark-mode, [data-theme="dark"], .dark-layout {
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --border-color: #2D2D3A;
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
         --neon-blue-tint: rgba(0, 212, 255, 0.1);
         --neon-green: #00FF7F;
         --neon-red: #ff3366;
         --neon-yellow: #ffcc00;
-        --neon-purple: #C6C3F2; /* Agregado para el ticket */
     }
 
     /* ==========================================
-                           ESTILOS DE LA VISTA DE PEDIDOS
-                           ========================================== */
+           ESTILOS DE LA TARJETA PRINCIPAL
+        ========================================== */
     .order-card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 16px;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        overflow: hidden;
+        transition: all 0.4s ease;
+        overflow: visible; /* Cambiado a visible para que el dropdown no se corte */
         color: var(--text-main);
     }
 
@@ -36,33 +59,36 @@
         }
 
     .order-card-header {
-        background-color: transparent;
+        background-color: var(--bg-main);
         border-bottom: 1px solid var(--border-color);
         padding: 1.5rem;
+        border-radius: 16px 16px 0 0;
     }
 
-    /* Tabla Adaptable */
+    /* ==========================================
+           TABLA ADAPTABLE
+        ========================================== */
     .table-orders {
         margin-bottom: 0;
         color: var(--text-main);
     }
 
         .table-orders th {
-            background-color: var(--neon-blue-tint);
-            color: var(--neon-blue-base);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            background-color: var(--bg-main);
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
             font-weight: 700;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 1px;
-            padding: 1.2rem;
+            padding: 1rem 1.2rem;
         }
 
         .table-orders td {
             background-color: transparent;
             color: var(--text-main);
             border-bottom: 1px solid var(--border-color);
-            padding: 1.2rem;
+            padding: 1rem 1.2rem;
             vertical-align: middle;
             transition: background-color 0.2s;
         }
@@ -75,106 +101,135 @@
             border-bottom: none;
         }
 
-    /* Botones de Acción de la Tabla estilo Icon-Circle */
+    /* ==========================================
+           BOTONES DE ACCIÓN
+        ========================================== */
     .action-btn {
         width: 36px;
         height: 36px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 10px;
+        border-radius: 8px;
         border: 1px solid var(--border-color);
-        background-color: var(--bg-main);
-        transition: all 0.3s ease;
+        background-color: var(--bg-card);
+        transition: all 0.2s ease;
         color: var(--text-main);
+        text-decoration: none;
     }
 
-        .action-btn.view:hover {
+        .action-btn.ticket:hover {
             color: var(--neon-blue-base);
             border-color: var(--neon-blue-base);
             background-color: var(--neon-blue-tint);
-            box-shadow: 0 0 15px var(--neon-blue-glow);
-            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 10px var(--neon-blue-glow);
         }
 
         .action-btn.complete:hover {
             color: var(--neon-green);
             border-color: var(--neon-green);
             background-color: rgba(0, 255, 127, 0.1);
-            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
-            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
         }
 
-        /* NUEVO ESTILO: Botón de Ticket */
-        .action-btn.ticket:hover {
-            color: var(--neon-purple);
-            border-color: var(--neon-purple);
-            background-color: rgba(198, 195, 242, 0.1);
-            box-shadow: 0 0 15px rgba(198, 195, 242, 0.4);
-            transform: scale(1.1) rotate(-5deg);
+        .action-btn.cancel:hover {
+            color: var(--neon-red);
+            border-color: var(--neon-red);
+            background-color: rgba(255, 51, 102, 0.1);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
         }
 
-    /* Badges de Estado Neón */
+    /* ==========================================
+           BADGES DE ESTADO
+        ========================================== */
     .status-badge {
         font-weight: 700;
         font-size: 0.75rem;
         padding: 0.5em 1.2em;
-        border-radius: 8px;
+        border-radius: 6px;
         letter-spacing: 0.5px;
         text-transform: uppercase;
+        display: inline-block;
     }
 
         .status-badge.completado {
             color: var(--neon-green);
             background-color: rgba(0, 255, 127, 0.1);
             border: 1px solid var(--neon-green);
-            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
         }
 
         .status-badge.pendiente {
             color: var(--neon-yellow);
             background-color: rgba(255, 204, 0, 0.1);
             border: 1px solid var(--neon-yellow);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
         }
 
         .status-badge.cancelado {
             color: var(--neon-red);
             background-color: rgba(255, 51, 102, 0.1);
             border: 1px solid var(--neon-red);
-            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
         }
 
         .status-badge.desconocido {
             color: var(--neon-blue-base);
             background-color: var(--neon-blue-tint);
             border: 1px solid var(--neon-blue-base);
-            box-shadow: 0 0 10px var(--neon-blue-glow);
         }
 
-    /* Dropdown adaptado */
-    .dropdown-menu-neon {
-        background-color: var(--bg-card);
-        border: 1px solid var(--neon-blue-base) !important;
-        box-shadow: 0 5px 20px var(--neon-blue-glow);
+    /* ==========================================
+           DROPDOWN DEL FILTRO (ARREGLADO)
+        ========================================== */
+    .btn-filter-custom {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        border-radius: 8px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-        .dropdown-menu-neon .dropdown-item {
-            color: var(--text-main);
+        .btn-filter-custom:hover, .btn-filter-custom:focus {
+            background-color: var(--bg-main) !important;
+            border-color: var(--neon-blue-base) !important;
+            color: var(--neon-blue-base) !important;
         }
 
-            .dropdown-menu-neon .dropdown-item:hover {
-                background-color: var(--neon-blue-tint);
-                color: var(--neon-blue-base);
+    .dropdown-menu-custom {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+        border-radius: 12px !important;
+        padding: 0.5rem 0 !important;
+        z-index: 1050 !important; /* Fuerza a estar por encima de la tabla */
+    }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-main) !important;
+            font-weight: 600 !important;
+            padding: 0.7rem 1.5rem !important;
+            transition: background-color 0.2s;
+        }
+
+            .dropdown-menu-custom .dropdown-item:hover {
+                background-color: var(--bg-main) !important;
+                color: var(--neon-blue-base) !important;
             }
+
+        .dropdown-menu-custom .dropdown-divider {
+            border-color: var(--border-color) !important;
+            margin: 0.3rem 0 !important;
+            opacity: 1 !important;
+        }
 </style>
 
 <div class="container-fluid container-xl py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <div class="premium-label mb-1" style="color: var(--neon-blue-base); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Dashboard</div>
+            <div class="mb-1 fw-bold text-uppercase" style="color: var(--neon-blue-base); font-size: 0.75rem; letter-spacing: 2px;">Dashboard</div>
             <h2 class="h3 mb-1 fw-bold" style="color: var(--text-main);">Gestión de Pedidos</h2>
-            <p class="mb-0" style="color: var(--text-muted);">Administra y da seguimiento a todas las órdenes generadas por los clientes en YuNet</p>
+            <p class="mb-0" style="color: var(--text-muted);">Administra y da seguimiento a todas las órdenes generadas por los clientes.</p>
         </div>
     </div>
 
@@ -182,23 +237,23 @@
 
     <div class="order-card">
         <div class="order-card-header d-flex justify-content-between align-items-center">
-            <h5 class="m-0 fw-bold d-flex align-items-center" style="color: var(--neon-blue-base);">
-                <div class="icon-circle me-3" style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem;">
+            <h5 class="m-0 fw-bold d-flex align-items-center" style="color: var(--text-main);">
+                <div class="me-3" style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem; background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-receipt"></i>
                 </div>
                 Listado General
             </h5>
 
             <div class="dropdown">
-                <button class="btn btn-sm d-flex align-items-center" type="button" data-bs-toggle="dropdown" style="background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.5rem 1rem;">
+                <button class="btn btn-filter-custom d-flex align-items-center" type="button" id="btnFiltrarAdmin" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-funnel me-2" style="color: var(--neon-blue-base);"></i> Filtrar <i class="bi bi-chevron-down ms-2" style="font-size: 0.7rem;"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg dropdown-menu-neon mt-2">
-                    <li><a class="dropdown-item" href="#">Todos los pedidos</a></li>
-                    <li><hr class="dropdown-divider" style="border-color: rgba(0, 212, 255, 0.2);"></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-yellow);"><i class="bi bi-clock-history me-2"></i>Pendientes</a></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-green);"><i class="bi bi-check2-circle me-2"></i>Completados</a></li>
-                    <li><a class="dropdown-item fw-bold" href="#" style="color: var(--neon-red);"><i class="bi bi-x-circle me-2"></i>Cancelados</a></li>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="btnFiltrarAdmin">
+                    <li><a class="dropdown-item btn-filtro" href="#" data-filtro="TODOS">Todos los pedidos</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn-filtro" href="#" data-filtro="PENDIENTE" style="color: var(--neon-yellow) !important;"><i class="bi bi-clock-history me-2"></i>Pendientes</a></li>
+                    <li><a class="dropdown-item btn-filtro" href="#" data-filtro="COMPLETADO" style="color: var(--neon-green) !important;"><i class="bi bi-check2-circle me-2"></i>Completados</a></li>
+                    <li><a class="dropdown-item btn-filtro" href="#" data-filtro="CANCELADO" style="color: var(--neon-red) !important;"><i class="bi bi-x-circle me-2"></i>Cancelados</a></li>
                 </ul>
             </div>
         </div>
@@ -206,8 +261,8 @@
         <div class="card-body p-0">
             @if (Model != null && Model.Any())
             {
-                <div class="table-responsive">
-                    <table class="table table-orders align-middle" id="dataTable">
+                <div class="table-responsive" style="overflow: visible;">
+                    <table class="table table-orders align-middle mb-0" id="dataTable">
                         <thead>
                             <tr>
                                 <th class="ps-4">ID</th>
@@ -221,16 +276,21 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                <tr>
+                                string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
+                                string claseBadge = estadoStr == "COMPLETADO" ? "completado" :
+                                estadoStr == "PENDIENTE" ? "pendiente" :
+                                estadoStr == "CANCELADO" ? "cancelado" : "desconocido";
+
+                                <tr class="fila-admin" data-estado="@estadoStr">
                                     <td class="ps-4 fw-bold" style="color: var(--neon-blue-base);">
                                         #@item.ID_PEDIDO
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="icon-circle me-3" style="width: 32px; height: 32px; font-size: 1rem;">
+                                            <div class="me-3" style="width: 32px; height: 32px; font-size: 1rem; color: var(--text-muted); background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="bi bi-person"></i>
                                             </div>
-                                            <span style="color: var(--text-main); font-weight: 500;">@item.CLIENTE</span>
+                                            <span style="font-weight: 500; color: var(--text-main);">@item.CLIENTE</span>
                                         </div>
                                     </td>
                                     <td style="color: var(--text-muted);">
@@ -240,12 +300,6 @@
                                         C$ @item.TOTAL.ToString("N2")
                                     </td>
                                     <td class="text-center">
-                                        @{
-                                            string estadoStr = item.ESTADO?.ToUpper() ?? "DESCONOCIDO";
-                                            string claseBadge = estadoStr == "COMPLETADO" ? "completado" :
-                                            estadoStr == "PENDIENTE" ? "pendiente" :
-                                            estadoStr == "CANCELADO" ? "cancelado" : "desconocido";
-                                        }
                                         <span class="status-badge @claseBadge">
                                             @item.ESTADO
                                         </span>
@@ -262,6 +316,9 @@
                                                 <button class="action-btn complete" onclick="cambiarEstado(@item.ID_PEDIDO, 'Completado')" title="Marcar como Completado">
                                                     <i class="bi bi-check2-all"></i>
                                                 </button>
+                                                <button class="action-btn cancel" onclick="cambiarEstado(@item.ID_PEDIDO, 'Cancelado')" title="Cancelar Pedido">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
                                             }
                                         </div>
                                     </td>
@@ -275,12 +332,12 @@
             {
                 <div class="text-center py-5">
                     <div class="mb-4">
-                        <div class="icon-circle mx-auto" style="width: 100px; height: 100px; font-size: 3rem;">
+                        <div class="mx-auto" style="width: 80px; height: 80px; font-size: 2.5rem; color: var(--text-muted); background: var(--bg-main); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-inbox"></i>
                         </div>
                     </div>
                     <h5 class="fw-bold" style="color: var(--text-main);">Panel en espera</h5>
-                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Aún no hay pedidos para procesar. Las órdenes aparecerán aquí de forma automática una vez que los clientes finalicen sus compras en la tienda.</p>
+                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Aún no hay pedidos para procesar. Las órdenes aparecerán aquí de forma automática.</p>
                 </div>
             }
         </div>
@@ -289,13 +346,35 @@
 
 @section Scripts {
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // LÓGICA DEL FILTRO
+            const botonesFiltro = document.querySelectorAll('.btn-filtro');
+            const filas = document.querySelectorAll('.fila-admin');
+
+            botonesFiltro.forEach(boton => {
+                boton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const filtroSeleccionado = this.getAttribute('data-filtro');
+
+                    filas.forEach(fila => {
+                        if (filtroSeleccionado === "TODOS" || fila.getAttribute('data-estado') === filtroSeleccionado) {
+                            fila.style.display = '';
+                        } else {
+                            fila.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+
+        // LÓGICA DE CAMBIO DE ESTADO
         function cambiarEstado(idPedido, nuevoEstado) {
+            const esCancelacion = nuevoEstado === 'Cancelado';
+            const colorAlerta = esCancelacion ? 'var(--neon-red)' : 'var(--neon-green)';
+
             if(confirm(`¿Estás seguro de marcar el pedido #${idPedido} como ${nuevoEstado}?`)) {
 
-                // Usamos URLSearchParams para asegurar el formato application/x-www-form-urlencoded
                 const formData = new URLSearchParams();
-                // OJO AQUÍ: Asegúrate de que los nombres coincidan exactamente con
-                // los parámetros de tu acción ActualizarEstado en el PedidoController
                 formData.append('idPedido', idPedido);
                 formData.append('nuevoEstado', nuevoEstado);
 
@@ -307,10 +386,7 @@
                     body: formData.toString()
                 })
                 .then(response => {
-                    // Si el servidor devuelve un error 500 o 400, lo atrapamos aquí
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
@@ -318,8 +394,8 @@
 
                     if (data.success) {
                         divNotif.innerHTML = `
-                            <div class="alert shadow-lg alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid var(--neon-green); border-left: 4px solid var(--neon-green); color: var(--text-main); box-shadow: 0 0 15px rgba(0, 255, 127, 0.2);">
-                                <i class="bi bi-check-circle-fill me-2 fs-5 align-middle" style="color: var(--neon-green);"></i>
+                            <div class="alert shadow-sm alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid ${colorAlerta}; border-left: 4px solid ${colorAlerta}; color: var(--text-main);">
+                                <i class="bi ${esCancelacion ? 'bi-x-circle-fill' : 'bi-check-circle-fill'} me-2 fs-5 align-middle" style="color: ${colorAlerta};"></i>
                                 <span class="align-middle">Estado del pedido <strong style="color: var(--neon-blue-base);">#${idPedido}</strong> actualizado a ${nuevoEstado}.</span>
                             </div>`;
                         divNotif.style.display = 'block';
@@ -327,10 +403,10 @@
                         setTimeout(() => { location.reload(); }, 1500);
                     } else {
                         divNotif.innerHTML = `
-                            <div class="alert shadow-lg alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid var(--neon-red); border-left: 4px solid var(--neon-red); color: var(--text-main); box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);">
+                            <div class="alert shadow-sm alert-dismissible fade show mb-4" style="background-color: var(--bg-card); border: 1px solid var(--neon-red); border-left: 4px solid var(--neon-red); color: var(--text-main);">
                                 <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle" style="color: var(--neon-red);"></i>
                                 <span class="align-middle">${data.message || 'Error al actualizar el estado del pedido.'}</span>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                                <button type="button" class="btn-close btn-close-dynamic" data-bs-dismiss="alert"></button>
                             </div>`;
                         divNotif.style.display = 'block';
                     }

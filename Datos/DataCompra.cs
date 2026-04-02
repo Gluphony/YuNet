@@ -61,5 +61,48 @@ namespace Datos
 
             return respuesta;
         }
+
+        // ==============================================================================
+        // NUEVO: LISTAR TODAS LAS COMPRAS (Para la tabla principal)
+        // ==============================================================================
+        public List<Compra> ListarCompras()
+        {
+            List<Compra> lista = new List<Compra>();
+
+            try
+            {
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+                {
+                    SqlCommand cmd = new SqlCommand("Inventario.Sp_ListarCompras", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    conexion.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            Compra obj = new Compra();
+
+                            obj.ID_COMPRA = Convert.ToInt32(dr["ID_COMPRA"]);
+                            obj.FECHA_COMPRA = Convert.ToDateTime(dr["FECHA_COMPRA"]);
+                            obj.NUMERO_FACTURA_PROV = dr["NUMERO_FACTURA_PROV"].ToString();
+                            obj.TOTAL_COMPRA = Convert.ToDecimal(dr["TOTAL_COMPRA"]);
+
+                            // El alias que le pusimos en SQL con el JOIN
+                            obj.PROVEEDOR_NOMBRE = dr["Proveedor"].ToString();
+
+                            lista.Add(obj);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener la lista de compras: " + ex.Message);
+            }
+
+            return lista;
+        }
     }
 }

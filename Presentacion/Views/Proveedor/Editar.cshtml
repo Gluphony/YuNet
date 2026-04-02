@@ -6,8 +6,8 @@
 @section Styles {
     <style>
         /* ==========================================
-                   ESTILOS DE FORMULARIO YUNET (MODO OSCURO/CLARO)
-                   ========================================== */
+                           ESTILOS DE FORMULARIO YUNET (MODO OSCURO/CLARO)
+                           ========================================== */
         .form-yunet {
             background-color: var(--hover-bg);
             border: 1px solid var(--border-color);
@@ -103,6 +103,24 @@
                 </div>
 
                 <div class="col-md-6">
+                    <label class="form-label yunet-label">Teléfono <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
+                            <i class="bi bi-telephone"></i>
+                        </span>
+                        <input type="tel"
+                               class="form-control form-yunet"
+                               style="border-left: none;"
+                               name="TELEFONO"
+                               value="@Model?.TELEFONO"
+                               placeholder="Ej. 8888-8888"
+                               maxlength="15"
+                               oninput="this.value = this.value.replace(/[^0-9+\- ]/g, '');"
+                               required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
                     <label class="form-label yunet-label">Correo Electrónico</label>
                     <div class="input-group">
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
@@ -112,7 +130,24 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 d-flex flex-column justify-content-center">
+                <div class="col-12">
+                    <label class="form-label yunet-label">Dirección <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
+                            <i class="bi bi-geo-alt"></i>
+                        </span>
+                        <textarea class="form-control form-yunet"
+                                  style="border-left: none;"
+                                  name="DIRECCION"
+                                  rows="2"
+                                  maxlength="255"
+                                  placeholder="Ej: De la rotonda 2 cuadras al sur..."
+                                  required>@Model?.DIRECCION</textarea>
+                        <div class="form-text text-muted">Máximo 255 caracteres.</div>
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex flex-column justify-content-center mt-4">
                     <label class="form-label yunet-label d-block">Estado en el Sistema</label>
                     <div class="form-check form-switch mt-1" style="font-size: 1.1rem;">
                         <input class="form-check-input shadow-sm" style="cursor: pointer;" type="checkbox" role="switch" id="estadoSwitch" name="ESTADO" value="true" @(Model.ESTADO ? "checked" : "")>

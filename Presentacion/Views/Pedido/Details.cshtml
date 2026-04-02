@@ -16,9 +16,33 @@
 
 <style>
     /* ==========================================
-                       VARIABLES NEÓN
-                       ========================================== */
+               1. VARIABLES TEMA CLARO (Por defecto)
+            ========================================== */
     :root {
+        --neon-blue-base: #0096c7;
+        --neon-blue-glow: rgba(0, 150, 199, 0.2);
+        --neon-blue-tint: rgba(0, 150, 199, 0.05);
+        --neon-green: #00b359;
+        --neon-red: #e6004c;
+        --neon-yellow: #e6a800;
+        --bg-card: #ffffff;
+        --bg-accordion: #f8f9fa;
+        --border-color: rgba(0, 0, 0, 0.08);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --row-hover: rgba(0, 0, 0, 0.02);
+        --icon-bg: rgba(0, 0, 0, 0.04);
+    }
+
+    /* ==========================================
+               2. VARIABLES TEMA OSCURO (Automático)
+               Detecta cualquier clase común de modo oscuro de tu layout
+            ========================================== */
+    [data-bs-theme="dark"],
+    body.dark-mode,
+    body.dark-theme,
+    .dark-layout,
+    [data-theme="dark"] {
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
         --neon-blue-tint: rgba(0, 212, 255, 0.1);
@@ -26,19 +50,22 @@
         --neon-red: #ff3366;
         --neon-yellow: #ffcc00;
         --bg-card: #0F172A;
+        --bg-accordion: rgba(255, 255, 255, 0.02);
         --border-color: rgba(255, 255, 255, 0.1);
         --text-main: #F8FAFC;
         --text-muted: #94A3B8;
+        --row-hover: rgba(255, 255, 255, 0.03);
+        --icon-bg: rgba(255, 255, 255, 0.05);
     }
 
     /* ==========================================
-                       ESTILOS DE TARJETAS NEÓN
-                       ========================================== */
+               ESTILOS DE TARJETAS
+            ========================================== */
     .info-card {
         background-color: var(--bg-card) !important;
         border: 1px solid var(--border-color);
         border-radius: 16px;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: all 0.4s ease;
         overflow: hidden;
     }
 
@@ -51,7 +78,16 @@
         border-top: 4px solid var(--neon-blue-base) !important;
     }
 
-    /* Botones */
+    .total-price {
+        color: var(--neon-blue-base);
+        text-shadow: 0 0 15px var(--neon-blue-glow);
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+    }
+
+    /* ==========================================
+               BOTONES Y BADGES
+            ========================================== */
     .btn-neon-outline {
         background: transparent;
         color: var(--text-main) !important;
@@ -80,12 +116,11 @@
     }
 
         .btn-report:hover {
-            background-color: rgba(255, 51, 102, 0.1);
+            background-color: rgba(230, 0, 76, 0.1);
             color: var(--neon-red) !important;
             border-color: var(--neon-red);
         }
 
-    /* Badges de Estado Neón */
     .status-badge {
         font-weight: 700;
         font-size: 0.85rem;
@@ -100,23 +135,23 @@
 
         .status-badge.completado {
             color: var(--neon-green);
-            background-color: rgba(0, 255, 127, 0.1);
+            background-color: rgba(0, 179, 89, 0.1);
             border: 1px solid var(--neon-green);
-            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
+            box-shadow: 0 0 10px rgba(0, 179, 89, 0.2);
         }
 
         .status-badge.pendiente {
             color: var(--neon-yellow);
-            background-color: rgba(255, 204, 0, 0.1);
+            background-color: rgba(230, 168, 0, 0.1);
             border: 1px solid var(--neon-yellow);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+            box-shadow: 0 0 10px rgba(230, 168, 0, 0.2);
         }
 
         .status-badge.cancelado {
             color: var(--neon-red);
-            background-color: rgba(255, 51, 102, 0.1);
+            background-color: rgba(230, 0, 76, 0.1);
             border: 1px solid var(--neon-red);
-            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+            box-shadow: 0 0 10px rgba(230, 0, 76, 0.2);
         }
 
         .status-badge.desconocido {
@@ -126,12 +161,57 @@
             box-shadow: 0 0 10px var(--neon-blue-glow);
         }
 
-    /* Total Price Glow */
-    .total-price {
-        color: var(--neon-blue-base);
-        text-shadow: 0 0 15px var(--neon-blue-glow);
-        font-size: 2.5rem;
-        letter-spacing: -1px;
+    /* ==========================================
+               ✨ MAGIA: ANIMACIÓN DE LA FLECHITA (ACORDEÓN) ✨
+            ========================================== */
+    .btn-toggle-accordion {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-radius: 50%; /* Círculo perfecto */
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Transición de rebote para todos los cambios */
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+        padding: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+        /* Estado Normal (Hover) */
+        .btn-toggle-accordion:hover {
+            background-color: var(--row-hover);
+            color: var(--text-main);
+            border-color: var(--text-muted);
+            transform: scale(1.05);
+        }
+
+        /* Flecha interna */
+        .btn-toggle-accordion i {
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+            font-size: 1.2rem;
+        }
+
+        /* ESTADO ABIERTO: Activa el resplandor y gira la flecha */
+        .btn-toggle-accordion:not(.collapsed) {
+            background-color: var(--neon-blue-tint);
+            color: var(--neon-blue-base);
+            border-color: var(--neon-blue-base);
+            box-shadow: 0 0 15px var(--neon-blue-glow);
+            transform: scale(1.1); /* Crece un poquito */
+        }
+
+            .btn-toggle-accordion:not(.collapsed) i {
+                transform: rotate(180deg); /* Gira con rebote */
+            }
+
+    .accordion-row-open {
+        background-color: var(--bg-accordion);
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s ease;
     }
 </style>
 
@@ -160,7 +240,7 @@
                     <div class="mb-4">
                         <small style="color: var(--text-muted); display: block; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">Cliente</small>
                         <div class="d-flex align-items-center mt-2">
-                            <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,212,255,0.2);">
+                            <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: var(--neon-blue-tint); color: var(--neon-blue-base); border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
                                 <i class="bi bi-person"></i>
                             </div>
                             <span style="color: var(--text-main); font-weight: 600; font-size: 1.1rem;">
@@ -186,7 +266,7 @@
                         </span>
                     </div>
 
-                    <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;" />
+                    <hr style="border-color: var(--border-color); margin: 2rem 0;" />
 
                     <div>
                         <small style="color: var(--text-muted); display: block; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">Total Pagado</small>
@@ -213,7 +293,7 @@
                         <div class="table-responsive">
                             <table class="table table-borderless align-middle mb-0" style="--bs-table-bg: transparent;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid rgba(0, 212, 255, 0.2);">
+                                    <tr style="border-bottom: 1px solid var(--border-color);">
                                         <th style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Producto</th>
                                         <th class="text-center" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Cantidad</th>
                                         <th class="text-end" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: transparent;">Precio Unit.</th>
@@ -224,17 +304,36 @@
                                 <tbody>
                                     @foreach (var item in ViewBag.Detalles)
                                     {
-                                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                        int cantidad = item.CANTIDAD;
+                                        string imeisGuardados = (item.IMEI_VENDIDO != null && item.IMEI_VENDIDO != "N/A") ? item.IMEI_VENDIDO : "";
+                                        string[] listaImeisAsignados = string.IsNullOrWhiteSpace(imeisGuardados) ? new string[0] : imeisGuardados.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                        <tr style="border-bottom: 1px solid var(--border-color);">
                                             <td class="py-3" style="background-color: transparent;">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: rgba(255, 255, 255, 0.05); color: var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+
+                                                    @if (cantidad > 1)
+                                                    {
+                                                        <button class="btn-toggle-accordion collapsed me-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_@item.ID_DETALLE_PEDIDO" aria-expanded="false">
+                                                            <i class="bi bi-chevron-down"></i>
+                                                        </button>
+                                                    }
+
+                                                    <div class="icon-circle me-3" style="width: 40px; height: 40px; background-color: var(--icon-bg); color: var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                         <i class="bi bi-box"></i>
                                                     </div>
                                                     <div>
                                                         <span style="color: var(--text-main); font-weight: 500; display: block;">@item.PRODUCTO</span>
-                                                        @if (item.IMEI_VENDIDO != "N/A" && !string.IsNullOrWhiteSpace(item.IMEI_VENDIDO))
+
+                                                        @if (cantidad == 1 && listaImeisAsignados.Length == 1)
                                                         {
-                                                            <small style="color: var(--neon-blue-base); font-size: 0.8rem; letter-spacing: 0.5px;">IMEI/Serie: @item.IMEI_VENDIDO</small>
+                                                            <small style="color: var(--text-muted); font-size: 0.8rem;">IMEI/Serie: <span style="color: var(--neon-blue-base);">@listaImeisAsignados[0]</span></small>
+                                                        }
+                                                        else if (cantidad > 1)
+                                                        {
+                                                            <small style="color: var(--text-muted); font-size: 0.8rem; letter-spacing: 0.5px;">
+                                                                <span style="color: var(--neon-blue-base); font-weight: 600;">@listaImeisAsignados.Length</span> de @cantidad asignados
+                                                            </small>
                                                         }
                                                     </div>
                                                 </div>
@@ -249,22 +348,88 @@
                                                 C$ @((item.CANTIDAD * item.PRECIO_UNITARIO).ToString("N2"))
                                             </td>
                                             <td class="text-center py-3" style="background-color: transparent;">
-
-                                                @if (User.IsInRole("Administrador") && (item.IMEI_VENDIDO == "N/A" || string.IsNullOrWhiteSpace(item.IMEI_VENDIDO)))
+                                                @if (cantidad == 1)
                                                 {
-                                                    <button type="button" class="btn btn-sm text-dark fw-bold btn-asignar-imei mb-2"
-                                                            style="background-color: var(--neon-yellow); box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);"
-                                                            data-iddetalle="@item.ID_DETALLE_PEDIDO">
-                                                        <i class="bi bi-upc-scan me-1"></i> Asignar IMEI
-                                                    </button>
-                                                    <br />
+                                                    if (listaImeisAsignados.Length == 0 && User.IsInRole("Administrador"))
+                                                    {
+                                                        <button type="button" class="btn btn-sm text-dark fw-bold btn-asignar-imei mb-2"
+                                                                style="background-color: var(--neon-yellow); box-shadow: 0 0 10px rgba(230, 168, 0, 0.3);"
+                                                                data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                            <i class="bi bi-upc-scan me-1"></i> Asignar
+                                                        </button>
+                                                        <br />
+                                                    }
+                                                    else if (listaImeisAsignados.Length == 1)
+                                                    {
+                                                        <button type="button" class="btn btn-report" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@listaImeisAsignados[0]')">
+                                                            <i class="bi bi-exclamation-triangle"></i> Reportar
+                                                        </button>
+                                                    }
                                                 }
-
-                                                <button type="button" class="btn btn-report" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO)">
-                                                    <i class="bi bi-exclamation-triangle"></i> Reportar
-                                                </button>
+                                                else
+                                                {
+                                                    <span style="color: var(--text-muted); font-size: 0.85rem; cursor: pointer; user-select: none;" data-bs-toggle="collapse" data-bs-target="#collapse_@item.ID_DETALLE_PEDIDO">
+                                                        Ver Desglose
+                                                    </span>
+                                                }
                                             </td>
                                         </tr>
+
+                                        @if (cantidad > 1)
+                                        {
+                                            <tr id="collapse_@item.ID_DETALLE_PEDIDO" class="collapse">
+                                                <td colspan="5" class="p-0 border-0">
+                                                    <div class="accordion-row-open p-3 p-md-4 m-2 rounded" style="border: 1px dashed var(--border-color);">
+                                                        <h6 style="color: var(--text-main); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; font-weight: 700;">
+                                                            <i class="bi bi-list-nested me-2" style="color: var(--neon-blue-base);"></i> Desglose de Unidades
+                                                        </h6>
+
+                                                        <div style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                                                            @for (int i = 0; i < cantidad; i++)
+                                                            {
+                                                                bool tieneImei = i < listaImeisAsignados.Length;
+                                                                string imeiActual = tieneImei ? listaImeisAsignados[i] : "";
+
+                                                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color: var(--border-color) !important;">
+                                                                    <div>
+                                                                        <span style="color: var(--text-main); font-weight: 500; font-size: 0.95rem;">Unidad #@(i + 1)</span>
+                                                                        @if (tieneImei)
+                                                                        {
+                                                                            <span class="badge ms-2" style="background-color: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 0.75rem;">
+                                                                                <i class="bi bi-check-circle me-1"></i> IMEI: @imeiActual
+                                                                            </span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="badge ms-2" style="background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); font-size: 0.75rem; font-weight: normal;">
+                                                                                Pendiente de asignar
+                                                                            </span>
+                                                                        }
+                                                                    </div>
+
+                                                                    <div>
+                                                                        @if (!tieneImei && User.IsInRole("Administrador"))
+                                                                        {
+                                                                            <button type="button" class="btn btn-sm text-dark fw-bold btn-asignar-imei"
+                                                                                    style="background-color: var(--neon-yellow); font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 6px;"
+                                                                                    data-iddetalle="@item.ID_DETALLE_PEDIDO">
+                                                                                <i class="bi bi-upc-scan"></i> Asignar
+                                                                            </button>
+                                                                        }
+                                                                        else if (tieneImei)
+                                                                        {
+                                                                            <button type="button" class="btn btn-sm btn-report" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;" onclick="abrirModalReporte(@item.ID_DETALLE_PEDIDO, '@imeiActual')">
+                                                                                <i class="bi bi-exclamation-triangle"></i> Reportar
+                                                                            </button>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
                                 </tbody>
                             </table>
@@ -299,40 +464,53 @@
                 <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: 700;">
                     <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--neon-red);"></i> Reportar un problema
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" style="filter: invert(1) grayscale(100%) brightness(200%);" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body p-4">
                 <form id="formReporte">
                     <input type="hidden" id="txtIdDetallePedidoReporte" />
+                    <input type="hidden" id="txtImeiReporte" />
 
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                        Estás reportando un problema con el producto seleccionado en este pedido.
-                    </p>
+                    <div class="alert mb-4" style="background-color: var(--icon-bg); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">
+                        Estás reportando un problema con la unidad <strong style="color: var(--neon-blue-base);" id="lblImeiReporte"></strong>.
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">¿Qué problema tuviste?</label>
                         <select class="form-select" id="cboMotivoReporte"
-                                style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);">
-                            <option value="Producto dañado" style="color: black;">El producto llegó dañado o defectuoso</option>
-                            <option value="Producto incorrecto" style="color: black;">Me enviaron un producto incorrecto</option>
-                            <option value="Faltan artículos" style="color: black;">Faltan artículos en mi paquete</option>
-                            <option value="No llegó" style="color: black;">Mi pedido nunca llegó</option>
-                            <option value="Otro" style="color: black;">Otro problema</option>
+                                style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+                            <option value="Producto dañado">El producto llegó dañado o defectuoso</option>
+                            <option value="Producto incorrecto">Me enviaron un producto incorrecto</option>
+                            <option value="Faltan artículos">Faltan artículos en mi paquete</option>
+                            <option value="No llegó">Mi pedido nunca llegó</option>
+                            <option value="Otro">Otro problema</option>
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Detalles adicionales</label>
-                        <textarea class="form-control" id="txtDetalleReporte" rows="3" placeholder="Por favor, explica detalladamente qué sucedió..."
-                                  style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);"></textarea>
+                    <div id="apartadoOtroProblema" style="display: none; background-color: var(--icon-bg); padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color);">
+                        <div class="mb-3">
+                            <label class="form-label text-warning fw-bold" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                                <i class="bi bi-info-circle me-1"></i> Describe el problema (Obligatorio)
+                            </label>
+                            <textarea class="form-control" id="txtDetalleReporte" rows="3" placeholder="Por favor, explica detalladamente qué sucedió..."
+                                      style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);"></textarea>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label" style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                                <i class="bi bi-image me-1"></i> Subir Evidencia (Opcional)
+                            </label>
+                            <input class="form-control" type="file" id="fileEvidenciaImagen" accept="image/png, image/jpeg, image/jpg"
+                                   style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+                        </div>
                     </div>
                 </form>
             </div>
 
             <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
                 <button type="button" class="btn btn-neon-outline" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 8px; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
+                <button type="button" class="btn" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 8px; box-shadow: 0 0 15px rgba(230, 0, 76, 0.4);">
                     <i class="bi bi-send-fill me-1"></i> Enviar Reporte
                 </button>
             </div>
@@ -344,11 +522,17 @@
     <script>
         let modalReporteBootstrap;
 
-        // Función global para abrir el modal
-        function abrirModalReporte(idDetallePedido) {
+        // Función para abrir modal y setear el IMEI
+        function abrirModalReporte(idDetallePedido, imei) {
             document.getElementById('txtIdDetallePedidoReporte').value = idDetallePedido;
+            document.getElementById('txtImeiReporte').value = imei || 'N/A';
+            document.getElementById('lblImeiReporte').innerText = imei ? `(IMEI: ${imei})` : '';
+
+            // Reiniciamos el formulario al abrir
             document.getElementById('cboMotivoReporte').selectedIndex = 0;
             document.getElementById('txtDetalleReporte').value = '';
+            document.getElementById('fileEvidenciaImagen').value = '';
+            document.getElementById('apartadoOtroProblema').style.display = 'none';
 
             if (!modalReporteBootstrap) {
                 const modalEl = document.getElementById('modalReporte');
@@ -360,23 +544,48 @@
 
         document.addEventListener("DOMContentLoaded", function () {
 
-            // --- LÓGICA DE ENVIAR REPORTE ---
+            // --- LÓGICA PARA MOSTRAR U OCULTAR "OTRO PROBLEMA" ---
+            document.getElementById('cboMotivoReporte').addEventListener('change', function () {
+                const apartado = document.getElementById('apartadoOtroProblema');
+                if (this.value === 'Otro') {
+                    // Usamos un pequeño delay para simular el "slideDown" de jQuery pero en JS Vanilla
+                    apartado.style.display = 'block';
+                } else {
+                    apartado.style.display = 'none';
+                    document.getElementById('txtDetalleReporte').value = '';
+                    document.getElementById('fileEvidenciaImagen').value = '';
+                }
+            });
+
+
+            // LÓGICA DE REPORTE ACTUALIZADA
             document.getElementById('btnEnviarReporte').addEventListener('click', function () {
                 const idDetallePedido = document.getElementById('txtIdDetallePedidoReporte').value;
+                const imeiSeleccionado = document.getElementById('txtImeiReporte').value;
                 const motivo = document.getElementById('cboMotivoReporte').value;
                 const detalle = document.getElementById('txtDetalleReporte').value;
 
-                if (detalle.trim() === '') {
-                    alert('Por favor, escribe un poco de detalle sobre el problema.');
+                // Validación inteligente: Solo exigimos detalle si elige "Otro"
+                if (motivo === 'Otro' && detalle.trim() === '') {
+                    alert('Has seleccionado "Otro problema". Por favor, escribe un poco de detalle sobre lo que sucedió.');
                     return;
                 }
 
-                const motivoCompleto = motivo + " - " + detalle;
+                // Construimos el mensaje para la base de datos
+                let motivoCompleto = `[Unidad: ${imeiSeleccionado}] ${motivo}`;
+                if (motivo === 'Otro') {
+                    motivoCompleto += ` - ${detalle}`;
+                }
 
-                // EL TRUCO ESTÁ AQUÍ: Usamos FormData para que MVC lo lea nativamente
                 const formData = new FormData();
                 formData.append('ID_DETALLE_PEDIDO', idDetallePedido);
                 formData.append('MOTIVO_CLIENTE', motivoCompleto);
+
+                // Si subió imagen, la agregamos al FormData (Lista para que el backend la reciba cuando lo programemos)
+                const fileInput = document.getElementById('fileEvidenciaImagen');
+                if (fileInput.files.length > 0) {
+                    formData.append('EVIDENCIA_IMAGEN', fileInput.files[0]);
+                }
 
                 const btnEnviar = document.getElementById('btnEnviarReporte');
                 const textoOriginal = btnEnviar.innerHTML;
@@ -384,7 +593,6 @@
                 btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
                 btnEnviar.disabled = true;
 
-                // Hacemos la petición enviando FormData (SIN headers json)
                 fetch('/Devolucion/Create', {
                     method: 'POST',
                     body: formData
@@ -393,11 +601,7 @@
                 .then(data => {
                     if (data.exito) {
                         alert('✅ ¡Reporte enviado! Nos pondremos en contacto contigo pronto.');
-                        if (modalReporteBootstrap) {
-                            modalReporteBootstrap.hide();
-                        }
-                        // Opcional: recargar la página para ver el cambio
-                        // window.location.reload();
+                        if (modalReporteBootstrap) modalReporteBootstrap.hide();
                     } else {
                         alert('❌ Hubo un problema: ' + data.mensaje);
                     }
@@ -412,9 +616,7 @@
                 });
             });
 
-            // ========================================================
-            // NUEVA LÓGICA: ASIGNAR IMEI CON SWEETALERT (SOLO ADMIN)
-            // ========================================================
+            // LÓGICA DE ASIGNAR IMEI (Se mantiene igual)
             document.querySelectorAll('.btn-asignar-imei').forEach(boton => {
                 boton.addEventListener('click', function () {
                     const idDetalle = this.getAttribute('data-iddetalle');
@@ -433,19 +635,20 @@
                         cancelButtonText: 'Cancelar',
                         customClass: {
                             popup: 'border border-secondary rounded-4 shadow-lg',
-                            input: 'bg-transparent text-white border-secondary'
+                            input: 'bg-transparent text-main border-secondary'
                         },
                         inputValidator: (value) => {
-                            if (!value || value.trim().length < 5) {
-                                return '¡Necesitás ingresar un IMEI válido (mínimo 5 caracteres)!';
+                            const imeiLimpio = value ? value.trim() : '';
+                            const regex = /^\d{15}$/;
+
+                            if (!regex.test(imeiLimpio)) {
+                                return '¡El IMEI debe tener exactamente 15 números y no contener letras!';
                             }
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            const imeiDigitado = result.value;
+                            const imeiDigitado = result.value.trim();
 
-                            // Mandamos el dato al Controlador usando Form URL Encoded
-                            // OJO: Revisá que el controlador en la ruta se llame igual que el tuyo (Pedido o Pedidos)
                             fetch('@Url.Action("AsignarImei", "Pedido")', {
                                 method: 'POST',
                                 headers: {
@@ -463,7 +666,7 @@
                                         background: 'var(--bg-card)',
                                         color: 'var(--text-main)',
                                         confirmButtonColor: 'var(--neon-blue-base)'
-                                    }).then(() => location.reload()); // Recargamos para ver el IMEI en pantalla
+                                    }).then(() => location.reload());
                                 } else {
                                     Swal.fire({
                                         title: "No se pudo asignar",

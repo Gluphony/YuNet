@@ -54,31 +54,30 @@ namespace LogicaNegocio
             return _dataDetalle.InsertarDetalle(oDetalle, idUsuarioSesion);
         }
 
+        // ==============================================================================
+        // OPCIÓN A: ASIGNAR UN SOLO IMEI EN DESPACHO
+        // ==============================================================================
         public bool AsignarImeiDespacho(int idDetallePedido, string imei)
         {
-            // 1. Limpiamos espacios en blanco
-            string imeiLimpio = imei?.Trim();
-
-            // 2. Validaciones Anti-Dedazos y Anti-Hackers
-            if (string.IsNullOrWhiteSpace(imeiLimpio))
+            if (string.IsNullOrWhiteSpace(imei))
             {
-                throw new Exception("El número de IMEI es obligatorio.");
+                throw new Exception("Debe escanear o ingresar el número de IMEI.");
             }
+
+            string imeiLimpio = imei.Trim();
 
             if (imeiLimpio.Length != 15)
             {
-                throw new Exception($"El IMEI debe tener exactamente 15 dígitos. Ingresaste {imeiLimpio.Length}.");
+                throw new Exception($"El IMEI '{imeiLimpio}' no es válido. Debe tener exactamente 15 dígitos.");
             }
 
-            // Usamos una expresión regular para asegurar que TODOS los 15 caracteres sean números
             if (!System.Text.RegularExpressions.Regex.IsMatch(imeiLimpio, @"^\d{15}$"))
             {
-                throw new Exception("El IMEI no es válido. Solo se permiten números, sin letras ni guiones.");
+                throw new Exception("El IMEI contiene letras o caracteres inválidos. Solo se permiten números.");
             }
 
-            // 3. Pasamos la orden a la capa de Datos
-            DataDetallePedido _datosDetalle = new DataDetallePedido();
-            return _datosDetalle.AsignarImeiDespacho(idDetallePedido, imeiLimpio);
+            // Si todo está bien, pasamos a la capa de Datos
+            return _dataDetalle.AsignarImeiDespacho(idDetallePedido, imeiLimpio);
         }
 
         // 2. LISTAR TICKET (Para imprimir)

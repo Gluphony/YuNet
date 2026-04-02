@@ -34,23 +34,25 @@ namespace Datos
                             devolucion.FECHA_DEVOLUCION = Convert.ToDateTime(dr["Fecha_Devolucion"]);
                             devolucion.MOTIVO_CLIENTE = dr["Motivo_Cliente"].ToString();
 
-                            // Estos pueden venir nulos de la BD si aún no se ha procesado
                             devolucion.ESTADO_DISPOSITIVO_RECIBIDO = dr["Estado_Dispositivo_Recibido"] != DBNull.Value ? dr["Estado_Dispositivo_Recibido"].ToString() : "";
                             devolucion.ACCION_TOMADA = dr["Accion_Tomada"] != DBNull.Value ? dr["Accion_Tomada"].ToString() : "";
 
                             devolucion.REGRESAR_INVENTARIO = dr["Reingreso_Stock"].ToString() == "SÍ";
 
-                            // Mapeo de los campos calculados del SP
                             devolucion.FACTURA_ORIGINAL = Convert.ToInt32(dr["Factura_Original"]);
                             devolucion.PRODUCTO_NOMBRE = dr["Producto"].ToString();
                             devolucion.IMEI = dr["IMEI"].ToString();
                             devolucion.AUTORIZADO_POR_NOMBRE = dr["Autorizado_Por"] != DBNull.Value ? dr["Autorizado_Por"].ToString() : "Pendiente";
 
-                            // ¡IMPORTANTE! Agregar el estado del reporte para saber si es Pendiente, Aprobado, etc.
-                            // Asegúrate de que tu clase Devolucion.cs en Entidades tenga la propiedad ESTADO_REPORTE
                             if (HasColumn(dr, "ESTADO_REPORTE"))
                             {
                                 devolucion.ESTADO_REPORTE = dr["ESTADO_REPORTE"].ToString();
+                            }
+
+                            // 👇 EXTRAEMOS LA RUTA DE LA IMAGEN SI EXISTE 👇
+                            if (HasColumn(dr, "RUTA_EVIDENCIA"))
+                            {
+                                devolucion.RUTA_EVIDENCIA = dr["RUTA_EVIDENCIA"] != DBNull.Value ? dr["RUTA_EVIDENCIA"].ToString() : null;
                             }
 
                             lista.Add(devolucion);
@@ -66,8 +68,46 @@ namespace Datos
             return lista;
         }
 
-        // 2. CREAR DEVOLUCIÓN (Para el Cliente)
-        public bool Crear(int idDetallePedido, string motivoCliente)
+        public bool ProcesarReporte(int idDevolucion, string estadoReporte, string estadoDispositivo, string accionTomada, bool regresarInventario, string imeiAfectado, decimal monto)
+        {
+            bool respuesta = false;
+            using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
+            {
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("Venta.Sp_ProcesarDevolucion", conexion))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@IdDevolucion", idDevolucion);
+                        cmd.Parameters.AddWithValue("@EstadoReporte", estadoReporte ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@EstadoDispositivo", estadoDispositivo ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@AccionTomada", accionTomada ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@RegresarInventario", regresarInventario);
+                        cmd.Parameters.AddWithValue("@ImeiAfectado", imeiAfectado ?? "");
+                        cmd.Parameters.AddWithValue("@Monto", monto);
+
+                        conexion.Open();
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                int exito = Convert.ToInt32(dr["Exito"]);
+                                if (exito == 1) return true;
+                                else throw new Exception(dr["Mensaje"].ToString());
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+            return respuesta;
+        }
+
+        // 2. CREAR DEVOLUCIÓN (Para el Cliente) - AHORA RECIBE LA RUTA
+        public bool Crear(int idDetallePedido, string motivoCliente, string rutaImagen)
         {
             bool respuesta = false;
 
@@ -75,12 +115,14 @@ namespace Datos
             {
                 using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
                 {
-                    // Usamos el nuevo SP que solo pide el ID del detalle y el motivo
                     SqlCommand cmd = new SqlCommand("Venta.Sp_SolicitarDevolucionCliente", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Id_Detalle_Pedido", idDetallePedido);
                     cmd.Parameters.AddWithValue("@Motivo_Cliente", motivoCliente);
+
+                    // 👇 INYECTAMOS EL NUEVO PARÁMETRO DE LA RUTA 👇
+                    cmd.Parameters.AddWithValue("@Ruta_Evidencia", rutaImagen ?? (object)DBNull.Value);
 
                     conexion.Open();
                     int filasAfectadas = cmd.ExecuteNonQuery();
@@ -97,7 +139,6 @@ namespace Datos
             return respuesta;
         }
 
-        // 3. PROCESAR DEVOLUCIÓN (Para el Admin)
         // 3. PROCESAR DEVOLUCIÓN (Para el Admin)
         public bool ProcesarAdmin(Devolucion devolucion)
         {
@@ -118,18 +159,13 @@ namespace Datos
                     cmd.Parameters.AddWithValue("@Estado_Reporte", devolucion.ESTADO_REPORTE ?? (object)DBNull.Value);
 
                     conexion.Open();
-
-                    // Simplemente ejecutamos el comando. 
-                    // Si el SP falla, SQL Server lanzará un error que será atrapado por el "catch" abajo.
                     cmd.ExecuteNonQuery();
 
-                    // Si llegamos a esta línea sin errores, el SP fue un éxito.
                     respuesta = true;
                 }
             }
             catch (Exception ex)
             {
-                // Solo entraremos aquí si SQL lanza un error real (ej. foreign key, timeout, rollback en el SP)
                 throw new Exception("Error al procesar la devolución: " + ex.Message);
             }
 

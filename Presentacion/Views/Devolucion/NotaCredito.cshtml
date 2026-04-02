@@ -1,0 +1,387 @@
+﻿@model Entidades.Devolucion
+
+@{
+    ViewData["Title"] = "Nota de Crédito / Reembolso";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - YuNet Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --doc-accent: #059669; /* Verde oscuro financiero */
+            --doc-secondary: #f8fafc;
+            --brand-color: #008bba;
+        }
+
+        @@media (prefers-color-scheme: dark) {
+            : root
+
+        {
+            --bg-main: #13131A;
+            --bg-card: #1C1C24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #2D2D3A;
+            --doc-accent: #10B981; /* Verde Neón */
+            --doc-secondary: #13131A;
+            --brand-color: #00D4FF;
+        }
+
+        }
+
+        body {
+            background-color: var(--bg-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .action-buttons {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .top-nav {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .document-container {
+            max-width: 850px;
+            margin: 2rem auto;
+            background-color: var(--bg-card);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .doc-header {
+            border-bottom: 3px solid var(--doc-accent);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+        }
+
+        .company-logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--brand-color);
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .company-logo i {
+                background-color: #0F172A;
+                color: #00D4FF;
+                padding: 8px;
+                border-radius: 8px;
+                font-size: 20px;
+            }
+
+        .doc-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--doc-accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+
+        .inv-info-table {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+            .inv-info-table td {
+                padding: 0.5rem 0;
+                vertical-align: top;
+            }
+
+        .inv-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: 40%;
+            text-transform: uppercase;
+        }
+
+        .inv-value {
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .inv-device-box {
+            background-color: var(--doc-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--doc-accent);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+
+        .inv-imei-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-main);
+            letter-spacing: 2px;
+        }
+
+        .signature-box {
+            margin-top: 60px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 40px;
+            page-break-inside: avoid;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid var(--text-muted);
+            width: 80%;
+            margin: 0 auto 10px auto;
+        }
+
+        .inv-footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .btn-print-custom {
+            background-color: #059669;
+            color: #fff;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        @@media print {
+            body
+
+        {
+            background-color: #fff !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .document-container {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .d-print-none {
+            display: none !important;
+        }
+
+        .inv-device-box {
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6 !important;
+            border-left: 4px solid #059669 !important;
+        }
+
+        .rma-header {
+            border-bottom: 3px solid #000 !important;
+        }
+
+        .text-muted, .inv-label {
+            color: #6c757d !important;
+        }
+
+        .inv-value, h4, h6, .doc-title, .inv-imei-text {
+            color: #000 !important;
+        }
+
+        .company-logo {
+            color: #000 !important;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container py-4 d-print-none action-buttons">
+        <div class="d-flex justify-content-between align-items-center top-nav p-3 rounded shadow-sm">
+            <a href="@Url.Action("Index", "Devolucion")" class="btn btn-outline-secondary fw-bold" style="color: var(--text-main); border-color: var(--border-color);">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Listado
+            </a>
+            <button onclick="window.print()" class="btn-print-custom">
+                <i class="bi bi-printer me-2"></i> Imprimir Nota de Crédito
+            </button>
+        </div>
+    </div>
+
+    <div id="documento-imprimir" class="document-container">
+
+        <div class="doc-header row align-items-center">
+            <div class="col-7">
+                <div class="company-logo">
+                    <i class="bi bi-cpu"></i> YuNet Store
+                </div>
+                <div class="doc-title mt-2">NOTA DE CRÉDITO / REEMBOLSO</div>
+                <p class="mb-0 mt-1 fw-medium" style="color: var(--text-muted);">Comprobante Oficial de Devolución de Valores</p>
+            </div>
+
+            <div class="col-5 text-end">
+                <span class="inv-label d-block text-end mb-1">Fecha de Emisión</span>
+                <span class="inv-value d-block text-end mb-3">@DateTime.Now.ToString("dd/MMM/yyyy HH:mm")</span>
+
+                <span class="inv-label d-block text-end mb-1">Documento Asociado</span>
+                <span class="inv-value d-block text-end" style="font-size: 24px; color: var(--doc-accent);">NC-@Model.ID_DEVOLUCION.ToString("D5")</span>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-6 pe-md-4">
+                <h6 style="color: var(--doc-accent); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">Información del Cliente</h6>
+                <table class="inv-info-table">
+                    <tbody>
+                        <tr>
+                            <td class="inv-label">Nombre a Favor:</td>
+                            <td class="inv-value">@(string.IsNullOrEmpty(Model.CLIENTE) ? "Cliente de Mostrador" : Model.CLIENTE)</td>
+                        </tr>
+                        <tr>
+                            <td class="inv-label">Factura Base:</td>
+                            <td class="inv-value">#@Model.FACTURA_ORIGINAL</td>
+                        </tr>
+                        <tr>
+                            <td class="inv-label">Contacto:</td>
+                            <td class="inv-value" style="color: var(--text-muted); font-weight: normal;">
+                                @(string.IsNullOrEmpty(Model.CORREO_CLIENTE) ? "___________________" : Model.CORREO_CLIENTE)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6 ps-md-4">
+                <h6 style="color: var(--doc-accent); font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">Detalles de Aprobación</h6>
+                <table class="inv-info-table">
+                    <tbody>
+                        <tr>
+                            <td class="inv-label">Tipo de Acción:</td>
+                            <td class="inv-value">@Model.ACCION_TOMADA</td>
+                        </tr>
+                        <tr>
+                            <td class="inv-label">Autorizado Por:</td>
+                            <td class="inv-value">@(string.IsNullOrEmpty(Model.AUTORIZADO_POR_NOMBRE) ? "Admin del Sistema" : Model.AUTORIZADO_POR_NOMBRE)</td>
+                        </tr>
+                        <tr>
+                            <td class="inv-label">Condición Inv.:</td>
+                            <td class="inv-value">@(Model.REGRESAR_INVENTARIO ? "Apto para reingreso" : "Baja técnica")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="inv-device-box">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <span class="inv-label mb-1">Producto Retornado</span>
+                    <h5 class="fw-bold mb-3" style="color: var(--text-main); margin: 0;">@Model.PRODUCTO_NOMBRE</h5>
+
+                    <span class="inv-label mb-1">IMEI / Número de Serie</span>
+                    <div class="inv-imei-text">
+                        @{
+                            string imei = Model.IMEI ?? "";
+                            if (Model.MOTIVO_CLIENTE != null && Model.MOTIVO_CLIENTE.Contains("[Unidad:"))
+                            {
+                                int start = Model.MOTIVO_CLIENTE.IndexOf(":") + 1;
+                                int end = Model.MOTIVO_CLIENTE.IndexOf("]");
+                                if (start > 0 && end > start) { imei = Model.MOTIVO_CLIENTE.Substring(start, end - start).Trim(); }
+                            }
+                        }
+                        <i class="bi bi-upc-scan me-2" style="color: var(--text-muted);"></i>@imei
+                    </div>
+                </div>
+
+                <div class="col-md-5 border-start ps-4">
+                    <span class="inv-label mb-1">Resolución Financiera</span>
+                    <p class="fw-bold mb-0" style="color: var(--doc-accent); font-size: 1.1rem;">
+                        Aprobado para Reembolso
+                    </p>
+                    <p class="small text-muted mt-2 mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                        Monto Autorizado:<br />
+                        <span style="font-size: 1.4rem; font-weight: 800; color: var(--doc-accent); display: block; margin: 5px 0;">
+                            $ @Model.MONTO_REEMBOLSO.ToString("N2")
+                        </span>
+                        <small>(Valor pagado en Factura #@Model.FACTURA_ORIGINAL)</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <h6 style="color: var(--doc-accent); font-weight: 700; margin-bottom: 10px; margin-top: 30px;">Motivo del Reembolso</h6>
+        <div style="background-color: var(--bg-main); padding: 1rem; border-radius: 4px; border: 1px dashed var(--border-color);">
+            <p class="mb-0" style="color: var(--text-main); line-height: 1.6; font-size: 0.95rem;">
+                @{
+                    string motivo = Model.MOTIVO_CLIENTE ?? "";
+                    if (motivo.Contains("]"))
+                    {
+                        motivo = motivo.Substring(motivo.IndexOf("]") + 1).Trim();
+                        if (motivo.StartsWith("-")) motivo = motivo.Substring(1).Trim();
+                    }
+                }
+                <i class="bi bi-chat-left-quote me-2" style="color: var(--text-muted);"></i>"@motivo"
+            </p>
+        </div>
+
+        <div class="row signature-box text-center">
+            <div class="col-6">
+                <div class="signature-line"></div>
+                <h6 class="fw-bold mb-1" style="color: var(--text-main);">Recibí Conforme (Cliente)</h6>
+                <p style="font-size: 0.7rem; color: var(--text-muted); max-width: 250px; margin: 0 auto; line-height: 1.3;">
+                    Declaro haber recibido la compensación correspondiente y libero a la tienda de futuras obligaciones sobre este equipo.
+                </p>
+            </div>
+            <div class="col-6 text-center">
+                <div class="signature-line"></div>
+                <h6 class="fw-bold mb-1" style="color: var(--text-main);">Entregado / Aplicado Por (YuNet)</h6>
+                <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3;">
+                    Firma / Sello de Caja
+                </p>
+            </div>
+        </div>
+
+        <div class="inv-footer">
+            <p class="mb-1 fw-bold">TÉRMINOS DE NOTAS DE CRÉDITO Y REEMBOLSOS</p>
+            <p class="mb-0 text-muted" style="line-height: 1.4; text-align: justify; max-width: 90%; margin: 0 auto;">
+                1. Este documento anula total o parcialmente la garantía del equipo devuelto. 2. Los reembolsos de efectivo se harán según el método de pago original o mediante transferencia bancaria en un plazo máximo de 72 horas. 3. Si es saldo a favor, podrá ser utilizado en futuras compras sin fecha de vencimiento presentando su cédula de identidad.
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

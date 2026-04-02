@@ -7,8 +7,8 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
     <style>
         /* ==========================================
-                   ADAPTACIÓN DE DATATABLES AL TEMA YUNET
-                   ========================================== */
+                           ADAPTACIÓN DE DATATABLES AL TEMA YUNET
+                           ========================================== */
         .dataTables_wrapper .dataTables_length,
         .dataTables_wrapper .dataTables_filter,
         .dataTables_wrapper .dataTables_info,
@@ -128,6 +128,7 @@
                         <th class="rounded-start">ID</th>
                         <th>Razón Social</th>
                         <th>Contacto</th>
+                        <th>Teléfono</th>
                         <th>Correo</th>
                         <th>Estado</th>
                         <th class="text-center rounded-end">Acciones</th>
@@ -148,6 +149,9 @@
                                         </div>
                                         @item.NOMBRE_CONTACTO
                                     </div>
+                                </td>
+                                <td style="color: var(--text-main);">
+                                    <i class="bi bi-telephone text-muted me-2"></i>@item.TELEFONO
                                 </td>
                                 <td>
                                     <a href="mailto:@item.CORREO" class="text-decoration-none" style="color: var(--tech-accent);">

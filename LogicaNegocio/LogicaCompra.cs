@@ -37,5 +37,9 @@ namespace LogicaNegocio
                 throw new Exception(ex.Message);
             }
         }
+        public List<Compra> ListarCompras()
+        {
+            return _data.ListarCompras();
+        }
     }
 }

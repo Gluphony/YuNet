@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using System.IO; // <-- NECESARIO PARA MANEJAR CARPETAS Y ARCHIVOS
+using Microsoft.AspNetCore.Http; // <-- NECESARIO PARA RECIBIR LA IMAGEN (IFormFile)
+using System.Threading.Tasks; // <-- NECESARIO PARA GUARDAR DE FORMA ASÍNCRONA
 
 namespace Presentacion.Controllers
 {
@@ -36,8 +39,9 @@ namespace Presentacion.Controllers
         // 2. POST: El cliente envía su reporte (Accesible para todos)
         // ========================================================
         [HttpPost]
-        [AllowAnonymous] // <-- Solo este método es público para que el cliente reporte
-        public IActionResult Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE)
+        [AllowAnonymous]
+        // 👇 AHORA RECIBE EL ARCHIVO (IFormFile) Y ES ASÍNCRONO (Task) 👇
+        public async Task<IActionResult> Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE, IFormFile EVIDENCIA_IMAGEN)
         {
             try
             {
@@ -46,7 +50,37 @@ namespace Presentacion.Controllers
                     return Json(new { exito = false, mensaje = "ID de producto inválido." });
                 }
 
-                bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, out string mensajeRespuesta);
+                string rutaImagenBd = null; // Empezamos asumiendo que no hay foto
+
+                // 🔥 MAGIA: PROCESAMOS LA IMAGEN SI EL CLIENTE ENVIÓ UNA 🔥
+                if (EVIDENCIA_IMAGEN != null && EVIDENCIA_IMAGEN.Length > 0)
+                {
+                    // 1. Creamos la ruta física hacia la carpeta wwwroot/imagenes/evidencias
+                    string carpetaDestino = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "evidencias");
+
+                    // Si la carpeta no existe, C# la crea automáticamente
+                    if (!Directory.Exists(carpetaDestino))
+                    {
+                        Directory.CreateDirectory(carpetaDestino);
+                    }
+
+                    // 2. Generamos un nombre de archivo único (ejemplo: Evidencia_7_a1b2c3d4.jpg)
+                    string extension = Path.GetExtension(EVIDENCIA_IMAGEN.FileName);
+                    string nombreArchivo = $"Evidencia_{ID_DETALLE_PEDIDO}_{Guid.NewGuid()}{extension}";
+                    string rutaFisicaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+
+                    // 3. Guardamos físicamente el archivo en el servidor
+                    using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
+                    {
+                        await EVIDENCIA_IMAGEN.CopyToAsync(stream);
+                    }
+
+                    // 4. Guardamos la ruta relativa que usará el navegador para mostrarla (ej: /imagenes/evidencias/foto.jpg)
+                    rutaImagenBd = $"/imagenes/evidencias/{nombreArchivo}";
+                }
+
+                // 👇 AHORA LE PASAMOS LA RUTA A LA LÓGICA 👇
+                bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, rutaImagenBd, out string mensajeRespuesta);
 
                 return Json(new { exito = respuesta, mensaje = mensajeRespuesta });
             }
@@ -57,39 +91,64 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 3. POST: El Admin aprueba o rechaza 
+        // 3. POST: El Admin procesa el reporte (Aprobar o Rechazar)
         // ========================================================
         [HttpPost]
-        public IActionResult Procesar(Devolucion devolucionAdmin)
+        public IActionResult Procesar(Entidades.DevolucionProcesar modelo)
         {
             try
             {
-                var claimId = User.Claims.FirstOrDefault(c => c.Type == "IdUsuario")?.Value;
-                if (claimId != null)
+                var listaDevoluciones = _logicaDevolucion.Listar();
+                var devOriginal = listaDevoluciones.FirstOrDefault(d => d.ID_DEVOLUCION == modelo.ID_DEVOLUCION);
+
+                if (devOriginal == null)
                 {
-                    devolucionAdmin.ID_USUARIO_AUTORIZA = int.Parse(claimId);
+                    TempData["MensajeError"] = "No se encontró el registro original del reporte.";
+                    return RedirectToAction("Index");
+                }
+
+                string imeiAfectado = "";
+                string motivo = devOriginal.MOTIVO_CLIENTE ?? "";
+
+                if (motivo.StartsWith("[Unidad: "))
+                {
+                    int finCorchete = motivo.IndexOf(']');
+                    if (finCorchete > 0)
+                    {
+                        imeiAfectado = motivo.Substring(9, finCorchete - 9).Trim();
+                    }
                 }
                 else
                 {
-                    devolucionAdmin.ID_USUARIO_AUTORIZA = 1;
+                    imeiAfectado = devOriginal.IMEI?.Split(',')[0].Trim() ?? "";
                 }
 
-                bool respuesta = _logicaDevolucion.ProcesarAdmin(devolucionAdmin, out string mensajeRespuesta);
+                decimal montoReembolso = 0;
+
+                bool respuesta = _logicaDevolucion.ProcesarReporte(
+                    modelo.ID_DEVOLUCION,
+                    modelo.ESTADO_REPORTE,
+                    modelo.ESTADO_DISPOSITIVO_RECIBIDO,
+                    modelo.ACCION_TOMADA,
+                    modelo.REGRESAR_INVENTARIO,
+                    imeiAfectado,
+                    montoReembolso
+                );
 
                 if (respuesta)
                 {
-                    TempData["MensajeExito"] = mensajeRespuesta;
+                    TempData["MensajeExito"] = $"Reporte #{modelo.ID_DEVOLUCION} procesado exitosamente como {modelo.ESTADO_REPORTE}.";
                 }
                 else
                 {
-                    TempData["MensajeError"] = mensajeRespuesta;
+                    TempData["MensajeError"] = "Ocurrió un problema al intentar procesar la devolución en la base de datos.";
                 }
 
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Error crítico al procesar: " + ex.Message;
+                TempData["MensajeError"] = "Error al procesar: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -117,6 +176,138 @@ namespace Presentacion.Controllers
                 TempData["MensajeError"] = "Error al cargar los detalles: " + ex.Message;
                 return RedirectToAction("Index");
             }
+        }
+
+        // ========================================================
+        // 5. GET: DOCUMENTOS PDF (Garantía, NC, Cambio)
+        // ========================================================
+
+        [HttpGet]
+        public IActionResult OrdenServicio(int id)
+        {
+            var devolucion = _logicaDevolucion.Listar().FirstOrDefault(d => d.ID_DEVOLUCION == id);
+            if (devolucion == null) return RedirectToAction("Index");
+
+            string nombreAdmin = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value
+                                 ?? User.Identity.Name ?? "Christhian Ortiz";
+            devolucion.AUTORIZADO_POR_NOMBRE = nombreAdmin;
+
+            try
+            {
+                var _logicaPedido = new LogicaPedido();
+                var pedido = _logicaPedido.Listar().FirstOrDefault(p => p.ID_PEDIDO == devolucion.FACTURA_ORIGINAL);
+
+                if (pedido != null)
+                {
+                    devolucion.CLIENTE = pedido.CLIENTE;
+
+                    var _logicaUsuario = new LogicaUsuario();
+                    var dtUsuarios = _logicaUsuario.ListarUsuarios();
+
+                    foreach (System.Data.DataRow row in dtUsuarios.Rows)
+                    {
+                        string nombreBd = row.Table.Columns.Contains("NOMBRE") ? row["NOMBRE"].ToString() : "";
+                        int idBd = row.Table.Columns.Contains("ID_USUARIO") && row["ID_USUARIO"] != DBNull.Value ? Convert.ToInt32(row["ID_USUARIO"]) : 0;
+
+                        if (idBd == pedido.ID_USUARIO || nombreBd == pedido.CLIENTE)
+                        {
+                            if (row.Table.Columns.Contains("CORREO"))
+                                devolucion.CORREO_CLIENTE = row["CORREO"].ToString();
+                            else if (row.Table.Columns.Contains("Correo"))
+                                devolucion.CORREO_CLIENTE = row["Correo"].ToString();
+
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(devolucion.CORREO_CLIENTE))
+                        devolucion.CORREO_CLIENTE = "Sin correo en base de datos";
+                }
+            }
+            catch (Exception ex)
+            {
+                devolucion.CORREO_CLIENTE = "Error: " + ex.Message;
+            }
+
+            return View(devolucion);
+        }
+
+        [HttpGet]
+        public IActionResult NotaCredito(int id)
+        {
+            var devolucion = _logicaDevolucion.Listar().FirstOrDefault(d => d.ID_DEVOLUCION == id);
+            if (devolucion == null) return RedirectToAction("Index");
+
+            string nombreAdmin = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value ?? User.Identity.Name ?? "Christhian Ortiz";
+            devolucion.AUTORIZADO_POR_NOMBRE = nombreAdmin;
+
+            try
+            {
+                var _logicaPedido = new LogicaPedido();
+                var pedido = _logicaPedido.Listar().FirstOrDefault(p => p.ID_PEDIDO == devolucion.FACTURA_ORIGINAL);
+                if (pedido != null)
+                {
+                    devolucion.CLIENTE = pedido.CLIENTE;
+                    devolucion.MONTO_REEMBOLSO = pedido.TOTAL;
+
+                    var _logicaUsuario = new LogicaUsuario();
+                    var dtUsuarios = _logicaUsuario.ListarUsuarios();
+                    foreach (System.Data.DataRow row in dtUsuarios.Rows)
+                    {
+                        string nombreBd = row.Table.Columns.Contains("NOMBRE") ? row["NOMBRE"].ToString() : "";
+                        int idBd = row.Table.Columns.Contains("ID_USUARIO") && row["ID_USUARIO"] != DBNull.Value ? Convert.ToInt32(row["ID_USUARIO"]) : 0;
+
+                        if (idBd == pedido.ID_USUARIO || nombreBd == pedido.CLIENTE)
+                        {
+                            if (row.Table.Columns.Contains("CORREO")) devolucion.CORREO_CLIENTE = row["CORREO"].ToString();
+                            else if (row.Table.Columns.Contains("Correo")) devolucion.CORREO_CLIENTE = row["Correo"].ToString();
+                            break;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(devolucion.CORREO_CLIENTE)) devolucion.CORREO_CLIENTE = "Sin correo en base de datos";
+                }
+            }
+            catch (Exception ex) { devolucion.CORREO_CLIENTE = "Error: " + ex.Message; }
+
+            return View(devolucion);
+        }
+
+        [HttpGet]
+        public IActionResult CambioEquipo(int id)
+        {
+            var devolucion = _logicaDevolucion.Listar().FirstOrDefault(d => d.ID_DEVOLUCION == id);
+            if (devolucion == null) return RedirectToAction("Index");
+
+            string nombreAdmin = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value ?? User.Identity.Name ?? "Christhian Ortiz";
+            devolucion.AUTORIZADO_POR_NOMBRE = nombreAdmin;
+
+            try
+            {
+                var _logicaPedido = new LogicaPedido();
+                var pedido = _logicaPedido.Listar().FirstOrDefault(p => p.ID_PEDIDO == devolucion.FACTURA_ORIGINAL);
+                if (pedido != null)
+                {
+                    devolucion.CLIENTE = pedido.CLIENTE;
+                    var _logicaUsuario = new LogicaUsuario();
+                    var dtUsuarios = _logicaUsuario.ListarUsuarios();
+                    foreach (System.Data.DataRow row in dtUsuarios.Rows)
+                    {
+                        string nombreBd = row.Table.Columns.Contains("NOMBRE") ? row["NOMBRE"].ToString() : "";
+                        int idBd = row.Table.Columns.Contains("ID_USUARIO") && row["ID_USUARIO"] != DBNull.Value ? Convert.ToInt32(row["ID_USUARIO"]) : 0;
+
+                        if (idBd == pedido.ID_USUARIO || nombreBd == pedido.CLIENTE)
+                        {
+                            if (row.Table.Columns.Contains("CORREO")) devolucion.CORREO_CLIENTE = row["CORREO"].ToString();
+                            else if (row.Table.Columns.Contains("Correo")) devolucion.CORREO_CLIENTE = row["Correo"].ToString();
+                            break;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(devolucion.CORREO_CLIENTE)) devolucion.CORREO_CLIENTE = "Sin correo en base de datos";
+                }
+            }
+            catch (Exception ex) { devolucion.CORREO_CLIENTE = "Error: " + ex.Message; }
+
+            return View(devolucion);
         }
     }
 }

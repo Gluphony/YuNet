@@ -14,23 +14,23 @@ namespace TuProyecto.Controllers // Acordate de cambiar esto por el namespace de
         private readonly Logica_Proveedor _logicaProveedor = new Logica_Proveedor();
         private readonly LogicaProducto _logicaProducto = new LogicaProducto();
 
-        // 2. CARGA LA VISTA PRINCIPAL
         public IActionResult Index()
         {
             try
             {
-                // A. Llenamos los combos usando TUS métodos
+                // A. Llenamos los combos (Esto está bien)
                 ViewBag.Proveedores = _logicaProveedor.ListarProveedores();
                 ViewBag.Productos = _logicaProducto.ListarProductos();
 
-                // B. Lista vacía para la tabla HTML para que no se quiebre la vista
-                List<Compra> listaCompras = new List<Compra>();
+                // B. 🔥 AQUÍ ESTÁ EL CAMBIO: Llamamos a la base de datos de verdad
+                // En lugar de: List<Compra> listaCompras = new List<Compra>();
+                List<Compra> listaCompras = _logica.ListarCompras();
 
                 return View(listaCompras);
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = "Error al cargar compras: " + ex.Message;
                 return View(new List<Compra>());
             }
         }

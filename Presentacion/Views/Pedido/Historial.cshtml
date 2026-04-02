@@ -6,47 +6,69 @@
 
 <style>
     /* ==========================================
-           VARIABLES Y ESTILOS BASE
-           ========================================== */
+               1. VARIABLES GLOBALES (MODO CLARO POR DEFECTO)
+               Basadas exactamente en el diseño de tu Catálogo
+            ========================================== */
     :root {
+        --bg-main: #F4F7FE;
+        --bg-card: #FFFFFF;
+        --text-main: #2B3674;
+        --text-muted: #707EAE;
+        --border-color: #E2E8F0;
+        /* Variables Neón */
         --neon-blue-base: #00D4FF;
         --neon-blue-glow: rgba(0, 212, 255, 0.4);
-        --neon-blue-tint: rgba(0, 212, 255, 0.1);
-        --neon-green: #00FF7F;
-        --neon-red: #ff3366;
+        --neon-blue-tint: rgba(0, 212, 255, 0.05);
+        --neon-green: #05CD99;
+        --neon-red: #EE5D50;
         --neon-yellow: #ffcc00;
-        --bg-card: #0F172A;
-        --border-color: rgba(255, 255, 255, 0.1);
-        --text-main: #F8FAFC;
-        --text-muted: #94A3B8;
     }
 
-    /* Tarjetas de Pedido E-commerce */
+    /* ==========================================
+               1.5 VARIABLES MODO OSCURO (Adaptativo)
+            ========================================== */
+    [data-bs-theme="dark"], body.dark-theme, body.dark-mode, [data-theme="dark"], .dark-layout {
+        --bg-main: #13131A;
+        --bg-card: #1C1C24;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8A98;
+        --border-color: #2D2D3A;
+        /* Variables Neón Brillantes */
+        --neon-blue-glow: rgba(0, 212, 255, 0.5);
+        --neon-blue-tint: rgba(0, 212, 255, 0.15);
+        --neon-green: #20C997;
+        --neon-red: #E83E8C;
+    }
+
+    /* ==========================================
+               TARJETAS Y ESTRUCTURAS BASE
+            ========================================== */
     .customer-order-card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         margin-bottom: 1.5rem;
         overflow: hidden;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     }
 
         .customer-order-card:hover {
             border-color: rgba(0, 212, 255, 0.3);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px var(--neon-blue-glow);
         }
 
     .order-header {
-        background-color: rgba(255, 255, 255, 0.02);
+        background-color: var(--bg-main);
         border-bottom: 1px solid var(--border-color);
         padding: 1rem 1.5rem;
+        transition: background-color 0.3s ease;
     }
 
     .order-body {
         padding: 1.5rem;
     }
 
-    /* Textos */
+    /* Textos Adaptativos */
     .text-label {
         color: var(--text-muted);
         font-size: 0.75rem;
@@ -54,6 +76,7 @@
         letter-spacing: 1px;
         margin-bottom: 0.2rem;
         display: block;
+        transition: color 0.3s ease;
     }
 
     .text-value {
@@ -61,6 +84,7 @@
         font-weight: 600;
         font-size: 1rem;
         margin: 0;
+        transition: color 0.3s ease;
     }
 
     /* Badges de Estado Neón */
@@ -78,7 +102,7 @@
 
         .status-badge.completado {
             color: var(--neon-green);
-            background-color: rgba(0, 255, 127, 0.1);
+            background-color: rgba(32, 201, 151, 0.1);
             border: 1px solid var(--neon-green);
         }
 
@@ -90,7 +114,7 @@
 
         .status-badge.cancelado {
             color: var(--neon-red);
-            background-color: rgba(255, 51, 102, 0.1);
+            background-color: rgba(232, 62, 140, 0.1);
             border: 1px solid var(--neon-red);
         }
 
@@ -114,39 +138,51 @@
 
         .btn-details:hover {
             background-color: var(--neon-blue-base);
-            color: #000 !important;
+            color: #FFF !important;
             box-shadow: 0 0 15px var(--neon-blue-glow);
         }
 
-    .btn-report {
-        background-color: transparent;
-        color: var(--text-muted) !important;
-        border: 1px solid var(--border-color);
+    [data-bs-theme="dark"] .btn-details:hover, body.dark-theme .btn-details:hover {
+        color: #000 !important;
     }
 
-        .btn-report:hover {
-            background-color: rgba(255, 51, 102, 0.1);
-            color: var(--neon-red) !important;
-            border-color: var(--neon-red);
+    /* Modal Inputs y Dropdowns adaptables */
+    .dropdown-menu-custom {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-main);
+        }
+
+            .dropdown-menu-custom .dropdown-item:hover {
+                background-color: var(--bg-main);
+                color: var(--neon-blue-base);
+            }
+
+        .dropdown-menu-custom .dropdown-divider {
+            border-color: var(--border-color);
         }
 </style>
 
 <div class="container-fluid container-xl py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 m-0" style="color: var(--text-main); font-weight: 700;">
+        <h2 class="h3 m-0 fw-bold" style="color: var(--text-main);">
             <i class="bi bi-bag-check me-2" style="color: var(--neon-blue-base);"></i> Mis Pedidos
         </h2>
 
         <div class="dropdown">
-            <button class="btn btn-customer dropdown-toggle" type="button" id="btnFiltrarPedidos" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid var(--border-color); color: var(--text-main);">
+            <button class="btn btn-customer dropdown-toggle" type="button" id="btnFiltrarPedidos" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);">
                 <i class="bi bi-funnel"></i> Filtrar
             </button>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="btnFiltrarPedidos" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <ul class="dropdown-menu dropdown-menu-custom dropdown-menu-end" aria-labelledby="btnFiltrarPedidos">
                 <li><a class="dropdown-item btn-filtro" href="#" data-filtro="TODOS">Todos los pedidos</a></li>
-                <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
-                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="COMPLETADO" style="color: var(--neon-green);">Completados</a></li>
-                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="PENDIENTE" style="color: var(--neon-yellow);">Pendientes</a></li>
-                <li><a class="dropdown-item btn-filtro" href="#" data-filtro="CANCELADO" style="color: var(--neon-red);">Cancelados</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item btn-filtro fw-bold" href="#" data-filtro="COMPLETADO" style="color: var(--neon-green);">Completados</a></li>
+                <li><a class="dropdown-item btn-filtro fw-bold" href="#" data-filtro="PENDIENTE" style="color: var(--neon-yellow);">Pendientes</a></li>
+                <li><a class="dropdown-item btn-filtro fw-bold" href="#" data-filtro="CANCELADO" style="color: var(--neon-red);">Cancelados</a></li>
             </ul>
         </div>
     </div>
@@ -190,12 +226,8 @@
 
                             <div class="d-flex flex-wrap gap-2 justify-content-end">
                                 <a href="@Url.Action("Details", "Pedido", new { id = item.ID_PEDIDO })" class="btn btn-customer btn-details text-decoration-none">
-                                    <i class="bi bi-box-seam"></i> Ver Productos
+                                    <i class="bi bi-box-seam"></i> Ver Detalles
                                 </a>
-
-                                <button type="button" class="btn btn-customer btn-report" onclick="abrirModalReporte('@item.ID_PEDIDO')">
-                                    <i class="bi bi-exclamation-triangle"></i> Reportar
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -209,87 +241,16 @@
             <div class="mb-3">
                 <i class="bi bi-bag-x" style="font-size: 3rem; color: var(--text-muted);"></i>
             </div>
-            <h5 class="text-white">Aún no tienes compras</h5>
+            <h5 class="fw-bold" style="color: var(--text-main);">Aún no tienes compras</h5>
             <p style="color: var(--text-muted);">Tus pedidos aparecerán aquí una vez que finalices una compra.</p>
-            <a href="@Url.Action("Index", "Tienda")" class="btn btn-customer btn-details mt-2">Ir a la tienda</a>
+            <a href="@Url.Action("Index", "Tienda")" class="btn btn-customer btn-details mt-2 text-decoration-none">Ir a la tienda</a>
         </div>
     }
 </div>
 
-<div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;">
-
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" id="modalReporteLabel" style="color: var(--text-main); font-weight: bold;">
-                    <i class="bi bi-exclamation-triangle" style="color: var(--neon-red);"></i> Reportar Problema
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-4">
-                <form id="formReporte">
-                    <div class="mb-3">
-                        <label class="form-label text-label">Número de Pedido</label>
-                        <input type="text" class="form-control" id="txtIdPedidoReporte" readonly
-                               style="background-color: rgba(255,255,255,0.02); color: var(--neon-blue-base); border: 1px solid var(--border-color); font-weight: bold;">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-label">¿Qué problema tuviste?</label>
-                        <select class="form-select" id="cboMotivoReporte"
-                                style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);">
-                            <option value="Producto dañado" style="color: black;">El producto llegó dañado o defectuoso</option>
-                            <option value="Producto incorrecto" style="color: black;">Me enviaron un producto incorrecto</option>
-                            <option value="Faltan artículos" style="color: black;">Faltan artículos en mi paquete</option>
-                            <option value="No llegó" style="color: black;">Mi pedido nunca llegó</option>
-                            <option value="Otro" style="color: black;">Otro problema</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-label">Detalles adicionales</label>
-                        <textarea class="form-control" id="txtDetalleReporte" rows="3" placeholder="Por favor, explica detalladamente qué sucedió..."
-                                  style="background-color: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-color);"></textarea>
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-customer" data-bs-dismiss="modal" style="color: var(--text-muted); border: 1px solid var(--border-color); background: transparent;">Cancelar</button>
-                <button type="button" class="btn btn-customer" id="btnEnviarReporte" style="background-color: var(--neon-red); color: white; border: none; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
-                    <i class="bi bi-send-fill me-1"></i> Enviar Reporte
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
-        // Declaramos la variable global para el modal
-        let modalReporteBootstrap;
-
-        // Función global para abrir el modal
-        function abrirModalReporte(idPedido) {
-            // Llenamos los campos del modal
-            document.getElementById('txtIdPedidoReporte').value = idPedido;
-            document.getElementById('cboMotivoReporte').selectedIndex = 0;
-            document.getElementById('txtDetalleReporte').value = '';
-
-            // Instanciamos el modal si no existe
-            if (!modalReporteBootstrap) {
-                const modalEl = document.getElementById('modalReporte');
-                modalReporteBootstrap = new bootstrap.Modal(modalEl);
-            }
-
-            // Lo mostramos
-            modalReporteBootstrap.show();
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
-
             // --- LÓGICA DEL FILTRO ---
             const botonesFiltro = document.querySelectorAll('.btn-filtro');
             const tarjetas = document.querySelectorAll('.tarjeta-pedido-wrapper');
@@ -308,65 +269,6 @@
                     });
                 });
             });
-
-            // --- LÓGICA DE ENVIAR REPORTE ---
-            document.getElementById('btnEnviarReporte').addEventListener('click', function () {
-                const idPedido = document.getElementById('txtIdPedidoReporte').value;
-                const motivo = document.getElementById('cboMotivoReporte').value;
-                const detalle = document.getElementById('txtDetalleReporte').value;
-
-                if (detalle.trim() === '') {
-                    alert('Por favor, escribe un poco de detalle sobre el problema.');
-                    return;
-                }
-
-                // Juntamos el motivo principal y el detalle
-                const motivoCompleto = motivo + " - " + detalle;
-
-                const formData = new FormData();
-                formData.append("ID_DETALLE_PEDIDO", idPedido);
-                formData.append("MOTIVO_CLIENTE", motivoCompleto);
-
-                const btnEnviar = document.getElementById('btnEnviarReporte');
-                const textoOriginal = btnEnviar.innerHTML;
-
-                // Mostramos estado de carga
-                btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
-                btnEnviar.disabled = true;
-
-                // Petición al backend
-                fetch('/Devolucion/Create', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    // Verificamos que la respuesta sea un JSON válido
-                    if (!response.ok) {
-                        throw new Error('Error en la red o en el servidor');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.exito) {
-                        alert('✅ ¡Reporte enviado! Nos pondremos en contacto contigo pronto.');
-                        if (modalReporteBootstrap) {
-                            modalReporteBootstrap.hide();
-                        }
-                    } else {
-                        alert('❌ Hubo un problema: ' + (data.mensaje || 'Error desconocido.'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ocurrió un error al intentar enviar el reporte. Verifica la consola para más detalles.');
-                })
-                .finally(() => {
-                    // Restauramos el botón
-                    btnEnviar.innerHTML = textoOriginal;
-                    btnEnviar.disabled = false;
-                });
-            });
-
         });
     </script>
 }

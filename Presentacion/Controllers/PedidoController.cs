@@ -34,34 +34,34 @@ namespace Presentacion.Controllers
             }
         }
 
-[HttpGet]
-public ActionResult Historial()
-{
-    try
-    {
-        // 1. Obtenemos el ID del usuario directamente de las Claims de su sesión
-        var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                      ?? User.FindFirst("IdUsuario")?.Value;
-
-        if (string.IsNullOrEmpty(claimId))
+        [HttpGet]
+        public ActionResult Historial()
         {
-            // Si por alguna razón la sesión se perdió, lo mandamos al Login
-            return RedirectToAction("Login", "Cuenta"); 
-        }
+            try
+            {
+                // 1. Obtenemos el ID del usuario directamente de las Claims de su sesión
+                var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                              ?? User.FindFirst("IdUsuario")?.Value;
 
-        int idUsuarioActual = int.Parse(claimId);
+                if (string.IsNullOrEmpty(claimId))
+                {
+                    // Si por alguna razón la sesión se perdió, lo mandamos al Login
+                    return RedirectToAction("Login", "Cuenta");
+                }
+
+                int idUsuarioActual = int.Parse(claimId);
 
                 // 2. Filtramos los pedidos para que solo vea los suyos
                 var misPedidos = _logicaPedido.ListarPorUsuario(idUsuarioActual);
 
                 return View(misPedidos);
-    }
-    catch (Exception ex)
-    {
-        ViewBag.Error = "Error al cargar tu historial de compras: " + ex.Message;
-        return View(new List<Pedido>());
-    }
-}
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar tu historial de compras: " + ex.Message;
+                return View(new List<Pedido>());
+            }
+        }
 
         public ActionResult Details(int id)
         {
@@ -74,14 +74,13 @@ public ActionResult Historial()
                 if (pedido == null)
                 {
                     TempData["MensajeError"] = "El pedido solicitado no existe o fue eliminado.";
-                    // Nota: Si esta vista es solo para el cliente, quizás quieras cambiar "Index" por "Historial"
                     return RedirectToAction("Index");
                 }
 
-                // 2. ¡LO NUEVO! Buscamos los productos que pertenecen a este ID de pedido
+                // 2. Buscamos los productos que pertenecen a este ID de pedido
                 var listaProductos = _logicaPedido.ObtenerDetallesPorPedido(id);
 
-                // 3. ¡LO NUEVO! Guardamos la lista en el ViewBag para leerla en el HTML
+                // 3. Guardamos la lista en el ViewBag para leerla en el HTML
                 ViewBag.Detalles = listaProductos;
 
                 // 4. Mandamos el pedido a la vista como modelo principal
@@ -95,33 +94,36 @@ public ActionResult Historial()
         }
 
         // ==========================================
-        // NUEVO: POST PARA ASIGNAR IMEI (AJAX)
+        // POST PARA ASIGNAR UN SOLO IMEI (AJAX) - OPCIÓN A
         // ==========================================
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public IActionResult AsignarImei(int idDetallePedido, string imei)
         {
             try
             {
-                // Instanciamos la lógica
-                LogicaDetallePedido logica = new LogicaDetallePedido();
+                if (idDetallePedido <= 0 || string.IsNullOrWhiteSpace(imei))
+                {
+                    return Json(new { success = false, message = "El ID del detalle o el IMEI son inválidos." });
+                }
 
-                // Ejecutamos la función
-                bool respuesta = logica.AsignarImeiDespacho(idDetallePedido, imei);
+                // Llamamos a la lógica enviando el IMEI único
+                bool respuesta = _logicaDetalle.AsignarImeiDespacho(idDetallePedido, imei.Trim());
 
                 if (respuesta)
                 {
-                    // Si todo sale al cien, le mandamos el OK al SweetAlert
-                    return Json(new { success = true, message = $"IMEI {imei} asignado y descontado del inventario correctamente." });
+                    return Json(new { success = true, message = "El IMEI fue asignado y descontado del inventario correctamente." });
                 }
 
-                return Json(new { success = false, message = "No se pudo asignar el IMEI por un problema interno." });
+                return Json(new { success = false, message = "No se pudo despachar el dispositivo por un problema interno." });
             }
             catch (Exception ex)
             {
-                // Si el SQL bota el error (ej. "El IMEI ya fue vendido"), cae aquí y se lo mandamos a la vista
+                // Esto captura los errores de SQL y se los manda al SweetAlert
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         // ==========================================
         public ActionResult Ticket(int id)
         {
@@ -135,7 +137,6 @@ public ActionResult Historial()
                     return View(new List<DetallePedido>());
                 }
 
-                // NUEVO: Le pasamos el ID a la vista mediante ViewBag
                 ViewBag.NumeroPedido = id;
 
                 return View(listaDetalles);
@@ -146,57 +147,6 @@ public ActionResult Historial()
                 return RedirectToAction("Index");
             }
         }
-
-        // ==========================================
-        // GET: Pedido/Create
-        // ==========================================
-        //public ActionResult Create()
-        //{
-        //    CargarUsuariosDropdown();
-        //    return View(new Pedido());
-        //}
-
-        //// ==========================================
-        //// POST: Pedido/Create
-        //// ==========================================
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Create(Pedido nuevoPedido)
-        //{
-        //    try
-        //    {
-        //        nuevoPedido.FECHA_PEDIDO = DateTime.Now;
-
-        //        // Limpiamos validaciones
-        //        ModelState.Remove("ID_PEDIDO");
-        //        ModelState.Remove("Usuario");
-        //        ModelState.Remove("Detalles");
-        //        ModelState.Remove("DetallePedidos");
-
-        //        if (ModelState.IsValid)
-        //        {
-        //            int idGenerado = _logicaPedido.Crear(nuevoPedido);
-        //            TempData["MensajeExito"] = $"¡Pedido #{idGenerado} creado correctamente!";
-        //            return RedirectToAction("Index");
-        //        }
-        //        else
-        //        {
-        //            var listaErrores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-        //            ViewBag.Error = "Revise los campos: " + string.Join(" | ", listaErrores);
-        //        }
-        //    }
-        //    catch (ArgumentException argEx)
-        //    {
-        //        ViewBag.Error = argEx.Message;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ViewBag.Error = "Error en el servidor: " + ex.Message;
-        //    }
-
-        //    CargarUsuariosDropdown();
-        //    return View(nuevoPedido);
-        //}
 
         // ==========================================
         // POST: Pedido/ActualizarEstado
