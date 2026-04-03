@@ -51,23 +51,68 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // 1. Limpiamos espacios en blanco accidentales al inicio o final
+                // 1. Limpieza rápida de espacios locos al inicio y al final
+                proveedor.RAZON_SOCIAL = proveedor.RAZON_SOCIAL?.Trim();
+                proveedor.NOMBRE_CONTACTO = proveedor.NOMBRE_CONTACTO?.Trim();
                 proveedor.TELEFONO = proveedor.TELEFONO?.Trim();
+                proveedor.CORREO = proveedor.CORREO?.Trim();
                 proveedor.DIRECCION = proveedor.DIRECCION?.Trim();
 
-                // 2. 🔥 ESCUDO DE SEGURIDAD: Nulos, Vacíos y Límites de caracteres
-                // Validamos el Teléfono (No nulo y máximo 15)
-                if (string.IsNullOrWhiteSpace(proveedor.TELEFONO) || proveedor.TELEFONO.Length > 15)
+                // 2. 🔥 EL SÚPER ESCUDO: Barrera Anti-Spam y Validaciones Estrictas
+
+                // Función interna para detectar 5 o más caracteres idénticos seguidos (ej: "aaaaa", "33333")
+                bool EsSpam(string texto)
                 {
-                    ViewBag.Error = "El Teléfono es obligatorio y no puede tener más de 15 caracteres.";
+                    if (string.IsNullOrWhiteSpace(texto)) return false;
+                    return System.Text.RegularExpressions.Regex.IsMatch(texto, @"(.)\1{4,}");
+                }
+
+                // A) Validar campos estrictamente obligatorios
+                if (string.IsNullOrWhiteSpace(proveedor.RAZON_SOCIAL) ||
+                    string.IsNullOrWhiteSpace(proveedor.TELEFONO) ||
+                    string.IsNullOrWhiteSpace(proveedor.DIRECCION))
+                {
+                    ViewBag.Error = "Los campos Razón Social, Teléfono y Dirección son obligatorios.";
                     return View(proveedor);
                 }
 
-                // Validamos la Dirección (No nula y máximo 255)
-                if (string.IsNullOrWhiteSpace(proveedor.DIRECCION) || proveedor.DIRECCION.Length > 255)
+                // B) Bloqueo de Spam (Teclas pegadas)
+                if (EsSpam(proveedor.RAZON_SOCIAL) || EsSpam(proveedor.NOMBRE_CONTACTO) || EsSpam(proveedor.DIRECCION))
                 {
-                    ViewBag.Error = "La Dirección es obligatoria y no puede tener más de 255 caracteres.";
+                    ViewBag.Error = "El sistema ha detectado texto sin sentido o repetitivo. Por favor, ingrese datos reales.";
                     return View(proveedor);
+                }
+
+                // C) Validar longitudes y formato del Teléfono
+                if (proveedor.TELEFONO.Length < 8 || proveedor.TELEFONO.Length > 15)
+                {
+                    ViewBag.Error = "El Teléfono debe tener entre 8 y 15 caracteres válidos.";
+                    return View(proveedor);
+                }
+
+                // D) Validar longitud de la Dirección y Razón Social
+                if (proveedor.RAZON_SOCIAL.Length > 100)
+                {
+                    ViewBag.Error = "La Razón Social no puede pasar de 100 caracteres.";
+                    return View(proveedor);
+                }
+
+                if (proveedor.DIRECCION.Length > 255)
+                {
+                    ViewBag.Error = "La Dirección no puede pasar de 255 caracteres.";
+                    return View(proveedor);
+                }
+
+                // E) Validar Correo Electrónico con Lista Blanca (Whitelist)
+                if (!string.IsNullOrWhiteSpace(proveedor.CORREO))
+                {
+                    // Patrón: usuario de 3 a 30 caracteres, arroba, y dominios específicos
+                    bool correoValido = System.Text.RegularExpressions.Regex.IsMatch(proveedor.CORREO, @"^[a-zA-Z0-9._%+-]{3,30}@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|yunet\.com)$");
+                    if (!correoValido)
+                    {
+                        ViewBag.Error = "El correo ingresado es inválido o usa un dominio no permitido (solo Gmail, Hotmail, Yahoo, Outlook).";
+                        return View(proveedor);
+                    }
                 }
 
                 // 3. Si pasó las validaciones, procedemos a la lógica
@@ -91,7 +136,6 @@ namespace Presentacion.Controllers
                 return View(proveedor);
             }
         }
-
         // --- 5. VISTA PARA EDITAR (GET) ---
         [HttpGet]
         public IActionResult Editar(int id)
@@ -122,24 +166,71 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // 1. Limpieza rápida de espacios locos
+                // 1. Limpieza rápida de espacios locos al inicio y al final
+                proveedor.RAZON_SOCIAL = proveedor.RAZON_SOCIAL?.Trim();
+                proveedor.NOMBRE_CONTACTO = proveedor.NOMBRE_CONTACTO?.Trim();
                 proveedor.TELEFONO = proveedor.TELEFONO?.Trim();
+                proveedor.CORREO = proveedor.CORREO?.Trim();
                 proveedor.DIRECCION = proveedor.DIRECCION?.Trim();
 
-                // 2. 🔥 EL ESCUDO: Validamos los límites antes de ir a SQL
-                if (string.IsNullOrWhiteSpace(proveedor.TELEFONO) || proveedor.TELEFONO.Length > 15)
+                // 2. 🔥 EL SÚPER ESCUDO: Barrera Anti-Spam y Validaciones Estrictas
+
+                // Función interna para detectar 5 o más caracteres idénticos seguidos (ej: "aaaaa", "33333")
+                bool EsSpam(string texto)
                 {
-                    ViewBag.Error = "El Teléfono no puede estar vacío ni pasar de 15 caracteres.";
+                    if (string.IsNullOrWhiteSpace(texto)) return false;
+                    return System.Text.RegularExpressions.Regex.IsMatch(texto, @"(.)\1{4,}");
+                }
+
+                // A) Validar campos estrictamente obligatorios
+                if (string.IsNullOrWhiteSpace(proveedor.RAZON_SOCIAL) ||
+                    string.IsNullOrWhiteSpace(proveedor.TELEFONO) ||
+                    string.IsNullOrWhiteSpace(proveedor.DIRECCION))
+                {
+                    ViewBag.Error = "Los campos Razón Social, Teléfono y Dirección son obligatorios.";
                     return View(proveedor);
                 }
 
-                if (string.IsNullOrWhiteSpace(proveedor.DIRECCION) || proveedor.DIRECCION.Length > 255)
+                // B) Bloqueo de Spam (Teclas pegadas)
+                if (EsSpam(proveedor.RAZON_SOCIAL) || EsSpam(proveedor.NOMBRE_CONTACTO) || EsSpam(proveedor.DIRECCION))
                 {
-                    ViewBag.Error = "La Dirección no puede estar vacía ni pasar de 255 caracteres.";
+                    ViewBag.Error = "El sistema ha detectado texto sin sentido o repetitivo. Por favor, ingrese datos reales.";
                     return View(proveedor);
                 }
 
-                // 3. Si todo está "fresh", guardamos
+                // C) Validar longitudes y formato del Teléfono
+                if (proveedor.TELEFONO.Length < 8 || proveedor.TELEFONO.Length > 15)
+                {
+                    ViewBag.Error = "El Teléfono debe tener entre 8 y 15 caracteres válidos.";
+                    return View(proveedor);
+                }
+
+                // D) Validar longitud de la Dirección y Razón Social
+                if (proveedor.RAZON_SOCIAL.Length > 100)
+                {
+                    ViewBag.Error = "La Razón Social no puede pasar de 100 caracteres.";
+                    return View(proveedor);
+                }
+
+                if (proveedor.DIRECCION.Length > 255)
+                {
+                    ViewBag.Error = "La Dirección no puede pasar de 255 caracteres.";
+                    return View(proveedor);
+                }
+
+                // E) Validar Correo Electrónico con Lista Blanca (Whitelist)
+                if (!string.IsNullOrWhiteSpace(proveedor.CORREO))
+                {
+                    // Patrón: usuario de 3 a 30 caracteres, arroba, y dominios específicos
+                    bool correoValido = System.Text.RegularExpressions.Regex.IsMatch(proveedor.CORREO, @"^[a-zA-Z0-9._%+-]{3,30}@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|yunet\.com)$");
+                    if (!correoValido)
+                    {
+                        ViewBag.Error = "El correo ingresado es inválido o usa un dominio no permitido (solo Gmail, Hotmail, Yahoo, Outlook).";
+                        return View(proveedor);
+                    }
+                }
+
+                // 3. Si todo está "fresh" y pasó la aduana, guardamos en SQL
                 bool exito = _logicaProveedor.EditarProveedor(proveedor);
 
                 if (exito)
@@ -149,13 +240,13 @@ namespace Presentacion.Controllers
                 }
                 else
                 {
-                    ViewBag.Error = "Error interno al intentar guardar los cambios.";
+                    ViewBag.Error = "Error interno al intentar guardar los cambios en la base de datos.";
                     return View(proveedor);
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = "Error inesperado: " + ex.Message;
                 return View(proveedor);
             }
         }

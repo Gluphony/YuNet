@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq; // Agregado para el FirstOrDefault
 using Microsoft.AspNetCore.Mvc;
 using LogicaNegocio;
 using Entidades;
@@ -7,14 +8,14 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Presentacion.Controllers
 {
-    // Solo administradores deberían gestionar la tabla maestra de permisos
-    [Authorize(Roles = "Administrador")]
+    // 🔥 EL ESCUDO BASE: Solo el Administrador y el Auditor pueden entrar a ver la tabla.
+    [Authorize(Roles = "Administrador,Admin,Auditor")]
     public class PermisosController : Controller
     {
         private readonly LogicaPermisos _logicaPermisos = new LogicaPermisos();
 
         // GET: Permisos
-        // Lista todos los permisos registrados
+        // Todos los autorizados arriba pueden ver la lista.
         [HttpGet]
         public ActionResult Index()
         {
@@ -31,7 +32,9 @@ namespace Presentacion.Controllers
         }
 
         // GET: Permisos/Create
+        // 🔥 ESCUDO: El Auditor queda fuera de la creación.
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin")]
         public ActionResult Create()
         {
             return View();
@@ -40,6 +43,7 @@ namespace Presentacion.Controllers
         // POST: Permisos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Admin")]
         public ActionResult Create(Permisos oPermiso)
         {
             try
@@ -62,12 +66,13 @@ namespace Presentacion.Controllers
         }
 
         // GET: Permisos/Edit/5
+        // 🔥 ESCUDO: El Auditor queda fuera de la edición.
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin")]
         public ActionResult Edit(int id)
         {
             try
             {
-                // Buscamos el permiso en la lista por su ID
                 var permiso = _logicaPermisos.ListarPermisos()
                                 .FirstOrDefault(p => p.ID_PERMISO == id);
 
@@ -85,6 +90,7 @@ namespace Presentacion.Controllers
         // POST: Permisos/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Admin")]
         public ActionResult Edit(Permisos oPermiso)
         {
             try
@@ -107,7 +113,9 @@ namespace Presentacion.Controllers
         }
 
         // POST: Permisos/Desactivar/5
+        // 🔥 ESCUDO: El Auditor queda fuera de la desactivación.
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public JsonResult Desactivar(int id)
         {
             try
@@ -120,6 +128,5 @@ namespace Presentacion.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
     }
 }

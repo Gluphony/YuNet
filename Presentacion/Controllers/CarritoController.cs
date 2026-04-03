@@ -10,7 +10,8 @@ using LogicaNegocio;
 
 namespace Presentacion.Controllers
 {
-    [Authorize] // Protegemos el carrito, solo usuarios logueados pueden entrar
+    // Bloqueamos al Auditor. Solo Administrador, Vendedor y Usuario (Cliente) pueden entrar aquí.
+    [Authorize(Roles = "Administrador,Admin,Vendedor,Usuario")]
     public class CarritoController : Controller
     {
         private readonly LogicaCarrito _logicaCarrito = new LogicaCarrito();
@@ -75,8 +76,8 @@ namespace Presentacion.Controllers
                 LogicaDetalleCarrito logicaDetalle = new LogicaDetalleCarrito();
                 ViewBag.ListaDetalles = logicaDetalle.Listar(miCarrito.ID_CARRITO);
 
-                // LÓGICA EXCLUSIVA PARA EL ADMIN
-                if (User.IsInRole("Administrador"))
+                // LÓGICA EXCLUSIVA PARA EL ADMIN Y VENDEDOR (Actúan como cajeros POS)
+                if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Vendedor"))
                 {
                     LogicaProducto logicaProd = new LogicaProducto();
                     DataTable todosLosProductos = logicaProd.ListarProductos();
@@ -124,6 +125,7 @@ namespace Presentacion.Controllers
         // 3. PROCESAR COMPRA (CLIENTE NORMAL)
         // ==========================================
         [HttpPost]
+        [Authorize(Roles = "Usuario")] // Solo los clientes de la web usan este método
         public IActionResult ProcesarCompra(int? idMetodoPago)
         {
             int idUsuario = ObtenerIdUsuarioLogueado();
@@ -176,10 +178,11 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // MÉTODOS EXCLUSIVOS PARA EL POS (ADMIN)
+        // MÉTODOS EXCLUSIVOS PARA EL POS (ADMIN Y VENDEDOR)
         // ==========================================
 
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult AgregarAdmin(int idProducto, int cantidad)
         {
             try
@@ -201,6 +204,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Eliminar(int idDetalle)
         {
             try
@@ -217,6 +221,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult ProcesarCompraAdmin(int idClienteReal, int idMetodoPago)
         {
             try
@@ -247,7 +252,7 @@ namespace Presentacion.Controllers
 
                         if (detalle.CANTIDAD > stockDisponible)
                         {
-                            // Le avisamos al Admin
+                            // Le avisamos al Admin/Vendedor
                             string nombreProducto = filaProducto[0]["NOMBRE"].ToString();
                             TempData["MensajeError"] = $"Error de Stock: Intentas vender {detalle.CANTIDAD} de '{nombreProducto}', pero solo hay {stockDisponible} en el inventario.";
                             return RedirectToAction("Index");

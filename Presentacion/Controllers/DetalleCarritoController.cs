@@ -7,7 +7,8 @@ using System.Security.Claims;
 
 namespace Presentacion.Controllers
 {
-    [Authorize]
+    // 🔥 EL ESCUDO: Bloqueamos al Auditor de raíz.
+    [Authorize(Roles = "Administrador,Admin,Vendedor,Usuario")]
     public class DetalleCarritoController : Controller
     {
         private readonly LogicaDetalleCarrito _logicaDetalle = new LogicaDetalleCarrito();
@@ -25,7 +26,7 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 1. AGREGAR PRODUCTO AL CARRITO (Cliente Normal)
+        // 1. AGREGAR PRODUCTO AL CARRITO 
         // ==========================================
         [HttpPost]
         public IActionResult Agregar(int idProducto, int cantidad = 1)
@@ -48,12 +49,12 @@ namespace Presentacion.Controllers
                 TempData["MensajeError"] = "Error al agregar el producto: " + ex.Message;
             }
 
-            // Lo enviamos a la vista principal del carrito (o podrías enviarlo de vuelta al catálogo)
+            // Lo enviamos a la vista principal del carrito
             return RedirectToAction("Index", "Carrito");
         }
 
         // ==========================================
-        // 2. ELIMINAR ÍTEM DEL CARRITO (Cliente Normal)
+        // 2. ELIMINAR ÍTEM DEL CARRITO 
         // ==========================================
         [HttpPost]
         public IActionResult Eliminar(int idDetalle)

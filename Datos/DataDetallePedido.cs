@@ -91,57 +91,73 @@ namespace Datos
             }
             return respuesta;
         }
+        // Método dentro de DatosDetallePedido.cs
         public List<DetallePedido> ListarTicket(int idPedido)
         {
-            var olista = new List<DetallePedido>();
-            using (SqlConnection connection = new SqlConnection(_con.GetCadena()))
+            List<DetallePedido> lista = new List<DetallePedido>();
+            try
             {
-                using (SqlCommand cmd = new SqlCommand("Venta.Sp_ListarTicketPedido", connection))
+                using (SqlConnection conexion = new SqlConnection(_con.GetCadena()))
                 {
+                    SqlCommand cmd = new SqlCommand("Venta.Sp_ListarTicketPedido", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id_Pedido", idPedido);
 
-                    try
+                    conexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
                     {
-                        connection.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        while (dr.Read())
                         {
-                            while (reader.Read())
-                            {
-                                // 1. Armamos el objeto base
-                                var detalle = new DetallePedido()
-                                {
-                                    ID_DETALLE_PEDIDO = Convert.ToInt32(reader["Id_Detalle_Pedido"]),
-                                    PRODUCTO = reader["Producto"].ToString(),
-                                    IMEI_VENDIDO = reader["Numero_Serie_IMEI"].ToString(),
-                                    CANTIDAD = Convert.ToInt32(reader["Cantidad"]),
-                                    PRECIO_UNITARIO = Convert.ToDecimal(reader["Precio_Unitario"])
-                                };
+                            DetallePedido detalle = new DetallePedido();
 
-                                // 2. Lógica para saber si ya hay un reporte (Devolución)
-                                if (reader["ID_DEVOLUCION"] != DBNull.Value)
-                                {
-                                    detalle.Tiene_Devolucion = true;
-                                    detalle.Id_Devolucion_Vinculada = Convert.ToInt32(reader["ID_DEVOLUCION"]);
-                                    detalle.ESTADO_REPORTE = reader["ESTADO_REPORTE"] != DBNull.Value ? reader["ESTADO_REPORTE"].ToString() : "Pendiente";
-                                }
-                                else
-                                {
-                                    // No hay reporte todavía
-                                    detalle.Tiene_Devolucion = false;
-                                    detalle.Id_Devolucion_Vinculada = null;
-                                    detalle.ESTADO_REPORTE = null;
-                                }
+                            // Leemos ID con seguridad
+                            if (HasColumn(dr, "Id_Detalle_Pedido")) detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["Id_Detalle_Pedido"]);
+                            else if (HasColumn(dr, "ID_DETALLE_PEDIDO")) detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["ID_DETALLE_PEDIDO"]);
 
-                                // 3. Lo agregamos a la lista final
-                                olista.Add(detalle);
-                            }
+                            detalle.ID_PEDIDO = idPedido;
+
+                            // Leemos Producto con seguridad
+                            if (HasColumn(dr, "Producto")) detalle.PRODUCTO = dr["Producto"].ToString();
+                            else if (HasColumn(dr, "PRODUCTO")) detalle.PRODUCTO = dr["PRODUCTO"].ToString();
+
+                            // Leemos IMEI con seguridad
+                            if (HasColumn(dr, "Numero_Serie_IMEI"))
+                                detalle.IMEI_VENDIDO = dr["Numero_Serie_IMEI"] != DBNull.Value ? dr["Numero_Serie_IMEI"].ToString() : "N/A";
+                            else if (HasColumn(dr, "IMEI_VENDIDO"))
+                                detalle.IMEI_VENDIDO = dr["IMEI_VENDIDO"] != DBNull.Value ? dr["IMEI_VENDIDO"].ToString() : "N/A";
+                            else
+                                detalle.IMEI_VENDIDO = "N/A";
+
+                            // Leemos Cantidad y Precio
+                            if (HasColumn(dr, "Cantidad")) detalle.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
+                            else if (HasColumn(dr, "CANTIDAD")) detalle.CANTIDAD = Convert.ToInt32(dr["CANTIDAD"]);
+
+                            if (HasColumn(dr, "Precio_Unitario")) detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["Precio_Unitario"]);
+                            else if (HasColumn(dr, "PRECIO_UNITARIO")) detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["PRECIO_UNITARIO"]);
+
+                            // ❌ NO LEEMOS EL SUBTOTAL PORQUE C# LO CALCULA SOLO
+
+                            lista.Add(detalle);
                         }
                     }
-                    catch (Exception) { /* Log error */ }
                 }
             }
-            return olista;
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener el ticket: " + ex.Message);
+            }
+            return lista;
+        }
+
+        // Función auxiliar (pégala al final de la clase si no existe)
+        private bool HasColumn(SqlDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+            return false;
         }
     }
 }

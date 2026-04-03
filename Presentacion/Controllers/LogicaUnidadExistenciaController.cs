@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // <- NECESARIO PARA LA SEGURIDAD
 using Entidades;
 using LogicaNegocio;
 using System;
@@ -6,6 +7,8 @@ using System.Data;
 
 namespace Presentacion.Controllers
 {
+    // 🔥 EL ESCUDO BASE: Dejamos entrar al Staff y al Auditor a la pantalla
+    [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor")]
     public class UnidadExistenciaController : Controller
     {
         // Instanciamos la capa de negocio
@@ -38,6 +41,8 @@ namespace Presentacion.Controllers
 
         // --- 2. ACCIÓN PARA INSERTAR (Llamada desde AJAX/Fetch) ---
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: El Auditor NO puede registrar nuevos IMEIs/Unidades
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Insertar([FromBody] UnidadExistencia unidad)
         {
             try

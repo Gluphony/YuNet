@@ -1,50 +1,63 @@
-﻿using Microsoft.AspNetCore.Mvc; 
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Entidades;
 using LogicaNegocio;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims; // Agregado para leer el ID real del usuario
 
 namespace Presentacion.Controllers
 {
+    // Escudo Base: Tienes que haber iniciado sesión para entrar a este controlador
+    [Authorize]
     public class DetallePedidoController : Controller
     {
         // Instanciamos la capa de negocio
         private readonly LogicaDetallePedido _logicaDetalle = new LogicaDetallePedido();
 
-        // --- 1. ACCIÓN PARA INSERTAR DETALLE (Llamada desde AJAX / Fetch en la vista) ---
+        // --- 1. ACCIÓN PARA INSERTAR DETALLE (Llamada desde AJAX) ---
+        // 🔥 EL ESCUDO: El Auditor NO tiene permiso para insertar nada
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor,Usuario")]
         public IActionResult Insertar([FromBody] DetallePedido oDetalle)
         {
             try
             {
-
-                int idUsuarioSesion = 1; // Simulando el ID para el ejemplo
+                // Obtenemos el ID del usuario real desde los Claims (Adiós a la simulación)
+                int idUsuarioSesion = 1;
+                var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(claimId, out int parsedId))
+                {
+                    idUsuarioSesion = parsedId;
+                }
 
                 // Llamamos a la capa de negocio
                 bool resultado = _logicaDetalle.InsertarDetalle(oDetalle, idUsuarioSesion);
 
                 if (resultado)
                 {
-                    // Retornamos JSON porque normalmente los detalles se agregan sin recargar toda la página
                     return Json(new { exito = true, mensaje = "Producto agregado al pedido." });
                 }
 
                 return Json(new { exito = false, mensaje = "No se pudo registrar el detalle en la base de datos." });
             }
-            catch (ArgumentException ex) // ¡Aquí atrapamos TUS validaciones de negocio!
+            catch (ArgumentException ex)
             {
-                // Si faltó el precio, la cantidad, etc., le devolvemos tu mensaje exacto a la vista
+                // Atrapamos validaciones de negocio
                 return Json(new { exito = false, mensaje = ex.Message });
             }
             catch (Exception ex)
             {
-                // Atrapamos errores graves (caída de BD, etc.)
+                // Atrapamos errores graves
                 return Json(new { exito = false, mensaje = "Error del sistema: " + ex.Message });
             }
         }
 
-        // --- 2. ACCIÓN PARA MOSTRAR EL TICKET (Para imprimir o visualizar) ---
+        // --- 2. ACCIÓN PARA MOSTRAR EL TICKET ---
+        // Todos pueden ver el ticket, INCLUYENDO al Auditor para sus revisiones
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor,Usuario")]
         public IActionResult Ticket(int idPedido)
         {
             try
@@ -57,7 +70,6 @@ namespace Presentacion.Controllers
             }
             catch (ArgumentException ex)
             {
-                // Si el idPedido es <= 0, mandamos el error a la vista usando ViewBag
                 ViewBag.Error = ex.Message;
                 return View(new List<DetallePedido>());
             }

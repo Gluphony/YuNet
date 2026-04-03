@@ -323,12 +323,32 @@ namespace CapaDatos
                         while (dr.Read())
                         {
                             DetallePedido detalle = new DetallePedido();
-                            detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["Id_Detalle_Pedido"]);
+
+                            // Leemos ID con seguridad
+                            if (HasColumn(dr, "Id_Detalle_Pedido")) detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["Id_Detalle_Pedido"]);
+                            else if (HasColumn(dr, "ID_DETALLE_PEDIDO")) detalle.ID_DETALLE_PEDIDO = Convert.ToInt32(dr["ID_DETALLE_PEDIDO"]);
+
                             detalle.ID_PEDIDO = idPedido;
-                            detalle.PRODUCTO = dr["Producto"].ToString();
-                            detalle.IMEI_VENDIDO = dr["Numero_Serie_IMEI"] != DBNull.Value ? dr["Numero_Serie_IMEI"].ToString() : "N/A";
-                            detalle.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
-                            detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["Precio_Unitario"]);
+
+                            // Leemos Producto con seguridad
+                            if (HasColumn(dr, "Producto")) detalle.PRODUCTO = dr["Producto"].ToString();
+                            else if (HasColumn(dr, "PRODUCTO")) detalle.PRODUCTO = dr["PRODUCTO"].ToString();
+
+                            // Leemos IMEI con seguridad (cubrimos ambos nombres posibles)
+                            if (HasColumn(dr, "Numero_Serie_IMEI"))
+                                detalle.IMEI_VENDIDO = dr["Numero_Serie_IMEI"] != DBNull.Value ? dr["Numero_Serie_IMEI"].ToString() : "N/A";
+                            else if (HasColumn(dr, "IMEI_VENDIDO"))
+                                detalle.IMEI_VENDIDO = dr["IMEI_VENDIDO"] != DBNull.Value ? dr["IMEI_VENDIDO"].ToString() : "N/A";
+                            else
+                                detalle.IMEI_VENDIDO = "N/A";
+
+                            // Leemos Cantidad y Precio
+                            if (HasColumn(dr, "Cantidad")) detalle.CANTIDAD = Convert.ToInt32(dr["Cantidad"]);
+                            else if (HasColumn(dr, "CANTIDAD")) detalle.CANTIDAD = Convert.ToInt32(dr["CANTIDAD"]);
+
+                            if (HasColumn(dr, "Precio_Unitario")) detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["Precio_Unitario"]);
+                            else if (HasColumn(dr, "PRECIO_UNITARIO")) detalle.PRECIO_UNITARIO = Convert.ToDecimal(dr["PRECIO_UNITARIO"]);
+
                             detalles.Add(detalle);
                         }
                     }
@@ -339,6 +359,17 @@ namespace CapaDatos
                 throw new Exception("Error al obtener el ticket del pedido: " + ex.Message);
             }
             return detalles;
+        }
+
+        // Agrega esta pequeña función auxiliar al final de la clase (si no la tienes ya):
+        private bool HasColumn(SqlDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+            return false;
         }
     }
 }

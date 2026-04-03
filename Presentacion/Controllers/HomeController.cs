@@ -16,7 +16,7 @@ using Entidades;
 
 namespace Presentacion.Controllers
 {
-    // Quitamos el [Authorize] de aquí arriba para tener control por cada método
+    // El controlador está abierto por defecto, cada método tiene sus propias reglas
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -28,17 +28,16 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
-        // 2. PANTALLA PRINCIPAL (ENRUTADOR)
+        // 1. PANTALLA PRINCIPAL (PÁGINA DE INICIO)
         // ==========================================
         [AllowAnonymous]
         public IActionResult Index()
         {
-            // 1. ELIMINAMOS LAS REDIRECCIONES
-            // Ahora cualquier persona (visitante, cliente, vendedor, admin) puede entrar aquí.
-
-            // 2. LÓGICA EXCLUSIVA PARA ADMINISTRADORES
-            // Solo hacemos las consultas pesadas a la base de datos si el usuario es Admin.
-            if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Admin")))
+            // 1. LÓGICA PARA EL STAFF (Admin, Vendedor, Auditor)
+            // Si eres del staff, cargamos el Dashboard con las estadísticas.
+            // Si eres Cliente o Anónimo, simplemente mostramos la página de inicio sin hacer consultas pesadas.
+            if (User.Identity.IsAuthenticated &&
+               (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor")))
             {
                 ViewBag.NombreUsuario = User.Identity.Name;
 
@@ -73,6 +72,7 @@ namespace Presentacion.Controllers
 
                     ViewBag.ProductosPopulares = topProductos;
 
+                    // NOTA: Estos valores están en duro ("hardcoded"). En el futuro puedes llamar a LogicaVentas.
                     ViewBag.TotalUsuarios = 8;
                     ViewBag.VentasHoy = 14;
                     ViewBag.IngresosMes = 12450.00m;
@@ -88,10 +88,13 @@ namespace Presentacion.Controllers
                 }
             }
 
-            // 3. Retorna la vista (Index.cshtml)
+            // Retorna la vista (Si es cliente, verá la landing page normal; si es staff, verá el Dashboard)
             return View();
         }
 
+        // ==========================================
+        // 2. OTRAS VISTAS GENERALES (Públicas)
+        // ==========================================
         [AllowAnonymous]
         public IActionResult Privacy()
         {
@@ -111,7 +114,10 @@ namespace Presentacion.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        // Cualquier usuario logueado puede cerrar sesión
+        // ==========================================
+        // 3. CERRAR SESIÓN
+        // ==========================================
+        // Cualquier usuario que esté logueado (Cliente o Staff) puede cerrar sesión
         [Authorize]
         public async Task<IActionResult> Salir()
         {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // <-- NECESARIO PARA LA SEGURIDAD
 using Entidades;
 using LogicaNegocio;
 using System;
@@ -6,6 +7,8 @@ using System.Collections.Generic;
 
 namespace Presentacion.Controllers
 {
+    // 🔥 EL ESCUDO BASE: Dejamos entrar a todo el Staff para que puedan ver los métodos
+    [Authorize(Roles = "Administrador,Admin,Auditor,Vendedor")]
     public class MetodoPagoController : Controller
     {
         private readonly LogicaMetodoPago _logicaMetodoPago = new LogicaMetodoPago();
@@ -29,6 +32,8 @@ namespace Presentacion.Controllers
 
         // --- 2. GUARDAR (INSERTAR O EDITAR) ---
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: El Auditor NO puede crear ni editar métodos de pago
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Guardar([FromBody] MetodoPago metodo)
         {
             try
@@ -65,6 +70,8 @@ namespace Presentacion.Controllers
 
         // --- 3. DESACTIVAR ---
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: El Auditor NO puede desactivar métodos de pago
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Desactivar([FromBody] int idMetodoPago)
         {
             try

@@ -1,40 +1,44 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Entidades;
 using LogicaNegocio;
 using System;
-using Presentacion.Reportes; // El namespace de tu nueva carpeta
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Presentacion.Reportes;
 using QuestPDF.Fluent;
 
 namespace TuProyecto.Controllers
 {
+    // Solo los altos mandos y el auditor pueden entrar a este módulo
+    [Authorize(Roles = "Administrador,Admin,Auditor")]
     public class CategoriaController : Controller
     {
-        // Instanciamos la clase de Lógica de Negocio que me compartiste
         private readonly LogicaCategoria _logicaCategoria = new LogicaCategoria();
 
-        // 1. LISTAR (GET: /Categoria o /Categoria/Index)
+        // 1. LISTAR (Todos los autorizados arriba pueden ver esto)
         public IActionResult Index()
         {
             var lista = _logicaCategoria.Listar();
             return View(lista);
         }
 
-        // 2. FILTRAR (GET: /Categoria/Filtrar?nombre=algo)
+        // 2. FILTRAR (Todos los autorizados arriba pueden usar el buscador)
         public IActionResult Filtrar(string nombre)
         {
-            // Si el nombre es nulo, traemos todo; si no, filtramos.
             var lista = string.IsNullOrEmpty(nombre)
                         ? _logicaCategoria.Listar()
                         : _logicaCategoria.FiltrarPorNombre(nombre);
 
-            // Mantenemos el valor en el buscador para que el usuario sepa qué buscó
             ViewBag.NombreFiltro = nombre;
 
             return View("Index", lista);
         }
 
-        // 3. CREAR (POST: /Categoria/Crear)
+        // 3. CREAR (🔥 ESCUDO: El Auditor NO puede crear)
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Crear(Categoria categoria)
         {
             try
@@ -44,15 +48,15 @@ namespace TuProyecto.Controllers
             }
             catch (Exception ex)
             {
-                // Atrapa las validaciones que pusiste en tu LN (ej. nombre vacío)
                 TempData["MensajeError"] = ex.Message;
             }
 
             return RedirectToAction("Index");
         }
 
-        // 4. EDITAR (POST: /Categoria/Editar)
+        // 4. EDITAR (🔥 ESCUDO: El Auditor NO puede editar)
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Editar(Categoria categoria)
         {
             try
@@ -68,8 +72,9 @@ namespace TuProyecto.Controllers
             return RedirectToAction("Index");
         }
 
-        // 5. DESACTIVAR (POST: /Categoria/Desactivar/5)
+        // 5. DESACTIVAR (🔥 ESCUDO: El Auditor NO puede desactivar)
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Desactivar(int idCategoria)
         {
             try
@@ -85,37 +90,26 @@ namespace TuProyecto.Controllers
             return RedirectToAction("Index");
         }
 
+        // 6. EXPORTAR PDF (El Auditor SÍ puede hacer esto)
         [HttpGet]
         public IActionResult DescargarPdf(string busqueda)
         {
             try
             {
-                // 1. Traemos los datos y forzamos a que sea una Lista fija en memoria
-                // Cambiamos 'Marca' por 'Categoria' y usamos tu lógica de categorías
                 List<Categoria> lista = string.IsNullOrEmpty(busqueda)
                                      ? _logicaCategoria.Listar().ToList()
                                      : _logicaCategoria.FiltrarPorNombre(busqueda).ToList();
 
-                // 2. Si la lista está vacía, evitamos que el PDF falle
                 if (lista == null) lista = new List<Categoria>();
 
-                // 3. Instanciamos el reporte específico de Categorías
-                // Nota: Debes tener creada la clase CategoriaReporte (similar a MarcaReporte)
                 var documento = new CategoriaReporte(lista);
-
-                // 4. Generamos los bytes
                 byte[] pdfBytes = documento.GeneratePdf();
-
                 var stream = new MemoryStream(pdfBytes);
 
-                // 5. Retornamos el archivo
-                // Al no poner el nombre del archivo como tercer parámetro, 
-                // el navegador suele abrirlo en una pestaña nueva (target="_blank")
                 return File(stream, "application/pdf");
             }
             catch (Exception ex)
             {
-                // Manejo de errores para que no se caiga tu proyecto de la UdeM
                 return Content("Error al generar el reporte de categorías: " + ex.Message);
             }
         }

@@ -51,6 +51,21 @@
             border-color: var(--neon-blue);
             background: rgba(0, 212, 255, 0.1);
         }
+
+    /* Efectos para la imagen */
+    .img-evidencia {
+        max-height: 250px;
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 15px var(--neon-blue-glow);
+        border-radius: 8px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        object-fit: contain;
+    }
+
+        .img-evidencia:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px var(--neon-blue-glow);
+        }
 </style>
 
 <div class="container-fluid py-4">
@@ -93,10 +108,23 @@
                         </div>
                         <div class="col-12 mt-3">
                             <label class="form-label small fw-bold text-muted">Motivo del Cliente (Problema Reportado)</label>
-                            <div class="form-control custom-field-readonly" style="min-height: 60px; color: var(--text-main) !important;">
+                            <div class="form-control custom-field-readonly" style="min-height: 60px; color: var(--text-main) !important; white-space: pre-wrap;">
                                 @Model.MOTIVO_CLIENTE
                             </div>
                         </div>
+
+                        @if (!string.IsNullOrEmpty(Model.RUTA_EVIDENCIA))
+                        {
+                            <div class="col-12 mt-4">
+                                <label class="form-label small fw-bold text-muted"><i class="bi bi-camera me-1"></i> Evidencia Fotográfica Adjunta</label>
+                                <div class="text-center p-4" style="background-color: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-color); border-radius: 8px;">
+                                    <a href="@Model.RUTA_EVIDENCIA" target="_blank" title="Haz clic para abrir la imagen en tamaño completo">
+                                        <img src="@Model.RUTA_EVIDENCIA" alt="Evidencia del cliente" class="img-fluid img-evidencia" />
+                                    </a>
+                                    <div class="mt-3 small text-muted"><i class="bi bi-hand-index-thumb me-1"></i> Haz clic en la imagen para verla en tamaño completo</div>
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     <div class="d-flex align-items-center mb-4">
@@ -107,13 +135,13 @@
                     <div class="row g-4">
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">Estado del Reporte</label>
-                            <div class="form-control custom-field-readonly" style="color: @(Model.ESTADO_REPORTE == "Aprobado" ? "var(--neon-green)" : "var(--neon-red)") !important;">
+                            <div class="form-control custom-field-readonly" style="color: @(Model.ESTADO_REPORTE == "Aprobado" ? "var(--neon-green)" : (Model.ESTADO_REPORTE == "Pendiente" ? "var(--neon-yellow)" : "var(--neon-red)")) !important;">
                                 @Model.ESTADO_REPORTE
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">Condición del Equipo</label>
-                            <div class="form-control custom-field-readonly">@Model.ESTADO_DISPOSITIVO_RECIBIDO</div>
+                            <div class="form-control custom-field-readonly">@(string.IsNullOrEmpty(Model.ESTADO_DISPOSITIVO_RECIBIDO) ? "Pendiente de Revisión" : Model.ESTADO_DISPOSITIVO_RECIBIDO)</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">Autorizado Por</label>
@@ -123,36 +151,40 @@
                         <div class="col-12">
                             <label class="form-label small fw-bold text-muted">Acción Tomada</label>
                             <div class="form-control custom-field-readonly" style="color: var(--text-main) !important;">
-                                @Model.ACCION_TOMADA
+                                @(string.IsNullOrEmpty(Model.ACCION_TOMADA) ? "Pendiente de Resolución" : Model.ACCION_TOMADA)
                             </div>
                         </div>
 
-                        <div class="col-12 mt-4">
-                            @if (Model.REGRESAR_INVENTARIO)
-                            {
-                                <div class="stock-panel p-4 rounded-3 d-flex align-items-center">
-                                    <div class="me-3 fs-3" style="color: var(--neon-yellow);">
-                                        <i class="bi bi-box-arrow-in-down"></i>
+                        @if (Model.ESTADO_REPORTE == "Aprobado")
+                        {
+                            <div class="col-12 mt-4">
+                                @if (Model.REGRESAR_INVENTARIO)
+                                {
+                                    <div class="stock-panel p-4 rounded-3 d-flex align-items-center">
+                                        <div class="me-3 fs-3" style="color: var(--neon-yellow);">
+                                            <i class="bi bi-box-arrow-in-down"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-light">Reingresado a Inventario</h6>
+                                            <p class="mb-0 text-warning small">El equipo volvió al stock disponible y el IMEI fue liberado para una nueva venta.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-1 fw-bold text-light">Reingresado a Inventario</h6>
-                                        <p class="mb-0 text-warning small">El equipo volvió al stock disponible y el IMEI fue liberado para una nueva venta.</p>
+                                }
+                                else
+                                {
+                                    <div class="p-4 rounded-3 d-flex align-items-center" style="background: rgba(255, 51, 102, 0.05); border: 1px solid rgba(255, 51, 102, 0.3);">
+                                        <div class="me-3 fs-3" style="color: var(--neon-red);">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-light">Baja Definitiva</h6>
+                                            <p class="mb-0 text-danger small">El equipo NO regresó al inventario disponible (Dañado/Garantía).</p>
+                                        </div>
                                     </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="p-4 rounded-3 d-flex align-items-center" style="background: rgba(255, 51, 102, 0.05); border: 1px solid rgba(255, 51, 102, 0.3);">
-                                    <div class="me-3 fs-3" style="color: var(--neon-red);">
-                                        <i class="bi bi-box-arrow-right"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1 fw-bold text-light">Baja Definitiva</h6>
-                                        <p class="mb-0 text-danger small">El equipo NO regresó al inventario disponible (Dañado/Garantía).</p>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                                }
+                            </div>
+                        }
+
                     </div>
 
                 </div>

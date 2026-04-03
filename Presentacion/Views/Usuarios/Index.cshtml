@@ -6,8 +6,8 @@
 
 <style>
     /* ==========================================
-                       1. VARIABLES GLOBALES (MODO CLARO)
-                       ========================================== */
+                               1. VARIABLES GLOBALES (MODO CLARO)
+                               ========================================== */
     :root {
         --bg-main: #F4F7FE;
         --bg-card: #FFFFFF;
@@ -28,8 +28,8 @@
     }
 
     /* ==========================================
-                       1.5 VARIABLES MODO OSCURO
-                       ========================================== */
+                               1.5 VARIABLES MODO OSCURO
+                               ========================================== */
     [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
@@ -49,8 +49,8 @@
     }
 
     /* ==========================================
-                       2. ESTILOS GENERALES
-                       ========================================== */
+                               2. ESTILOS GENERALES
+                               ========================================== */
     body {
         background-color: var(--bg-main);
         color: var(--text-main);
@@ -81,8 +81,8 @@
     }
 
     /* ==========================================
-                       3. TABLA FUTURISTA
-                       ========================================== */
+                               3. TABLA FUTURISTA
+                               ========================================== */
     .table {
         color: var(--text-main);
         margin-bottom: 0;
@@ -112,8 +112,8 @@
     }
 
     /* ==========================================
-                       4. BOTONES E INPUTS
-                       ========================================== */
+                               4. BOTONES E INPUTS
+                               ========================================== */
     .btn-neon-primary {
         background: transparent;
         color: var(--primary-color) !important;
@@ -150,8 +150,8 @@
         }
 
     /* ==========================================
-                       5. MODALES
-                       ========================================== */
+                               5. MODALES
+                               ========================================== */
     .modal-content {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -189,8 +189,8 @@
     }
 
     /* ==========================================
-                       6. BADGES Y ALERTS
-                       ========================================== */
+                               6. BADGES Y ALERTS
+                               ========================================== */
     .badge-soft-success {
         background-color: var(--success-bg);
         color: var(--success-color);
@@ -464,14 +464,16 @@
             // ==========================================
             const botonesEditar = document.querySelectorAll('.btn-editar');
             const selectEstado = document.getElementById('editEstado');
+            const selectRol = document.getElementById('editRol');
+            const inputCorreo = document.getElementById('editCorreo');
             const mensajeEstadoBloqueado = document.getElementById('mensajeEstadoBloqueado');
 
             botonesEditar.forEach(boton => {
                 boton.addEventListener('click', function () {
                     document.getElementById('editId').value = this.getAttribute('data-id');
                     document.getElementById('editNombre').value = this.getAttribute('data-nombre');
-                    document.getElementById('editCorreo').value = this.getAttribute('data-correo');
-                    document.getElementById('editRol').value = this.getAttribute('data-idrol');
+                    inputCorreo.value = this.getAttribute('data-correo');
+                    selectRol.value = this.getAttribute('data-idrol');
                     selectEstado.value = this.getAttribute('data-estado');
 
                     const esActual = this.getAttribute('data-esactual') === "1";
@@ -483,6 +485,42 @@
                         mensajeEstadoBloqueado.classList.add('d-none');
                     }
                 });
+            });
+
+            // ==========================================
+            // MAGIA: AUTO-COMPLETAR CORREO SEGÚN ROL
+            // ==========================================
+            selectRol.addEventListener('change', function() {
+                let correoActual = inputCorreo.value;
+                if (!correoActual) return;
+
+                // Obtenemos el nombre base (escapamos el arroba con @@ para Razor)
+                let nombreUsuario = correoActual.split('@@')[0];
+
+                // Limpiamos cualquier sufijo anterior si lo hubiera
+                nombreUsuario = nombreUsuario.replace(/\.admin$/, '')
+                                             .replace(/\.usuario$/, '')
+                                             .replace(/\.auditor$/, '')
+                                             .replace(/\.vendedor$/, '');
+
+                // Determinamos el nuevo sufijo (también con @@)
+                let rolId = this.value;
+                let nuevoSufijo = "";
+
+                if (rolId === "1") nuevoSufijo = ".admin@@yunet.com";
+                else if (rolId === "2") nuevoSufijo = ".usuario@@yunet.com";
+                else if (rolId === "3") nuevoSufijo = ".auditor@@yunet.com";
+                else if (rolId === "4") nuevoSufijo = ".vendedor@@yunet.com";
+
+                // Aplicamos el cambio y un pequeño efecto visual
+                if (nuevoSufijo !== "") {
+                    inputCorreo.value = nombreUsuario + nuevoSufijo;
+
+                    inputCorreo.style.backgroundColor = "var(--neon-blue-tint)";
+                    setTimeout(() => {
+                        inputCorreo.style.backgroundColor = "var(--bg-main)";
+                    }, 500);
+                }
             });
 
             // ==========================================
@@ -572,8 +610,6 @@
                         cancelButtonText: "Cancelar"
                     }).then((result) => {
                         if (result.isConfirmed) {
-
-                            // Obtenemos el token de seguridad de alguno de los formularios que ya existen
                             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
                             fetch('@Url.Action("Desactivar", "Usuarios")', {

@@ -11,8 +11,8 @@
 
     <style>
         /* ==========================================
-                   1. PALETA DE COLORES "TECH E-COMMERCE"
-                ========================================== */
+                                   1. PALETA DE COLORES "TECH E-COMMERCE"
+                                ========================================== */
         :root {
             --bg-main: #F1F5F9;
             --bg-card: #FFFFFF;
@@ -53,8 +53,8 @@
         }
 
         /* ==========================================
-                   2. HEADER RETRÁCTIL Y ANIMACIONES
-                ========================================== */
+                                   2. HEADER RETRÁCTIL Y ANIMACIONES
+                                ========================================== */
         .yunet-header {
             background-color: var(--header-bg) !important;
             border-bottom: 1px solid var(--border-color);
@@ -97,8 +97,8 @@
             }
 
         /* ==========================================
-                   3. ESTILOS DE NAVEGACIÓN
-                ========================================== */
+                                   3. ESTILOS DE NAVEGACIÓN
+                                ========================================== */
         .navbar-brand {
             font-weight: 800;
             font-size: 1.5rem;
@@ -188,8 +188,8 @@
         }
 
         /* ==========================================
-                   4. FOOTER
-                ========================================== */
+                                   4. FOOTER
+                                ========================================== */
         .footer-link {
             color: var(--text-muted);
             text-decoration: none;
@@ -204,23 +204,26 @@
             }
 
         /* ==========================================
-                   5. ANIMACIONES DE DROPDOWN Y PERFIL
-                ========================================== */
+                                   5. ANIMACIONES DE DROPDOWN Y PERFIL
+                                ========================================== */
         .dropdown-menu.show {
             animation: dropDownAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             transform-origin: top;
         }
 
-        @@keyframes dropDownAnim {
-            0% {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95);
-            }
+        @keyframes dropDownAnim {
+            0%
 
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
         }
 
         .user-profile-btn {
@@ -291,8 +294,6 @@
                                 </a>
                             </li>
                         }
-
-                        // Aquí imagino que sigue tu código para el Administrador, Jefe de Almacen, etc...
 
                         @if (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Auditor") || User.IsInRole("Vendedor"))
                         {

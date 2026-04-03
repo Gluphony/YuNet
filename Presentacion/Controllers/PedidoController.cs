@@ -137,7 +137,32 @@ namespace Presentacion.Controllers
                     return View(new List<DetallePedido>());
                 }
 
+                // 1. Obtenemos la info general del pedido
+                var infoPedido = _logicaPedido.ObtenerPorId(id);
+                ViewBag.InfoPedido = infoPedido;
                 ViewBag.NumeroPedido = id;
+
+                // 2. Buscamos el correo del cliente
+                string correoCliente = "No registrado";
+                try
+                {
+                    var dtUsuarios = _logicaUsuario.ListarUsuarios();
+                    foreach (System.Data.DataRow row in dtUsuarios.Rows)
+                    {
+                        string nombreBd = row.Table.Columns.Contains("NOMBRE") ? row["NOMBRE"].ToString() : "";
+                        int idBd = row.Table.Columns.Contains("ID_USUARIO") && row["ID_USUARIO"] != DBNull.Value ? Convert.ToInt32(row["ID_USUARIO"]) : 0;
+
+                        if (idBd == infoPedido.ID_USUARIO || nombreBd == infoPedido.CLIENTE)
+                        {
+                            if (row.Table.Columns.Contains("CORREO")) correoCliente = row["CORREO"].ToString();
+                            else if (row.Table.Columns.Contains("Correo")) correoCliente = row["Correo"].ToString();
+                            break;
+                        }
+                    }
+                }
+                catch { } // Si falla la búsqueda del correo, no pasa nada, se queda como "No registrado"
+
+                ViewBag.CorreoCliente = correoCliente;
 
                 return View(listaDetalles);
             }

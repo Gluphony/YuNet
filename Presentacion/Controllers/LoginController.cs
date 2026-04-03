@@ -6,18 +6,25 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization; // <-- Necesario para las etiquetas de seguridad
 using LogicaNegocio;
 
 namespace Presentacion.Controllers
 {
+    // El controlador base no lleva Authorize porque es la puerta de entrada
     public class LoginController : Controller
     {
         private readonly LogicaLogin _logicaSeguridad = new LogicaLogin();
         private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario();
 
+        // ========================================================
+        // 1. INICIAR SESIÓN (Público)
+        // ========================================================
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Index()
         {
+            // Si el usuario ya está logueado, lo mandamos directo al Home
             if (User?.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
@@ -26,6 +33,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Index(string correo, string clave)
         {
             try
@@ -48,7 +56,7 @@ namespace Presentacion.Controllers
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     // =========================================================
-                    // 1. LÓGICA DE TIEMPOS DE SESIÓN INDEPENDIENTES POR ROL
+                    // LÓGICA DE TIEMPOS DE SESIÓN INDEPENDIENTES POR ROL
                     // =========================================================
                     DateTimeOffset tiempoExpiracion;
                     bool permitirRefresco;
@@ -57,8 +65,8 @@ namespace Presentacion.Controllers
                     if (rolUsuario == "Usuario")
                     {
                         tiempoExpiracion = DateTimeOffset.UtcNow.AddMinutes(15); // 15 Minutos límite
-                        permitirRefresco = false; // No se renueva el tiempo al navegar
-                        esPersistente = false; // Se cierra si apagan el navegador
+                        permitirRefresco = false;
+                        esPersistente = false;
                     }
                     else if (rolUsuario == "Vendedor")
                     {
@@ -70,8 +78,8 @@ namespace Presentacion.Controllers
                     {
                         // Administradores, Auditores y otros
                         tiempoExpiracion = DateTimeOffset.UtcNow.AddHours(8); // 8 Horas
-                        permitirRefresco = true; // Se renueva si siguen activos
-                        esPersistente = true; // Se mantiene iniciada
+                        permitirRefresco = true;
+                        esPersistente = true;
                     }
 
                     var authProperties = new AuthenticationProperties
@@ -103,40 +111,44 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ========================================================
+        // 2. CERRAR SESIÓN (Solo usuarios autenticados)
+        // ========================================================
         [HttpGet]
+        [Authorize] // 🔥 Solo puedes salir si estás adentro
         public async Task<IActionResult> Salir()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
+        // ========================================================
+        // 3. REGISTRO DE USUARIOS (Público)
+        // ========================================================
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Registro()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public IActionResult Registro(string Nombre, string Correo, string Clave, int Id_Rol)
         {
             try
             {
-                // ==========================================
-                // 1. VALIDACIONES EN C# (Backend)
-                // ==========================================
-
                 // A. Validar longitud de la contraseña
                 if (string.IsNullOrEmpty(Clave) || Clave.Length < 5)
                 {
                     ViewBag.Error = "La contraseña debe tener al menos 5 caracteres.";
                     ViewBag.NombreTemp = Nombre;
                     ViewBag.CorreoTemp = Correo;
-                    return View(); // Regresa a la vista mostrando el error
+                    return View();
                 }
 
                 // B. Validar formato de correo según el rol
-                // Ajusta los números 1, 2, 3, 4 según los IDs reales de tus roles
                 string terminacionEsperada = Id_Rol switch
                 {
                     1 => ".admin@yunet.com",
@@ -151,23 +163,19 @@ namespace Presentacion.Controllers
                     ViewBag.Error = $"Formato de correo inválido. Para este rol, el correo debe terminar en '{terminacionEsperada}'.";
                     ViewBag.NombreTemp = Nombre;
                     ViewBag.CorreoTemp = Correo;
-                    return View(); // Regresa a la vista mostrando el error
+                    return View();
                 }
 
-                // ==========================================
-                // 2. EJECUCIÓN EN BASE DE DATOS
-                // ==========================================
+                // C. Ejecución en base de datos
                 bool respuesta = _logicaUsuario.InsertarUsuario(Nombre, Correo, Clave, Id_Rol);
 
                 if (respuesta)
                 {
-                    // Si todo sale bien, lo mandamos al Login ("Index")
                     ViewBag.Exito = "¡Cuenta creada con éxito! Ahora puedes iniciar sesión.";
                     return View("Index");
                 }
                 else
                 {
-                    // Por si la BD devuelve falso sin lanzar excepción
                     ViewBag.Error = "No se pudo registrar el usuario. Verifique los datos.";
                     ViewBag.NombreTemp = Nombre;
                     ViewBag.CorreoTemp = Correo;
@@ -175,13 +183,7 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                // ==========================================
-                // 3. CAPTURA DE ERRORES DE SQL (RAISERROR)
-                // ==========================================
-                // Si hay un error en la BD (ej. correo duplicado), lo atrapamos aquí
                 ViewBag.Error = ex.Message;
-
-                // Mantenemos los datos escritos por el usuario (menos la contraseña por seguridad)
                 ViewBag.NombreTemp = Nombre;
                 ViewBag.CorreoTemp = Correo;
             }
@@ -189,25 +191,28 @@ namespace Presentacion.Controllers
             return View();
         }
 
+        // ========================================================
+        // 4. RESTABLECER CONTRASEÑA (Público)
+        // ========================================================
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult RestablecerClave()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult RestablecerClave(string Correo, string NuevaClave)
         {
             try
             {
-                // CAMBIO: Se cambió _logicaUsuario.RestablecerClave por .CambiarClave
                 bool exito = _logicaSeguridad.CambiarClave(Correo, NuevaClave);
 
                 if (exito)
                 {
-                    // Usamos TempData para que el mensaje sobreviva al redireccionamiento
                     TempData["Exito"] = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
-                    return RedirectToAction("Index", "Login"); // Es mejor redireccionar al Login
+                    return RedirectToAction("Index", "Login");
                 }
                 else
                 {
@@ -221,30 +226,5 @@ namespace Presentacion.Controllers
 
             return View();
         }
-
-        //[HttpPost]
-        //public IActionResult RestablecerClave(string Correo, string NuevaClave)
-        //{
-        //    try
-        //    {
-        //        bool exito = _logicaUsuario.RestablecerClave(Correo, NuevaClave);
-
-        //        if (exito)
-        //        {
-        //            ViewBag.Exito = "¡Contraseña actualizada! Ya puedes iniciar sesión.";
-        //            return View("Index");
-        //        }
-        //        else
-        //        {
-        //            TempData["Error"] = "El correo ingresado no pertenece a ningún usuario activo.";
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["Error"] = ex.Message;
-        //    }
-
-        //    return View();
-        //}
     }
 }

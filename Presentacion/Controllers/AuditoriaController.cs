@@ -9,8 +9,8 @@ using QuestPDF.Infrastructure;
 
 namespace Presentacion.Controllers
 {
-    // Solo permitimos el acceso a los que tengan el rol "Auditor"
-    [Authorize(Roles = "Administrador, Admin, Auditor, Vendedor")]
+    // 🔥 EL ESCUDO: Solo permitimos el acceso EXCLUSIVO a los que tengan el rol "Auditor"
+    [Authorize(Roles = "Auditor")]
     public class AuditoriaController : Controller
     {
         private readonly logicaAuditoria _logicaAuditoria = new logicaAuditoria();

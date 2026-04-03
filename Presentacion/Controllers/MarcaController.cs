@@ -1,13 +1,18 @@
 ﻿using Entidades;
 using LogicaNegocio;
 using Microsoft.AspNetCore.Mvc;
-using Presentacion.Reportes; // El namespace de tu nueva carpeta
+using Microsoft.AspNetCore.Authorization; // <-- NECESARIO PARA LA SEGURIDAD
+using Presentacion.Reportes;
 using QuestPDF.Fluent;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Presentacion.Controllers
 {
+    // 🔥 EL ESCUDO BASE: Solo el Staff puede entrar al módulo de Marcas
+    [Authorize(Roles = "Administrador,Admin,Auditor,Vendedor")]
     public class MarcaController : Controller
     {
         private readonly LogicaMarca _logicaMarca = new LogicaMarca();
@@ -48,6 +53,8 @@ namespace Presentacion.Controllers
 
         // 3. CREAR NUEVA MARCA
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: Auditor NO puede crear marcas
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Crear(Marca marca)
         {
             try
@@ -72,6 +79,8 @@ namespace Presentacion.Controllers
 
         // 4. EDITAR MARCA EXISTENTE
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: Auditor NO puede editar marcas
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Editar(Marca marca)
         {
             try
@@ -81,10 +90,6 @@ namespace Presentacion.Controllers
                 {
                     TempData["MensajeExito"] = "Marca actualizada correctamente.";
                 }
-                //else
-                //{
-                //    TempData["MensajeError"] = "No se pudo actualizar la marca.";
-                //}
             }
             catch (Exception ex)
             {
@@ -96,6 +101,8 @@ namespace Presentacion.Controllers
 
         // 5. DESACTIVAR MARCA
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: Auditor NO puede desactivar marcas
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Desactivar(int id)
         {
             try
@@ -112,42 +119,34 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                // Esto asegura que si el error viene de SQL, solo mostramos el texto amigable
                 TempData["MensajeError"] = "Atención: " + ex.Message;
             }
 
             return RedirectToAction("Index");
         }
 
+        // 6. EXPORTAR PDF (El Auditor SÍ puede hacer esto por el escudo base)
         [HttpGet]
-
         public IActionResult DescargarPdf(string busqueda)
         {
             try
             {
-                // 1. Traemos los datos y forzamos a que sea una Lista fija en memoria
                 List<Marca> lista = string.IsNullOrEmpty(busqueda)
                                     ? _logicaMarca.Listar().ToList()
                                     : _logicaMarca.FiltrarPorNombre(busqueda).ToList();
 
-                // 2. Si la lista está vacía, evitamos que el PDF falle
                 if (lista == null) lista = new List<Marca>();
 
                 var documento = new MarcaReporte(lista);
 
-                // 3. Generamos los bytes
                 byte[] pdfBytes = documento.GeneratePdf();
 
                 var stream = new MemoryStream(pdfBytes);
 
-                // 4. Retornamos el archivo
-                // Usar "application/pdf" sin el nombre del archivo como tercer parámetro 
-                // a veces ayuda a que el navegador no fuerce la descarga inmediata
                 return File(stream, "application/pdf");
             }
             catch (Exception ex)
             {
-                // Esto evitará que el proyecto se cierre si algo falla dentro
                 return Content("Error al generar PDF: " + ex.Message);
             }
         }

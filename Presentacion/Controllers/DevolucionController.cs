@@ -5,20 +5,20 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
-using System.IO; // <-- NECESARIO PARA MANEJAR CARPETAS Y ARCHIVOS
-using Microsoft.AspNetCore.Http; // <-- NECESARIO PARA RECIBIR LA IMAGEN (IFormFile)
-using System.Threading.Tasks; // <-- NECESARIO PARA GUARDAR DE FORMA ASÍNCRONA
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace Presentacion.Controllers
 {
-    // Bloqueamos todo el controlador por defecto solo para estos roles
-    [Authorize(Roles = "Administrador,Vendedor")]
+    // 🔥 EL ESCUDO BASE: Dejamos entrar al Auditor para que pueda ver y sacar PDFs
+    [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor")]
     public class DevolucionController : Controller
     {
         private readonly LogicaDevolucion _logicaDevolucion = new LogicaDevolucion();
 
         // ========================================================
-        // 1. GET: MUESTRA LA LISTA DE DEVOLUCIONES (Para el Admin)
+        // 1. GET: MUESTRA LA LISTA DE DEVOLUCIONES 
         // ========================================================
         [HttpGet]
         public IActionResult Index()
@@ -36,11 +36,10 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 2. POST: El cliente envía su reporte (Accesible para todos)
+        // 2. POST: El cliente envía su reporte 
         // ========================================================
         [HttpPost]
-        [AllowAnonymous]
-        // 👇 AHORA RECIBE EL ARCHIVO (IFormFile) Y ES ASÍNCRONO (Task) 👇
+        [AllowAnonymous] // El cliente (incluso sin login si así lo deseas) puede mandar su solicitud
         public async Task<IActionResult> Create(int ID_DETALLE_PEDIDO, string MOTIVO_CLIENTE, IFormFile EVIDENCIA_IMAGEN)
         {
             try
@@ -50,36 +49,29 @@ namespace Presentacion.Controllers
                     return Json(new { exito = false, mensaje = "ID de producto inválido." });
                 }
 
-                string rutaImagenBd = null; // Empezamos asumiendo que no hay foto
+                string rutaImagenBd = null;
 
-                // 🔥 MAGIA: PROCESAMOS LA IMAGEN SI EL CLIENTE ENVIÓ UNA 🔥
                 if (EVIDENCIA_IMAGEN != null && EVIDENCIA_IMAGEN.Length > 0)
                 {
-                    // 1. Creamos la ruta física hacia la carpeta wwwroot/imagenes/evidencias
                     string carpetaDestino = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes", "evidencias");
 
-                    // Si la carpeta no existe, C# la crea automáticamente
                     if (!Directory.Exists(carpetaDestino))
                     {
                         Directory.CreateDirectory(carpetaDestino);
                     }
 
-                    // 2. Generamos un nombre de archivo único (ejemplo: Evidencia_7_a1b2c3d4.jpg)
                     string extension = Path.GetExtension(EVIDENCIA_IMAGEN.FileName);
                     string nombreArchivo = $"Evidencia_{ID_DETALLE_PEDIDO}_{Guid.NewGuid()}{extension}";
                     string rutaFisicaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
 
-                    // 3. Guardamos físicamente el archivo en el servidor
                     using (var stream = new FileStream(rutaFisicaCompleta, FileMode.Create))
                     {
                         await EVIDENCIA_IMAGEN.CopyToAsync(stream);
                     }
 
-                    // 4. Guardamos la ruta relativa que usará el navegador para mostrarla (ej: /imagenes/evidencias/foto.jpg)
                     rutaImagenBd = $"/imagenes/evidencias/{nombreArchivo}";
                 }
 
-                // 👇 AHORA LE PASAMOS LA RUTA A LA LÓGICA 👇
                 bool respuesta = _logicaDevolucion.Crear(ID_DETALLE_PEDIDO, MOTIVO_CLIENTE, rutaImagenBd, out string mensajeRespuesta);
 
                 return Json(new { exito = respuesta, mensaje = mensajeRespuesta });
@@ -91,9 +83,11 @@ namespace Presentacion.Controllers
         }
 
         // ========================================================
-        // 3. POST: El Admin procesa el reporte (Aprobar o Rechazar)
+        // 3. POST: El Admin/Vendedor procesa el reporte (Aprobar/Rechazar)
         // ========================================================
         [HttpPost]
+        // 🔥 EL ESCUDO ESTRICTO: ¡El Auditor NO puede procesar devoluciones!
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Procesar(Entidades.DevolucionProcesar modelo)
         {
             try
@@ -180,6 +174,7 @@ namespace Presentacion.Controllers
 
         // ========================================================
         // 5. GET: DOCUMENTOS PDF (Garantía, NC, Cambio)
+        // (El auditor sí puede ver esto por el candado de la clase)
         // ========================================================
 
         [HttpGet]

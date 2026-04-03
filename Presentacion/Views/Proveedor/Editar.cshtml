@@ -6,8 +6,8 @@
 @section Styles {
     <style>
         /* ==========================================
-                           ESTILOS DE FORMULARIO YUNET (MODO OSCURO/CLARO)
-                           ========================================== */
+                                   ESTILOS DE FORMULARIO YUNET (MODO OSCURO/CLARO)
+                                   ========================================== */
         .form-yunet {
             background-color: var(--hover-bg);
             border: 1px solid var(--border-color);
@@ -50,6 +50,12 @@
             letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
         }
+
+        /* Ajuste para validación de Bootstrap */
+        .was-validated .form-control:invalid {
+            border-color: #EE5D50;
+            background-image: none; /* Quita el icono feo por defecto de HTML5 */
+        }
     </style>
 }
 
@@ -78,7 +84,7 @@
             </div>
         }
 
-        <form action="/Proveedor/Editar" method="post">
+        <form action="/Proveedor/Editar" method="post" id="formEditarProv" class="needs-validation" novalidate>
             <input type="hidden" name="ID_PROVEEDOR" value="@Model.ID_PROVEEDOR" />
 
             <div class="row g-4">
@@ -88,7 +94,12 @@
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
                             <i class="bi bi-building"></i>
                         </span>
-                        <input type="text" class="form-control form-yunet" style="border-left: none;" name="RAZON_SOCIAL" value="@Model.RAZON_SOCIAL" required placeholder="Ej: Tech Solutions S.A.">
+                        <input type="text" class="form-control form-yunet" style="border-left: none;"
+                               name="RAZON_SOCIAL" value="@Model.RAZON_SOCIAL"
+                               maxlength="100"
+                               oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.,]/g, '')"
+                               required placeholder="Ej: Tech Solutions S.A.">
+                        <div class="invalid-feedback">La razón social es obligatoria y solo permite letras.</div>
                     </div>
                 </div>
 
@@ -98,7 +109,11 @@
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
                             <i class="bi bi-person-badge"></i>
                         </span>
-                        <input type="text" class="form-control form-yunet" style="border-left: none;" name="NOMBRE_CONTACTO" value="@Model.NOMBRE_CONTACTO" placeholder="Nombre de quien atiende">
+                        <input type="text" class="form-control form-yunet" style="border-left: none;"
+                               name="NOMBRE_CONTACTO" value="@Model.NOMBRE_CONTACTO"
+                               maxlength="60"
+                               oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')"
+                               placeholder="Nombre de quien atiende">
                     </div>
                 </div>
 
@@ -108,15 +123,13 @@
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
                             <i class="bi bi-telephone"></i>
                         </span>
-                        <input type="tel"
-                               class="form-control form-yunet"
-                               style="border-left: none;"
-                               name="TELEFONO"
-                               value="@Model?.TELEFONO"
+                        <input type="tel" class="form-control form-yunet" style="border-left: none;"
+                               name="TELEFONO" value="@Model?.TELEFONO"
                                placeholder="Ej. 8888-8888"
-                               maxlength="15"
+                               minlength="8" maxlength="15"
                                oninput="this.value = this.value.replace(/[^0-9+\- ]/g, '');"
                                required>
+                        <div class="invalid-feedback">Ingrese un teléfono válido (entre 8 y 15 números).</div>
                     </div>
                 </div>
 
@@ -126,7 +139,12 @@
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
                             <i class="bi bi-envelope-at"></i>
                         </span>
-                        <input type="email" class="form-control form-yunet" style="border-left: none;" name="CORREO" value="@Model.CORREO" placeholder="contacto@empresa.com">
+                        <input type="email" class="form-control form-yunet" style="border-left: none;"
+                               name="CORREO" value="@Model.CORREO"
+                               maxlength="50"
+                               pattern="^[a-zA-Z0-9._%+-]{3,30}@@(gmail\.com|hotmail\.com|yahoo\.com|outlook\.com|yunet\.com)$"
+                               placeholder="contacto@gmail.com">
+                        <div class="invalid-feedback">Correo no permitido o demasiado largo. Use dominios comunes (gmail, hotmail...).</div>
                     </div>
                 </div>
 
@@ -136,15 +154,13 @@
                         <span class="input-group-text" style="background-color: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-muted); border-right: none;">
                             <i class="bi bi-geo-alt"></i>
                         </span>
-                        <textarea class="form-control form-yunet"
-                                  style="border-left: none;"
-                                  name="DIRECCION"
-                                  rows="2"
+                        <textarea class="form-control form-yunet" style="border-left: none;"
+                                  name="DIRECCION" rows="2"
                                   maxlength="255"
                                   placeholder="Ej: De la rotonda 2 cuadras al sur..."
                                   required>@Model?.DIRECCION</textarea>
-                        <div class="form-text text-muted">Máximo 255 caracteres.</div>
                     </div>
+                    <div class="form-text mt-1" style="color: var(--text-muted); font-size: 0.8rem;">Máximo 255 caracteres.</div>
                 </div>
 
                 <div class="col-12 d-flex flex-column justify-content-center mt-4">
@@ -174,6 +190,7 @@
 
 @section Scripts {
     <script>
+        // Lógica de color del Switch
         document.getElementById('estadoSwitch').addEventListener('change', function() {
             var label = this.nextElementSibling;
             if (this.checked) {
@@ -183,7 +200,6 @@
             }
         });
 
-        // Opcional: Ejecutar una vez al cargar para dar color inicial al texto del switch
         window.addEventListener('load', function() {
             var switchElem = document.getElementById('estadoSwitch');
             var label = switchElem.nextElementSibling;
@@ -193,5 +209,60 @@
                 label.innerHTML = '<span style="color: #ea868f;">Proveedor Inactivo</span>';
             }
         });
+
+        // Activación de validación nativa de Bootstrap + Filtro Anti-Spam
+        (function () {
+            'use strict'
+            var form = document.getElementById('formEditarProv');
+
+            // Expresión regular: busca 5 caracteres idénticos seguidos (ej: aaaaa, 33333)
+            const regexSpam = /(.)\1{4,}/;
+
+            form.addEventListener('submit', function (event) {
+                let esValido = true;
+                let mensajeError = "";
+
+                // Validamos la Razón Social contra spam
+                const razonSocial = document.querySelector('input[name="RAZON_SOCIAL"]').value;
+                if (regexSpam.test(razonSocial)) {
+                    esValido = false;
+                    mensajeError = "La Razón Social contiene demasiados caracteres repetidos. Ingrese un nombre real.";
+                }
+
+                // Validamos el Contacto contra spam
+                const contacto = document.querySelector('input[name="NOMBRE_CONTACTO"]').value;
+                if (contacto && regexSpam.test(contacto)) {
+                    esValido = false;
+                    mensajeError = "El Nombre del Contacto contiene caracteres repetidos. Ingrese un nombre real.";
+                }
+
+                // Validamos la Dirección contra spam
+                const direccion = document.querySelector('textarea[name="DIRECCION"]').value;
+                if (regexSpam.test(direccion)) {
+                    esValido = false;
+                    mensajeError = "La Dirección contiene demasiados caracteres repetidos.";
+                }
+
+                // Si es spam o si HTML5 dice que es inválido, detenemos todo
+                if (!esValido) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    Swal.fire({
+                        title: "Datos Inválidos",
+                        text: mensajeError,
+                        icon: "warning",
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-main)',
+                        confirmButtonColor: 'var(--neon-blue-base)'
+                    });
+                } else if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            }, false);
+        })()
     </script>
 }
