@@ -9,12 +9,14 @@ using System;
 
 namespace Presentacion.Controllers
 {
-    [Authorize(Roles = "Administrador, Admin, Auditor")]
+    // 🔥 EL ESCUDO BASE: Solo Staff Operativo y Auditoría entran aquí
+    [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor")]
     public class ProveedorController : Controller
     {
         private readonly Logica_Proveedor _logicaProveedor = new Logica_Proveedor();
 
         // 1. VISTA PRINCIPAL (LISTADO)
+        // Todos los autorizados pueden ver la lista
         public IActionResult Index()
         {
             DataTable dt = _logicaProveedor.ListarProveedores();
@@ -23,7 +25,9 @@ namespace Presentacion.Controllers
         }
 
         // 2. DESACTIVAR PROVEEDOR
+        // 🔥 ESCUDO: Auditor NO puede desactivar
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Desactivar(int id)
         {
             try
@@ -39,7 +43,9 @@ namespace Presentacion.Controllers
         }
 
         // --- 3. VISTA PARA CREAR (GET) ---
+        // 🔥 ESCUDO: Auditor NO puede crear
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Crear()
         {
             return View(new Proveedor());
@@ -47,6 +53,7 @@ namespace Presentacion.Controllers
 
         // --- 4. GUARDAR NUEVO PROVEEDOR (POST) ---
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Crear(Proveedor proveedor)
         {
             try
@@ -136,8 +143,11 @@ namespace Presentacion.Controllers
                 return View(proveedor);
             }
         }
+
         // --- 5. VISTA PARA EDITAR (GET) ---
+        // 🔥 ESCUDO: Auditor NO puede editar
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Editar(int id)
         {
             if (id <= 0)
@@ -160,8 +170,8 @@ namespace Presentacion.Controllers
         }
 
         // --- 6. GUARDAR CAMBIOS DEL PROVEEDOR (POST) ---
-        // --- 6. GUARDAR CAMBIOS DEL PROVEEDOR (POST) ---
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult Editar(Proveedor proveedor)
         {
             try

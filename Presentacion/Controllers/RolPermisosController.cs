@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization; // <-- NECESARIO PARA LA SEGURIDAD
 using Entidades;
 using LogicaNegocio;
 using System;
@@ -9,12 +9,16 @@ using System.Linq;
 
 namespace Presentacion.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    // 🔥 EL ESCUDO BASE: Administradores y Auditores pueden entrar a auditar la tabla
+    [Authorize(Roles = "Administrador,Admin,Auditor")]
     public class RolPermisosController : Controller
     {
         private readonly LogicaRolPermisos _logicaRolPermisos = new LogicaRolPermisos();
         private readonly LogicaRol _logicaRol = new LogicaRol();
 
+        // ==========================================
+        // 1. VISTA PRINCIPAL (SOLO LECTURA)
+        // ==========================================
         [HttpGet]
         public IActionResult Index(int? idRolSeleccionado)
         {
@@ -22,13 +26,11 @@ namespace Presentacion.Controllers
             ViewBag.Roles = _logicaRol.ListarRoles();
 
             // 2. Cargamos el catálogo completo (Entidad: Permisos)
-            // Este método en tu lógica debe devolver List<Permisos>
             ViewBag.TodosLosPermisos = _logicaRolPermisos.ListarTodos();
 
             ViewBag.IdRolActual = idRolSeleccionado;
 
             // 3. Permisos que el rol ya tiene asignados (Lista para comparar)
-            // Se asume que ListarPermisosPorRol devuelve una lista de objetos que contienen ID_PERMISO
             List<Permisos> permisosAsignados = new List<Permisos>();
 
             if (idRolSeleccionado.HasValue && idRolSeleccionado.Value > 0)
@@ -46,7 +48,12 @@ namespace Presentacion.Controllers
             return View(permisosAsignados);
         }
 
+        // ==========================================
+        // 2. ASIGNAR UN PERMISO INDIVIDUAL
+        // ==========================================
         [HttpPost]
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede asignar permisos
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult AsignarPermiso(int idRol, int idPermiso)
         {
             try
@@ -78,11 +85,15 @@ namespace Presentacion.Controllers
             }
 
             // 3. LA CLAVE: Redireccionamos al Index pasando el ID del Rol 
-            // para que la vista se cargue mostrando los cambios de ese rol específico.
             return RedirectToAction("Index", new { idRolSeleccionado = idRol });
         }
 
+        // ==========================================
+        // 3. REVOCAR UN PERMISO INDIVIDUAL
+        // ==========================================
         [HttpPost]
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede revocar permisos
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult RevocarPermiso(int idRol, int idPermiso)
         {
             try
@@ -114,11 +125,15 @@ namespace Presentacion.Controllers
             }
 
             // 3. REDIRECCIÓN: Volvemos al Index manteniendo el Rol seleccionado 
-            // para que la vista recargue los permisos actuales.
             return RedirectToAction("Index", new { idRolSeleccionado = idRol });
         }
 
+        // ==========================================
+        // 4. GUARDAR PERMISOS EN BLOQUE (CHECKBOXES)
+        // ==========================================
         [HttpPost]
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede guardar permisos en bloque
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Guardar(int idRol, List<int> permisosSeleccionados)
         {
             if (idRol <= 0)

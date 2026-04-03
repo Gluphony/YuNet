@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization; // <-- FUNDAMENTAL PARA LA SEGURIDAD
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -9,8 +9,8 @@ using System.Data;
 
 namespace Presentacion.Controllers
 {
-    // Candado: Solo Administrador
-    [Authorize(Roles = "Administrador")]
+    // 🔥 EL ESCUDO BASE: Solo Administradores y Auditores pasan de la puerta principal
+    [Authorize(Roles = "Administrador,Admin,Auditor")]
     public class UsuariosController : Controller
     {
         private readonly LogicaUsuario _logicaUsuario = new LogicaUsuario();
@@ -37,7 +37,7 @@ namespace Presentacion.Controllers
                 int idRol = fila["Id_Rol"] != DBNull.Value ? Convert.ToInt32(fila["Id_Rol"]) : 0;
                 int idUser = Convert.ToInt32(fila["Id_Usuario"]);
 
-                if (estado && idRol == 1)
+                if (estado && (idRol == 1 || idRol.ToString() == "Administrador")) // Ajuste de seguridad por si acaso
                 {
                     cantidadAdminsActivos++;
                     if (idUser == idUsuarioAfectado)
@@ -49,13 +49,39 @@ namespace Presentacion.Controllers
             return esElUsuarioAfectadoAdmin && cantidadAdminsActivos <= 1;
         }
 
+        // ==========================================
+        // 1. VISTA PRINCIPAL (LISTA DE USUARIOS)
+        // ==========================================
+        // Todos los autorizados en la clase (Admin y Auditor) pueden ver esto
         [HttpGet]
+        public IActionResult Index()
+        {
+            ViewBag.IdUsuarioActual = ObtenerIdUsuarioActual();
+            DataTable tablaUsuarios = new DataTable();
+            try
+            {
+                tablaUsuarios = _logicaUsuario.ListarUsuarios();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cargar los usuarios: " + ex.Message;
+            }
+            return View(tablaUsuarios);
+        }
+
+        // ==========================================
+        // 2. RESTABLECER CLAVE DESDE EL PANEL
+        // ==========================================
+        // 🔥 ESCUDO: Auditor NO puede cambiar contraseñas
+        [HttpGet]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult RestablecerClave()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult RestablecerClave(string Correo, string NuevaClave)
         {
             try
@@ -79,24 +105,13 @@ namespace Presentacion.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult Index()
-        {
-            ViewBag.IdUsuarioActual = ObtenerIdUsuarioActual();
-            DataTable tablaUsuarios = new DataTable();
-            try
-            {
-                tablaUsuarios = _logicaUsuario.ListarUsuarios();
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error al cargar los usuarios: " + ex.Message;
-            }
-            return View(tablaUsuarios);
-        }
-
+        // ==========================================
+        // 3. CREAR NUEVO USUARIO
+        // ==========================================
+        // 🔥 ESCUDO: Auditor NO puede crear usuarios
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Crear(string Nombre, string Correo, string Clave, int Id_Rol)
         {
             try
@@ -117,17 +132,19 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // 4. EDITAR USUARIO
+        // ==========================================
+        // 🔥 ESCUDO: Auditor NO puede editar usuarios
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Editar(int Id_Usuario, string Nombre, string Correo, int Id_Rol, bool Estado)
         {
             try
             {
                 // 1. OBTENER EL ID DEL USUARIO LOGUEADO DESDE LOS CLAIMS
-                // Buscamos el claim donde guardaste el ID al momento del Login (usualmente NameIdentifier)
                 var claimId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                // Lo convertimos a entero de forma segura. Si por alguna razón no lo encuentra, asignará 0.
                 int idUsuarioLogueado = string.IsNullOrEmpty(claimId) ? 0 : int.Parse(claimId);
 
                 // 2. PASAR EL SEXTO PARÁMETRO AL MÉTODO DE LÓGICA
@@ -146,8 +163,13 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // 5. DESACTIVAR USUARIO
+        // ==========================================
+        // 🔥 ESCUDO: Auditor NO puede desactivar usuarios
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Desactivar(int Id_Usuario)
         {
             try

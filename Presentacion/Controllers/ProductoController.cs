@@ -8,22 +8,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using LogicaNegocio;
 using Entidades;
-using Presentacion.Reportes; // El namespace de tu nueva carpeta
+using Presentacion.Reportes;
 using QuestPDF.Fluent;
+using System.IO;
 
 namespace Presentacion.Controllers
 {
-    [Authorize] // 🔒 Por defecto, todo aquí requiere login...
+    // 🔒 Por defecto, todo aquí requiere login...
+    [Authorize]
     public class ProductoController : Controller
     {
         private readonly LogicaProducto _logicaProducto = new LogicaProducto();
         private readonly LogicaMarca _logicaMarca = new LogicaMarca();
         private readonly LogicaCategoria _logicaCategoria = new LogicaCategoria();
+        private readonly logicaAuditoria _logicaAuditoria = new logicaAuditoria(); // Instancia de tu capa de auditoría
 
         // ==========================================
         // 🛍️ VITRINA: PÚBLICA PARA TODOS
         // ==========================================
-        [AllowAnonymous] // 🔓 ...EXCEPTO la vitrina, que es pública
+        [AllowAnonymous] // 🔓 Pública para clientes
         public ActionResult Index()
         {
             try
@@ -31,7 +34,7 @@ namespace Presentacion.Controllers
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
 
-                // Verificamos de forma segura si el usuario está autenticado y tiene los roles
+                // Verificamos si el usuario es del Staff Operativo/Auditoría
                 bool esAdminOGestor = User?.Identity?.IsAuthenticated == true &&
                                      (User.IsInRole("Administrador") || User.IsInRole("Admin") ||
                                       User.IsInRole("Vendedor") || User.IsInRole("Auditor"));
@@ -49,7 +52,7 @@ namespace Presentacion.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al listar productos: " + ex.Message;
-                // Devolvemos una lista vacía para que no se rompa la vista
+
                 return User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrador")
                        ? View(new List<Producto>())
                        : View("Tienda", new List<Producto>());
@@ -57,11 +60,12 @@ namespace Presentacion.Controllers
         }
 
         [HttpGet]
+        // 🔥 Solo Administrador y Vendedor necesitan despachar/asignar IMEIs
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult ObtenerImeisDisponibles(int idProducto)
         {
             try
             {
-                // Asegurate de llamar a tu capa lógica correspondiente
                 List<UnidadExistencia> lista = _logicaProducto.ListarImeisDisponibles(idProducto);
                 return Json(new { success = true, data = lista });
             }
@@ -71,12 +75,11 @@ namespace Presentacion.Controllers
             }
         }
 
-        [AllowAnonymous]
+        [AllowAnonymous] // 🔓 Búsqueda en la tienda pública
         public ActionResult FiltrarPorNombre(string nombre)
         {
             try
             {
-                // Si el usuario borra todo y da clic en buscar, podrías redirigir al Index normal
                 if (string.IsNullOrEmpty(nombre))
                 {
                     return RedirectToAction("Index");
@@ -85,16 +88,16 @@ namespace Presentacion.Controllers
                 DataTable dt = _logicaProducto.BuscarProductoPorNombre(nombre);
                 List<Producto> lista = ConvertirDataTableALista(dt);
 
-                ViewBag.BusquedaActual = nombre; // Esto mantiene el texto en el buscador
+                ViewBag.BusquedaActual = nombre;
                 CargarListasDesplegables();
 
-                if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Vendedor") || User.IsInRole("Auditor")))
+                if (User.Identity.IsAuthenticated && (User.IsInRole("Administrador") || User.IsInRole("Admin") || User.IsInRole("Vendedor") || User.IsInRole("Auditor")))
                 {
-                    return View("Index", lista);
+                    return View("Index", lista); // Tabla para el Staff
                 }
                 else
                 {
-                    return View("Tienda", lista);
+                    return View("Tienda", lista); // Vitrina para el cliente
                 }
             }
             catch (Exception ex)
@@ -104,7 +107,7 @@ namespace Presentacion.Controllers
             }
         }
 
-        [AllowAnonymous] // 🔓 Cualquiera debe poder ver las imágenes de los productos
+        [AllowAnonymous] // 🔓 Cualquiera debe poder ver las imágenes
         public ActionResult VerImagen(int id)
         {
             byte[] imagen = _logicaProducto.ObtenerImagenProducto(id);
@@ -112,7 +115,7 @@ namespace Presentacion.Controllers
             {
                 return File(imagen, "image/jpeg");
             }
-            return File("~/img/no-image.png", "image/png"); // Imagen por defecto si no tiene
+            return File("~/img/no-image.png", "image/png");
         }
 
         // ==========================================
@@ -121,14 +124,14 @@ namespace Presentacion.Controllers
         [HttpGet]
         public ActionResult Pagar()
         {
-            // Lógica para ir a la pasarela de pago o confirmar carrito
             return View();
         }
 
         // ==========================================
         // 🛠️ MANTENIMIENTO: SÓLO ADMINISTRADORES
         // ==========================================
-        [Authorize(Roles = "Administrador,Admin")] // 🔒 Blindado solo para Admins
+
+        [Authorize(Roles = "Administrador,Admin")]
         public ActionResult Create()
         {
             CargarListasDesplegables();
@@ -153,6 +156,13 @@ namespace Presentacion.Controllers
 
                 if (_logicaProducto.InsertarProducto(oProducto))
                 {
+                    // 👇 AUDITORÍA DESDE C# 👇
+                    int idUsuarioLogueado = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "1");
+                    string ipUsuario = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Desconocida";
+
+                    _logicaAuditoria.RegistrarAuditoria(idUsuarioLogueado, "INSERT", "PRODUCTO", $"Se creó el producto modelo: {oProducto.MODELO}", ipUsuario);
+                    // 👆 FIN AUDITORÍA 👆
+
                     TempData["MensajeExito"] = "Producto registrado con éxito.";
                     return RedirectToAction("Index");
                 }
@@ -176,7 +186,6 @@ namespace Presentacion.Controllers
         {
             try
             {
-                // OPTIMIZACIÓN: Solo buscamos el producto específico en lugar de cargar toda la base de datos
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
                 Producto productoAEditar = lista.FirstOrDefault(p => p.ID_PRODUCTO == id);
@@ -214,14 +223,24 @@ namespace Presentacion.Controllers
                 }
                 else
                 {
-                    // Si no sube imagen, aseguramos que sea null para que la lógica de negocio no la sobreescriba en blanco
                     oProducto.IMAGEN = null;
                 }
 
                 if (_logicaProducto.EditarProducto(oProducto))
+                {
+                    // 👇 AUDITORÍA DESDE C# 👇
+                    int idUsuarioLogueado = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "1");
+                    string ipUsuario = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Desconocida";
+
+                    _logicaAuditoria.RegistrarAuditoria(idUsuarioLogueado, "UPDATE", "PRODUCTO", $"Se modificó el producto ID: {oProducto.ID_PRODUCTO} - {oProducto.MODELO}", ipUsuario);
+                    // 👆 FIN AUDITORÍA 👆
+
                     TempData["MensajeExito"] = "Producto actualizado correctamente.";
+                }
                 else
+                {
                     TempData["MensajeError"] = "No se pudo actualizar el producto.";
+                }
             }
             catch (Exception ex)
             {
@@ -238,9 +257,20 @@ namespace Presentacion.Controllers
             try
             {
                 if (_logicaProducto.DesactivarProducto(id))
+                {
+                    // 👇 AUDITORÍA DESDE C# 👇
+                    int idUsuarioLogueado = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "1");
+                    string ipUsuario = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Desconocida";
+
+                    _logicaAuditoria.RegistrarAuditoria(idUsuarioLogueado, "DELETE", "PRODUCTO", $"Se desactivó/eliminó el producto ID: {id}", ipUsuario);
+                    // 👆 FIN AUDITORÍA 👆
+
                     TempData["MensajeExito"] = "Producto desactivado correctamente.";
+                }
                 else
+                {
                     TempData["MensajeError"] = "No se pudo desactivar el producto.";
+                }
 
                 return RedirectToAction("Index");
             }
@@ -302,7 +332,6 @@ namespace Presentacion.Controllers
             List<Producto> lista = new List<Producto>();
             foreach (DataRow row in dt.Rows)
             {
-                // Protegemos contra posibles valores nulos (DBNull) en la BD para evitar crasheos
                 lista.Add(new Producto
                 {
                     ID_PRODUCTO = row["ID_PRODUCTO"] != DBNull.Value ? Convert.ToInt32(row["ID_PRODUCTO"]) : 0,
@@ -321,22 +350,20 @@ namespace Presentacion.Controllers
             return lista;
         }
 
+        // 🔥 ESCUDO: Auditor SÍ entra, Clientes NO
         [HttpGet]
+        [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor")]
         public IActionResult DescargarPdf()
         {
             try
             {
-                // 1. Obtenemos los datos (lista completa ya que no hay filtro aún)
                 DataTable dt = _logicaProducto.ListarProductos();
                 List<Producto> lista = ConvertirDataTableALista(dt);
 
-                // 2. Si la lista es nula, inicializamos para evitar errores
                 if (lista == null) lista = new List<Producto>();
 
-                // 3. Generamos el reporte (crearemos esta clase a continuación)
                 var documento = new ProductoReporte(lista);
 
-                // 4. Convertimos a bytes y retornamos el stream
                 byte[] pdfBytes = documento.GeneratePdf();
                 var stream = new MemoryStream(pdfBytes);
 
@@ -347,5 +374,5 @@ namespace Presentacion.Controllers
                 return Content("Error al generar reporte de inventario: " + ex.Message);
             }
         }
-        }
+    }
 }

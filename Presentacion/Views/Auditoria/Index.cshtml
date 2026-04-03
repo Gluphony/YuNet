@@ -8,14 +8,13 @@
 
 <style>
     /* =========================================
-           ESTILOS DEL DARK THEME (Basado en tus fotos)
-           ========================================= */
+                   ESTILOS DEL DARK THEME
+                   ========================================= */
     body {
-        background-color: #0b0f19; /* Fondo principal oscuro */
+        background-color: #0b0f19;
         color: #e2e8f0;
     }
 
-    /* Textos y Acentos */
     .text-cyan {
         color: #00d4ff !important;
     }
@@ -24,15 +23,13 @@
         color: #829ab1 !important;
     }
 
-    /* Tarjetas personalizadas */
     .custom-card {
-        background-color: #1a202c; /* Fondo de tarjeta */
+        background-color: #1a202c;
         border: 1px solid #2d3748;
-        border-top: 3px solid #00d4ff; /* Borde superior neón */
+        border-top: 3px solid #00d4ff;
         border-radius: 0.5rem;
     }
 
-    /* Inputs de Formulario (Dark) */
     .form-control-dark {
         background-color: #0b0f19;
         border: 1px solid #2d3748;
@@ -45,12 +42,11 @@
             color: white;
             box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
         }
-    /* Icono del calendario en blanco para inputs type date */
+
     ::-webkit-calendar-picker-indicator {
         filter: invert(1);
     }
 
-    /* Botones personalizados */
     .btn-cyan {
         background-color: transparent;
         border: 1px solid #00d4ff;
@@ -74,7 +70,6 @@
             color: white;
         }
 
-    /* Tabla y DataTables Dark Mode Fixes */
     .custom-table {
         color: #e2e8f0;
         border-color: #2d3748;
@@ -97,7 +92,6 @@
             padding: 1rem 0.5rem;
         }
 
-    /* Arreglos para la paginación y búsqueda de DataTables en Dark Mode */
     .dataTables_wrapper .dataTables_length select,
     .dataTables_wrapper .dataTables_filter input {
         background-color: #0b0f19;
@@ -119,7 +113,6 @@
         color: #e2e8f0;
     }
 
-    /* Badges translúcidos */
     .badge-glass {
         border-radius: 50rem;
         padding: 0.4em 0.8em;
@@ -166,22 +159,33 @@
 
 <div class="card custom-card shadow-sm mb-4">
     <div class="card-body p-4">
-        <form asp-controller="Auditoria" method="post" class="row align-items-end">
+        <form asp-controller="Auditoria" asp-action="FiltrarPorFecha" method="post" class="row align-items-end" id="formFiltros">
+
             <div class="col-md-3 mb-3 mb-md-0">
                 <label class="form-label small fw-bold text-muted-dark">Fecha Inicio</label>
-                <input type="date" class="form-control form-control-dark" name="fechaInicio" value="@ViewBag.FechaInicio" required>
+                <input type="date" class="form-control form-control-dark"
+                       name="fechaInicio"
+                       value="@ViewBag.FechaInicio"
+                       min="2024-01-01"
+                       max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       required>
             </div>
             <div class="col-md-3 mb-3 mb-md-0">
                 <label class="form-label small fw-bold text-muted-dark">Fecha Fin</label>
-                <input type="date" class="form-control form-control-dark" name="fechaFin" value="@ViewBag.FechaFin" required>
+                <input type="date" class="form-control form-control-dark"
+                       name="fechaFin"
+                       value="@ViewBag.FechaFin"
+                       min="2024-01-01"
+                       max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       required>
             </div>
 
             <div class="col-md-6 d-flex gap-3 justify-content-end">
-                <button type="submit" asp-action="FiltrarPorFecha" class="btn btn-cyan d-flex align-items-center gap-2 px-4">
+                <button type="submit" class="btn btn-cyan d-flex align-items-center gap-2 px-4">
                     <i class="bi bi-search"></i> Filtrar Registros
                 </button>
 
-                <button type="submit" asp-action="ExportarPDF" class="btn btn-outline-danger-dark d-flex align-items-center gap-2 px-4">
+                <button type="button" id="btnExportar" class="btn btn-outline-danger-dark d-flex align-items-center gap-2 px-4">
                     <i class="bi bi-filetype-pdf"></i> Exportar PDF
                 </button>
             </div>
@@ -222,30 +226,32 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="text-muted-dark fw-bold">#@item.ID_AUDITORIA</td>
-                                <td class="text-light">
+                                <td class="text-muted-dark fw-bold" data-sort="@item.ID_AUDITORIA">#@item.ID_AUDITORIA</td>
+
+                                <td class="text-light" data-sort="@item.FECHA_REGISTRO.ToString("yyyy-MM-ddTHH:mm:ss")">
                                     <div class="small">@item.FECHA_REGISTRO.ToString("dd MMM, yyyy")</div>
                                     <div class="text-cyan small">@item.FECHA_REGISTRO.ToString("HH:mm:ss")</div>
                                 </td>
+
                                 <td class="fw-bold text-white">@item.NOMBRE_USUARIO</td>
                                 <td>
                                     @{
                                         string accionFiltro = (item.ACCION ?? "").ToUpper();
                                     }
 
-                                    @if (accionFiltro == "INSERT")
+                                    @if (accionFiltro == "INSERT" || accionFiltro == "INSERTAR")
                                     {
                                         <span class="badge-glass glass-success"><i class="bi bi-plus-circle me-1"></i> Creación</span>
                                     }
-                                    else if (accionFiltro == "UPDATE")
+                                    else if (accionFiltro == "UPDATE" || accionFiltro == "ACTUALIZAR" || accionFiltro == "EDICIÓN")
                                     {
                                         <span class="badge-glass glass-warning"><i class="bi bi-pencil-square me-1"></i> Edición</span>
                                     }
-                                    else if (accionFiltro == "DELETE")
+                                    else if (accionFiltro == "DELETE" || accionFiltro == "ELIMINAR" || accionFiltro == "DESACTIVAR")
                                     {
                                         <span class="badge-glass glass-danger"><i class="bi bi-trash3 me-1"></i> Eliminación</span>
                                     }
-                                    else if (accionFiltro == "LOGIN")
+                                    else if (accionFiltro == "LOGIN" || accionFiltro == "ACCESO")
                                     {
                                         <span class="badge-glass glass-info"><i class="bi bi-box-arrow-in-right me-1"></i> Acceso</span>
                                     }
@@ -277,33 +283,32 @@
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
-                "order": [[0, "desc"]], // Ordena por el ID de forma descendente (los más nuevos primero)
+                // 🔥 AHORA ORDENA POR LA COLUMNA DE FECHA (Índice 1) DE FORMA DESCENDENTE 🔥
+                "order": [[1, "desc"]],
                 "pageLength": 10,
-                // Quitar los bordes feos de DataTables por defecto
                 "dom": "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
                        "<'row'<'col-sm-12'tr>>" +
                        "<'row mt-3'<'col-sm-12 col-md-5 text-muted-dark small'i><'col-sm-12 col-md-7'p>>"
             });
-        });
 
-                $("#btnExportar").click(function() {
-            // Crear un formulario temporal
-            var form = $('<form></form>');
-            form.attr("method", "post");
-            form.attr("action", "/Auditoria/ExportarPDF"); // Ajusta a tu Ruta/Controlador
+            // Lógica para exportar con las fechas actuales del formulario
+            $("#btnExportar").click(function(e) {
+                e.preventDefault();
 
-            // Obtener valores de tus inputs actuales
-            var fechaInicio = $("input[name='fechaInicio']").val();
-            var fechaFin = $("input[name='fechaFin']").val();
+                var form = $('<form></form>');
+                form.attr("method", "post");
+                form.attr("action", "/Auditoria/ExportarPDF");
 
-            // Añadir los campos al formulario temporal
-            form.append('<input type="hidden" name="fechaInicio" value="' + fechaInicio + '" />');
-            form.append('<input type="hidden" name="fechaFin" value="' + fechaFin + '" />');
+                var fechaInicio = $("input[name='fechaInicio']").val();
+                var fechaFin = $("input[name='fechaFin']").val();
 
-            // Enviarlo
-            $(document.body).append(form);
-            form.submit();
-            form.remove();
+                if (fechaInicio) form.append('<input type="hidden" name="fechaInicio" value="' + fechaInicio + '" />');
+                if (fechaFin) form.append('<input type="hidden" name="fechaFin" value="' + fechaFin + '" />');
+
+                $(document.body).append(form);
+                form.submit();
+                form.remove();
+            });
         });
     </script>
 }

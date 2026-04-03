@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization; // <-- NECESARIO PARA LA SEGURIDAD
 using Entidades;
 using LogicaNegocio;
 using System;
@@ -7,13 +7,14 @@ using System.Data;
 
 namespace Presentacion.Controllers
 {
-    // Solo el Administrador puede gestionar los Roles del sistema
-    [Authorize(Roles = "Administrador")]
+    // 🔥 EL ESCUDO BASE: Solo Administradores y Auditores pueden entrar a la sección de Roles
+    [Authorize(Roles = "Administrador,Admin,Auditor")]
     public class RolController : Controller
     {
         private readonly LogicaRol _logicaRol = new LogicaRol();
 
         // 1. VISTA PRINCIPAL
+        // Administrador y Auditor pueden ver la tabla
         [HttpGet]
         public IActionResult Index()
         {
@@ -31,7 +32,9 @@ namespace Presentacion.Controllers
         }
 
         // 2. CREAR ROL
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede crear roles
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Crear(Rol objRol)
         {
             try
@@ -49,7 +52,9 @@ namespace Presentacion.Controllers
         }
 
         // 3. EDITAR ROL
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede editar roles
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Editar(Rol objRol, string VersionOriginalBase64, string EstadoHtml)
         {
             try
@@ -78,7 +83,9 @@ namespace Presentacion.Controllers
         }
 
         // 4. DESACTIVAR ROL
+        // 🔥 ESCUDO ESTRICTO: Auditor NO puede desactivar roles
         [HttpPost]
+        [Authorize(Roles = "Administrador,Admin")]
         public IActionResult Desactivar(int idRol)
         {
             try

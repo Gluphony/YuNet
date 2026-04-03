@@ -2,7 +2,7 @@
 using LogicaNegocio;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization; // <-- NECESARIO PARA LA SEGURIDAD
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,8 @@ using System.Security.Claims;
 
 namespace Presentacion.Controllers
 {
+    // 🔥 EL ESCUDO BASE: Tienes que haber iniciado sesión para tocar cualquier cosa de pedidos
+    [Authorize]
     public class PedidoController : Controller
     {
         // Instancias de tus capas de Lógica de Negocio
@@ -20,6 +22,8 @@ namespace Presentacion.Controllers
         // ==========================================
         // GET: Pedido/Index (Tabla general para el Admin)
         // ==========================================
+        // 🔥 ESCUDO: Solo el Staff operativo y de auditoría pueden ver todos los pedidos del negocio
+        [Authorize(Roles = "Administrador,Admin,Vendedor,Auditor")]
         public ActionResult Index()
         {
             try
@@ -34,6 +38,10 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // GET: Pedido/Historial (Pedidos propios)
+        // ==========================================
+        // Todos los logueados pueden entrar (Clientes y Staff)
         [HttpGet]
         public ActionResult Historial()
         {
@@ -46,7 +54,7 @@ namespace Presentacion.Controllers
                 if (string.IsNullOrEmpty(claimId))
                 {
                     // Si por alguna razón la sesión se perdió, lo mandamos al Login
-                    return RedirectToAction("Login", "Cuenta");
+                    return RedirectToAction("Index", "Login"); // Ajustado a "Index" de "Login"
                 }
 
                 int idUsuarioActual = int.Parse(claimId);
@@ -63,6 +71,10 @@ namespace Presentacion.Controllers
             }
         }
 
+        // ==========================================
+        // GET: Pedido/Details
+        // ==========================================
+        // Todos pueden ver detalles (El cliente ve los suyos, el admin ve todos)
         public ActionResult Details(int id)
         {
             try
@@ -97,7 +109,8 @@ namespace Presentacion.Controllers
         // POST PARA ASIGNAR UN SOLO IMEI (AJAX) - OPCIÓN A
         // ==========================================
         [HttpPost]
-        [Authorize(Roles = "Administrador")]
+        // 🔥 ESCUDO ESTRICTO: Auditor y Clientes NO pueden asignar IMEIs
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public IActionResult AsignarImei(int idDetallePedido, string imei)
         {
             try
@@ -125,6 +138,9 @@ namespace Presentacion.Controllers
         }
 
         // ==========================================
+        // GET: Pedido/Ticket
+        // ==========================================
+        // Todos pueden ver el ticket
         public ActionResult Ticket(int id)
         {
             try
@@ -177,6 +193,8 @@ namespace Presentacion.Controllers
         // POST: Pedido/ActualizarEstado
         // ==========================================
         [HttpPost]
+        // 🔥 ESCUDO ESTRICTO: Auditor y Clientes NO pueden cambiar el estado del pedido
+        [Authorize(Roles = "Administrador,Admin,Vendedor")]
         public ActionResult ActualizarEstado(int idPedido, string nuevoEstado)
         {
             try
