@@ -6,8 +6,8 @@
 
 <style>
     /* ==========================================
-                               1. VARIABLES GLOBALES (MODO CLARO)
-                               ========================================== */
+                                   1. VARIABLES GLOBALES (MODO CLARO)
+                                   ========================================== */
     :root {
         --bg-main: #F4F7FE;
         --bg-card: #FFFFFF;
@@ -28,8 +28,8 @@
     }
 
     /* ==========================================
-                               1.5 VARIABLES MODO OSCURO
-                               ========================================== */
+                                   1.5 VARIABLES MODO OSCURO
+                                   ========================================== */
     [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
@@ -49,8 +49,8 @@
     }
 
     /* ==========================================
-                               2. ESTILOS GENERALES
-                               ========================================== */
+                                   2. ESTILOS GENERALES
+                                   ========================================== */
     body {
         background-color: var(--bg-main);
         color: var(--text-main);
@@ -81,8 +81,8 @@
     }
 
     /* ==========================================
-                               3. TABLA FUTURISTA
-                               ========================================== */
+                                   3. TABLA FUTURISTA
+                                   ========================================== */
     .table {
         color: var(--text-main);
         margin-bottom: 0;
@@ -112,8 +112,8 @@
     }
 
     /* ==========================================
-                               4. BOTONES E INPUTS
-                               ========================================== */
+                                   4. BOTONES E INPUTS
+                                   ========================================== */
     .btn-neon-primary {
         background: transparent;
         color: var(--primary-color) !important;
@@ -150,8 +150,8 @@
         }
 
     /* ==========================================
-                               5. MODALES
-                               ========================================== */
+                                   5. MODALES
+                                   ========================================== */
     .modal-content {
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -189,8 +189,8 @@
     }
 
     /* ==========================================
-                               6. BADGES Y ALERTS
-                               ========================================== */
+                                   6. BADGES Y ALERTS
+                                   ========================================== */
     .badge-soft-success {
         background-color: var(--success-bg);
         color: var(--success-color);
@@ -357,7 +357,7 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Nombre Completo</label>
-                        <input type="text" class="form-control custom-input" name="Nombre" placeholder="Ej. Juan Pérez"
+                        <input type="text" class="form-control custom-input" id="crearNombre" name="Nombre" placeholder="Ej. Juan Pérez"
                                pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
                                title="El nombre solo debe contener letras y espacios. No se permiten números ni caracteres especiales."
                                required>
@@ -366,7 +366,7 @@
                         <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Correo Electrónico</label>
                         <div class="input-group">
                             <span class="input-group-text border-0" style="background-color: var(--bg-main); border: 1px solid var(--border-color) !important; border-right: none !important; color: var(--text-muted);"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control custom-input" style="border-left: none !important;" name="Correo" placeholder="correo@ejemplo.com" required>
+                            <input type="email" class="form-control custom-input" id="crearCorreo" style="border-left: none !important;" name="Correo" placeholder="correo@ejemplo.com" required>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -378,7 +378,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-uppercase mb-1" style="color: var(--text-muted); letter-spacing: 1px;">Rol en el Sistema</label>
-                        <select class="form-select custom-input" name="Id_Rol" required>
+                        <select class="form-select custom-input" id="crearRol" name="Id_Rol" required>
                             <option value="">Seleccione un rol...</option>
                             <option value="1">Administrador</option>
                             <option value="2">Usuario</option>
@@ -488,40 +488,58 @@
             });
 
             // ==========================================
-            // MAGIA: AUTO-COMPLETAR CORREO SEGÚN ROL
+            // MAGIA: AUTO-COMPLETAR CORREO SEGÚN ROL (Crear y Editar)
             // ==========================================
-            selectRol.addEventListener('change', function() {
-                let correoActual = inputCorreo.value;
-                if (!correoActual) return;
+            function aplicarMagiaCorreo(selectElement, targetInputCorreo, inputNombre = null) {
+                if(!selectElement || !targetInputCorreo) return;
 
-                // Obtenemos el nombre base (escapamos el arroba con @@ para Razor)
-                let nombreUsuario = correoActual.split('@@')[0];
+                selectElement.addEventListener('change', function() {
+                    let correoActual = targetInputCorreo.value;
+                    let nombreBase = "";
 
-                // Limpiamos cualquier sufijo anterior si lo hubiera
-                nombreUsuario = nombreUsuario.replace(/\.admin$/, '')
-                                             .replace(/\.usuario$/, '')
-                                             .replace(/\.auditor$/, '')
-                                             .replace(/\.vendedor$/, '');
+                    if (correoActual) {
+                        nombreBase = correoActual.split('@@')[0];
+                    }
+                    else if (inputNombre && inputNombre.value) {
+                        nombreBase = inputNombre.value.split(' ')[0].toLowerCase();
+                    }
+                    else {
+                        nombreBase = "";
+                    }
 
-                // Determinamos el nuevo sufijo (también con @@)
-                let rolId = this.value;
-                let nuevoSufijo = "";
+                    nombreBase = nombreBase.replace(/\.admin$/, '')
+                                           .replace(/\.usuario$/, '')
+                                           .replace(/\.auditor$/, '')
+                                           .replace(/\.vendedor$/, '');
 
-                if (rolId === "1") nuevoSufijo = ".admin@@yunet.com";
-                else if (rolId === "2") nuevoSufijo = ".usuario@@yunet.com";
-                else if (rolId === "3") nuevoSufijo = ".auditor@@yunet.com";
-                else if (rolId === "4") nuevoSufijo = ".vendedor@@yunet.com";
+                    let rolId = this.value;
+                    let nuevoSufijo = "";
 
-                // Aplicamos el cambio y un pequeño efecto visual
-                if (nuevoSufijo !== "") {
-                    inputCorreo.value = nombreUsuario + nuevoSufijo;
+                    if (rolId === "1") nuevoSufijo = ".admin@@yunet.com";
+                    else if (rolId === "2") nuevoSufijo = ".usuario@@yunet.com";
+                    else if (rolId === "3") nuevoSufijo = ".auditor@@yunet.com";
+                    else if (rolId === "4") nuevoSufijo = ".vendedor@@yunet.com";
 
-                    inputCorreo.style.backgroundColor = "var(--neon-blue-tint)";
-                    setTimeout(() => {
-                        inputCorreo.style.backgroundColor = "var(--bg-main)";
-                    }, 500);
-                }
-            });
+                    if (nuevoSufijo !== "") {
+                        targetInputCorreo.value = nombreBase + nuevoSufijo;
+
+                        targetInputCorreo.style.backgroundColor = "var(--neon-blue-tint)";
+                        setTimeout(() => {
+                            targetInputCorreo.style.backgroundColor = "var(--bg-main)";
+                        }, 500);
+                    }
+                });
+            }
+
+            // Aplicar a Editar
+            aplicarMagiaCorreo(selectRol, inputCorreo);
+
+            // Aplicar a Crear
+            const selectRolCrear = document.getElementById('crearRol');
+            const inputCorreoCrear = document.getElementById('crearCorreo');
+            const inputNombreCrear = document.getElementById('crearNombre');
+            aplicarMagiaCorreo(selectRolCrear, inputCorreoCrear, inputNombreCrear);
+
 
             // ==========================================
             // FUNCIÓN GENÉRICA CON SWEETALERT (Crear/Editar)
@@ -575,14 +593,12 @@
                 });
             }
 
-            // INTERCEPTAMOS EL FORMULARIO CREAR
             const formCrear = document.getElementById('formCrear');
             const btnCrear = document.getElementById('btnGuardarCrear');
             if (formCrear && btnCrear) {
                 procesarFormularioAjax(formCrear, btnCrear, '<i class="bi bi-save me-2"></i>Guardar Usuario');
             }
 
-            // INTERCEPTAMOS EL FORMULARIO EDITAR
             const formEditar = document.getElementById('formEditar');
             const btnEditar = document.getElementById('btnGuardarEditar');
             if (formEditar && btnEditar) {
