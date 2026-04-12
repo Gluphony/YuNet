@@ -74,21 +74,20 @@ namespace Datos
                     SqlCommand cmd = new SqlCommand("Seguridad.Sp_CambiarClave", conexion);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Cambiamos @Id_Usuario por @Correo y pasamos el string 'correo'
                     cmd.Parameters.AddWithValue("@Correo", correo ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@NuevaClave", nuevaClave ?? (object)DBNull.Value);
 
                     conexion.Open();
+                    cmd.ExecuteNonQuery();
 
-                    // ExecuteNonQuery devolverá el número de filas afectadas
-                    int filasAfectadas = cmd.ExecuteNonQuery();
-
-                    // Es buena práctica asegurar que al menos una fila se actualizó
-                    respuesta = filasAfectadas > 0;
+                    // Si llegó hasta aquí sin lanzar error, el SP funcionó
+                    respuesta = true;
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error al cambiar la contraseña: " + ex.Message);
+                    // Si el SP lanza el RAISERROR porque el correo no existe, caerá aquí
+                    // Solo devolvemos false, el controlador se encarga de mostrar el mensaje genérico
+                    return false;
                 }
             }
             return respuesta;

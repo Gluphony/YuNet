@@ -5,8 +5,8 @@
 
 <style>
     /* ==========================================
-               1. VARIABLES GLOBALES (MODO CLARO)
-               ========================================== */
+                   1. VARIABLES GLOBALES (MODO CLARO)
+                   ========================================== */
     :root {
         --bg-main: #F4F7FE;
         --bg-card: #FFFFFF;
@@ -27,8 +27,8 @@
     }
 
     /* ==========================================
-               1.5 VARIABLES MODO OSCURO
-               ========================================== */
+                   1.5 VARIABLES MODO OSCURO
+                   ========================================== */
     [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
@@ -49,8 +49,8 @@
     }
 
     /* ==========================================
-               2. COMPONENTES BASE
-               ========================================== */
+                   2. COMPONENTES BASE
+                   ========================================== */
     .custom-input {
         background-color: var(--bg-main) !important;
         border: 1px solid var(--border-color) !important;
@@ -95,8 +95,8 @@
     }
 
     /* ==========================================
-               3. BOTONES NEÓN Y ACCIONES
-               ========================================== */
+                   3. BOTONES NEÓN Y ACCIONES
+                   ========================================== */
     .btn-neon {
         background: transparent;
         color: var(--neon-blue-base) !important;
@@ -151,8 +151,8 @@
         }
 
     /* ==========================================
-               4. TABLAS Y MODALES
-               ========================================== */
+                   4. TABLAS Y MODALES
+                   ========================================== */
     .table-tech > :not(caption) > * > * {
         background-color: transparent !important;
         border-bottom: 1px solid var(--border-color);
@@ -222,10 +222,10 @@
         <div class="d-flex gap-3">
             @* Botón Exportar *@
             <a href="@Url.Action("DescargarPdf", "Categoria")"
-                   target="_blank"
-                   id="linkPdf"
-                   class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
-                   style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+               target="_blank"
+               id="linkPdf"
+               class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
+               style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
             </a>
 
@@ -243,13 +243,11 @@
             @* Filtros *@
             <div class="row mb-4 align-items-center">
                 <div class="col-md-6 col-lg-5">
-                    @* Cambiamos a asp-action="Filtrar" para que coincida con tu método del controlador *@
                     <form asp-controller="Categoria" asp-action="Filtrar" method="get" class="d-flex gap-2">
                         <div class="input-group">
                             <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted); border-radius: 8px 0 0 8px; border-top: 1px solid var(--border-color) !important; border-bottom: 1px solid var(--border-color) !important; border-left: 1px solid var(--border-color) !important;">
                                 <i class="bi bi-search"></i>
                             </span>
-                            @* Agregamos value="@Context.Request.Query["nombre"]" para que el texto persista *@
                             <input type="text"
                                    name="nombre"
                                    id="txtBuscar"
@@ -261,12 +259,12 @@
                         <button type="submit" class="btn btn-neon px-3">Buscar</button>
                     </form>
                 </div>
-    
+
                 @* Botón Recargar: Limpia el filtro volviendo al Index *@
                 <div class="col-auto">
                     <a asp-action="Index" class="btn btn-outline-secondary border-0 d-flex align-items-center justify-content-center"
-                           style="background-color: var(--bg-main); color: var(--text-main); width: 42px; height: 42px; border-radius: 8px;"
-                           title="Recargar lista completa">
+                       style="background-color: var(--bg-main); color: var(--text-main); width: 42px; height: 42px; border-radius: 8px;"
+                       title="Recargar lista completa">
                         <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>
@@ -391,6 +389,9 @@
                             <option value="True">Activo</option>
                             <option value="False">Inactivo</option>
                         </select>
+                        <small id="alertaEstadoCategoria" class="d-none mt-2 d-flex align-items-center gap-1" style="color: var(--warning-base); font-size: 0.8rem; font-weight: bold;">
+                            <i class="bi bi-exclamation-triangle"></i> ¡Ojo! Si tiene productos activos, el sistema bloqueará la acción.
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-end gap-2">
@@ -409,50 +410,75 @@
             document.getElementById('edit_NOMBRE_CATEGORIA').value = nombre;
             document.getElementById('edit_ESTADO').value = estado;
 
+            // Limpiamos la alerta por si estaba visible de una edición anterior
+            document.getElementById('alertaEstadoCategoria').classList.add('d-none');
+
+            // Si el estado ya venía Inactivo (False), mostramos la alerta por precaución
+            if (estado === 'False' || estado === 'false') {
+                 document.getElementById('alertaEstadoCategoria').classList.remove('d-none');
+            }
+
             var modalElement = document.getElementById('modalEditarCategoria');
             var modalInstance = new bootstrap.Modal(modalElement);
             modalInstance.show();
         }
 
+        // 🔥 MAGIA: SweetAlert para el botón de la basura (Desactivar)
         function desactivarCategoria(id) {
-            if(confirm("¿Estás seguro de que deseas desactivar esta categoría?")) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '@Url.Action("Desactivar", "Categoria")';
+            Swal.fire({
+                title: '¿Desactivar Categoría?',
+                text: "Si esta categoría tiene productos activos asociados, el sistema bloqueará la acción por seguridad. ¿Deseas intentarlo?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EE5D50',
+                cancelButtonColor: '#707EAE',
+                confirmButtonText: 'Sí, intentar desactivar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '@Url.Action("Desactivar", "Categoria")';
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'idCategoria';
-                input.value = id;
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'id'; // <-- Cuidamos que se llame 'id' para hacer match con el Controller
+                    input.value = id;
 
-                form.appendChild(input);
-                document.body.appendChild(form);
+                    form.appendChild(input);
+                    document.body.appendChild(form);
 
-                form.submit();
-            }
+                    form.submit();
+                }
+            });
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            // 1. Capturamos el enlace del PDF y el input del buscador
+            // Lógica del PDF
             const linkPdf = document.getElementById("linkPdf");
             const txtBuscar = document.querySelector('input[name="nombre"]');
 
             if (linkPdf && txtBuscar) {
-                // 2. Escuchamos el evento 'click' en el botón de Exportar
                 linkPdf.addEventListener("click", function (e) {
-                    // 3. Obtenemos el valor actual del buscador (lo que el usuario escribió)
                     const valorBusqueda = txtBuscar.value.trim();
-                    
-                    // 4. Construimos la URL dinámica hacia el controlador de Categoría
                     const urlBase = "@Url.Action("DescargarPdf", "Categoria")";
-                    
-                    // 5. Seteamos el nuevo href con el parámetro 'busqueda'
-                    // Esto hace que el controlador reciba el filtro antes de generar el PDF
                     this.href = `${urlBase}?busqueda=${encodeURIComponent(valorBusqueda)}`;
-                    
-                    console.log("Exportando PDF con filtro: " + valorBusqueda);
                 });
-                }
+            }
+
+            // 🔥 MAGIA: Mostrar alerta si seleccionan Inactivo en el modal de Editar
+            const selectEstadoCat = document.getElementById('edit_ESTADO');
+            const alertaEstadoCat = document.getElementById('alertaEstadoCategoria');
+
+            if(selectEstadoCat) {
+                selectEstadoCat.addEventListener('change', function() {
+                    if(this.value === 'False' || this.value === 'false') {
+                        alertaEstadoCat.classList.remove('d-none');
+                    } else {
+                        alertaEstadoCat.classList.add('d-none');
+                    }
+                });
+            }
         });
     </script>
 }

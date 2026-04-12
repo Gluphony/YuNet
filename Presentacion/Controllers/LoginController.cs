@@ -34,7 +34,8 @@ namespace Presentacion.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string correo, string clave)
+        // 1. Agregamos "bool recordarme = false" para atrapar el checkbox
+        public async Task<IActionResult> Index(string correo, string clave, bool recordarme = false)
         {
             try
             {
@@ -46,46 +47,43 @@ namespace Presentacion.Controllers
                     string rolUsuario = fila["Nombre_Rol"].ToString();
 
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, fila["Id_Usuario"].ToString()),
-                        new Claim(ClaimTypes.Name, fila["Nombre"].ToString()),
-                        new Claim(ClaimTypes.Email, fila["Correo"].ToString()),
-                        new Claim(ClaimTypes.Role, rolUsuario)
-                    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, fila["Id_Usuario"].ToString()),
+                new Claim(ClaimTypes.Name, fila["Nombre"].ToString()),
+                new Claim(ClaimTypes.Email, fila["Correo"].ToString()),
+                new Claim(ClaimTypes.Role, rolUsuario)
+            };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     // =========================================================
-                    // LÓGICA DE TIEMPOS DE SESIÓN INDEPENDIENTES POR ROL
+                    // 🔥 LÓGICA REPARADA: HACEMOS CASO AL CHECKBOX
                     // =========================================================
                     DateTimeOffset tiempoExpiracion;
-                    bool permitirRefresco;
-                    bool esPersistente;
+                    bool permitirRefresco = true;
+
+                    // Si el usuario marcó la casilla, la cookie sobrevive al cerrar el navegador
+                    bool esPersistente = recordarme;
 
                     if (rolUsuario == "Usuario")
                     {
-                        tiempoExpiracion = DateTimeOffset.UtcNow.AddMinutes(15); // 15 Minutos límite
-                        permitirRefresco = false;
-                        esPersistente = false;
+                        // Si marcó recordar, le damos 7 días. Si no, los 15 min estrictos.
+                        tiempoExpiracion = recordarme ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.UtcNow.AddMinutes(15);
                     }
                     else if (rolUsuario == "Vendedor")
                     {
-                        tiempoExpiracion = DateTimeOffset.UtcNow.AddHours(1); // 1 Hora límite
-                        permitirRefresco = false;
-                        esPersistente = false;
+                        tiempoExpiracion = recordarme ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.UtcNow.AddHours(1);
                     }
                     else
                     {
                         // Administradores, Auditores y otros
-                        tiempoExpiracion = DateTimeOffset.UtcNow.AddHours(8); // 8 Horas
-                        permitirRefresco = true;
-                        esPersistente = true;
+                        tiempoExpiracion = recordarme ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.UtcNow.AddHours(8);
                     }
 
                     var authProperties = new AuthenticationProperties
                     {
                         AllowRefresh = permitirRefresco,
-                        IsPersistent = esPersistente,
+                        IsPersistent = esPersistente, // <-- Aquí aplicamos el valor del checkbox
                         ExpiresUtc = tiempoExpiracion
                     };
                     // =========================================================

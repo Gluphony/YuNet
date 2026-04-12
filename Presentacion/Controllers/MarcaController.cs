@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Data; // <-- NUEVO: Necesario para leer la tabla de productos
 
 namespace Presentacion.Controllers
 {
@@ -16,6 +17,7 @@ namespace Presentacion.Controllers
     public class MarcaController : Controller
     {
         private readonly LogicaMarca _logicaMarca = new LogicaMarca();
+        private readonly LogicaProducto _logicaProducto = new LogicaProducto(); // <-- NUEVO: El guardia que vigila los productos
 
         // 1. LISTAR TODO (Al abrir la página)
         [HttpGet]
@@ -85,6 +87,31 @@ namespace Presentacion.Controllers
         {
             try
             {
+                // 🔥 EL ESCUDO DE INTEGRIDAD: Si intentan ponerla inactiva desde la edición...
+                if (!marca.ESTADO)
+                {
+                    DataTable dtProductos = _logicaProducto.ListarProductos();
+                    bool tieneProductos = false;
+
+                    foreach (DataRow row in dtProductos.Rows)
+                    {
+                        int idMarcaProducto = row["ID_MARCA"] != DBNull.Value ? Convert.ToInt32(row["ID_MARCA"]) : 0;
+                        bool estadoProducto = row["ESTADO"] != DBNull.Value && Convert.ToBoolean(row["ESTADO"]);
+
+                        if (idMarcaProducto == marca.ID_MARCA && estadoProducto)
+                        {
+                            tieneProductos = true;
+                            break;
+                        }
+                    }
+
+                    if (tieneProductos)
+                    {
+                        TempData["MensajeError"] = "Bloqueado: No puedes cambiar el estado a Inactivo porque existen productos activos de esta marca.";
+                        return RedirectToAction("Index");
+                    }
+                }
+
                 bool resultado = _logicaMarca.Editar(marca);
                 if (resultado)
                 {
@@ -107,6 +134,28 @@ namespace Presentacion.Controllers
         {
             try
             {
+                // 🔥 EL ESCUDO DE INTEGRIDAD: Revisar si hay productos vivos atados a esta marca
+                DataTable dtProductos = _logicaProducto.ListarProductos();
+                bool tieneProductos = false;
+
+                foreach (DataRow row in dtProductos.Rows)
+                {
+                    int idMarcaProducto = row["ID_MARCA"] != DBNull.Value ? Convert.ToInt32(row["ID_MARCA"]) : 0;
+                    bool estadoProducto = row["ESTADO"] != DBNull.Value && Convert.ToBoolean(row["ESTADO"]);
+
+                    if (idMarcaProducto == id && estadoProducto)
+                    {
+                        tieneProductos = true;
+                        break;
+                    }
+                }
+
+                if (tieneProductos)
+                {
+                    TempData["MensajeError"] = "Acción bloqueada: Esta marca tiene productos activos en el sistema. Desactívalos o cámbiales la marca primero.";
+                    return RedirectToAction("Index");
+                }
+
                 bool resultado = _logicaMarca.Desactivar(id);
                 if (resultado)
                 {

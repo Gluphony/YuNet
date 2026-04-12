@@ -14,8 +14,8 @@
 
     <style>
         /* ==========================================
-                           VARIABLES Y TEMA OSCURO REFINADO
-                           ========================================== */
+                                   VARIABLES Y TEMA OSCURO REFINADO
+                                   ========================================== */
         :root {
             --neon-primary: #00D4FF;
             --neon-secondary: #ff00ff; /* Un toque magenta para contraste */
@@ -46,8 +46,8 @@
         }
 
         /* ==========================================
-                           FONDO ANIMADO (PARTÍCULAS Y BRILLOS)
-                           ========================================== */
+                                   FONDO ANIMADO (PARTÍCULAS Y BRILLOS)
+                                   ========================================== */
         .background-fx {
             position: absolute;
             top: 0;
@@ -98,8 +98,8 @@
         }
 
         /* ==========================================
-                           CONTENEDOR PRINCIPAL (GLASSMORPHISM)
-                           ========================================== */
+                                   CONTENEDOR PRINCIPAL (GLASSMORPHISM)
+                                   ========================================== */
         .login-wrapper {
             position: relative;
             z-index: 10;
@@ -142,8 +142,8 @@
         }
 
         /* ==========================================
-                           LADO IZQUIERDO: BRANDING
-                           ========================================== */
+                                   LADO IZQUIERDO: BRANDING
+                                   ========================================== */
         .login-brand {
             width: 50%;
             padding: 4rem;
@@ -198,8 +198,8 @@
         }
 
         /* ==========================================
-                           LADO DERECHO: FORMULARIO
-                           ========================================== */
+                                   LADO DERECHO: FORMULARIO
+                                   ========================================== */
         .login-form-container {
             width: 50%;
             padding: 4rem 3.5rem;
@@ -393,8 +393,8 @@
         }
 
         /* ==========================================
-                           RESPONSIVE
-                           ========================================== */
+                                   RESPONSIVE
+                                   ========================================== */
         @@media (max-width: 900px) {
             .login-wrapper
 
@@ -466,16 +466,16 @@
                 </div>
             }
 
-            <form action="/Login/Index" method="POST">
+            <form action="/Login/Index" method="POST" id="loginForm">
 
                 <div class="form-floating-custom">
-                    <input type="email" name="correo" id="emailInput" placeholder=" " required autofocus autocomplete="off">
+                    <input type="email" name="correo" id="emailInput" placeholder=" " required autofocus autocomplete="off" maxlength="80">
                     <i class="bi bi-envelope icon-left"></i>
                     <label style="position: absolute; left: 3rem; top: 1rem; color: var(--text-muted); pointer-events: none; transition: 0.3s; opacity: 0;">Correo electrónico</label>
                 </div>
 
                 <div class="form-floating-custom">
-                    <input type="password" name="clave" id="passwordInput" placeholder=" " required>
+                    <input type="password" name="clave" id="passwordInput" placeholder=" " required maxlength="35">
                     <i class="bi bi-shield-lock icon-left"></i>
                     <span class="toggle-password" id="togglePassword">
                         <i class="bi bi-eye-slash" id="eyeIcon"></i>
@@ -484,7 +484,7 @@
 
                 <div class="form-options">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="recordarme" value="true">
                         <label class="form-check-label text-muted" for="rememberMe">
                             Recordar sesión
                         </label>
@@ -523,6 +523,31 @@
         const inputs = document.querySelectorAll('.form-floating-custom input');
         inputs.forEach(input => {
             input.setAttribute('placeholder', input.type === 'email' ? 'usuario@yunet.com' : '••••••••');
+        });
+
+        // ==============================================================
+        // 🔥 MAGIA DE RECORDAR CORREO (Local Storage)
+        // ==============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('emailInput');
+            const rememberCheckbox = document.getElementById('rememberMe');
+            const loginForm = document.getElementById('loginForm');
+
+            // 1. Al cargar la página, revisamos si hay un correo guardado
+            const savedEmail = localStorage.getItem('yunet_saved_email');
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                rememberCheckbox.checked = true;
+            }
+
+            // 2. Al enviar el formulario, guardamos o borramos el correo
+            loginForm.addEventListener('submit', function() {
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('yunet_saved_email', emailInput.value);
+                } else {
+                    localStorage.removeItem('yunet_saved_email');
+                }
+            });
         });
     </script>
 </body>

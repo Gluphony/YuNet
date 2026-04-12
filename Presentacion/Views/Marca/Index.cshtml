@@ -5,8 +5,8 @@
 
 <style>
     /* ==========================================
-               1. VARIABLES GLOBALES (MODO CLARO)
-               ========================================== */
+                   1. VARIABLES GLOBALES (MODO CLARO)
+                   ========================================== */
     :root {
         --bg-main: #F4F7FE;
         --bg-card: #FFFFFF;
@@ -27,8 +27,8 @@
     }
 
     /* ==========================================
-               1.5 VARIABLES MODO OSCURO
-               ========================================== */
+                   1.5 VARIABLES MODO OSCURO
+                   ========================================== */
     [data-bs-theme="dark"], body.dark-theme, [data-theme="dark"] {
         --bg-main: #13131A;
         --bg-card: #1C1C24;
@@ -49,8 +49,8 @@
     }
 
     /* ==========================================
-               2. COMPONENTES BASE
-               ========================================== */
+                   2. COMPONENTES BASE
+                   ========================================== */
     .custom-input {
         background-color: var(--bg-main) !important;
         border: 1px solid var(--border-color) !important;
@@ -95,8 +95,8 @@
     }
 
     /* ==========================================
-               3. BOTONES NEÓN
-               ========================================== */
+                   3. BOTONES NEÓN
+                   ========================================== */
     .btn-neon {
         background: transparent;
         color: var(--neon-blue-base) !important;
@@ -152,8 +152,8 @@
         }
 
     /* ==========================================
-               4. TABLAS Y MODALES
-               ========================================== */
+                   4. TABLAS Y MODALES
+                   ========================================== */
     .table-tech > :not(caption) > * > * {
         background-color: transparent !important;
         border-bottom: 1px solid var(--border-color);
@@ -219,16 +219,16 @@
             <p class="mb-0 mt-1" style="color: var(--text-muted); font-size: 0.9rem;">Gestiona las marcas de tus productos</p>
         </div>
         <div class="d-flex justify-content-end align-items-center gap-3">
-            @* Botón de Exportar (Estilo Outline Info con coherencia Neón) *@
+            @* Botón de Exportar *@
             <a href="@Url.Action("DescargarPdf", "Marca")"
-                   target="_blank"
-                   id="linkPdf"
-                   class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
-                   style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+               target="_blank"
+               id="linkPdf"
+               class="btn btn-outline-info px-4 py-2 d-flex align-items-center gap-2"
+               style="border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
             </a>
 
-            @* Botón Nueva Marca (Estilo Neón Principal) *@
+            @* Botón Nueva Marca *@
             <button type="button"
                     class="btn btn-neon px-4 py-2 d-flex align-items-center gap-2"
                     data-bs-toggle="modal"
@@ -250,7 +250,6 @@
                             <span class="input-group-text border-0" style="background-color: var(--bg-main); color: var(--text-muted); border-radius: 8px 0 0 8px; border-top: 1px solid var(--border-color) !important; border-bottom: 1px solid var(--border-color) !important; border-left: 1px solid var(--border-color) !important;">
                                 <i class="bi bi-search"></i>
                             </span>
-                            @* AGREGADO: id="txtBuscar" para que el script del PDF pueda leer el valor *@
                             <input type="text" id="txtBuscar" name="nombre" value="@Context.Request.Query["nombre"]" class="form-control custom-input border-start-0" placeholder="Buscar marca..." style="border-radius: 0 8px 8px 0 !important; padding-left: 0;">
                         </div>
                         <button type="submit" class="btn btn-neon px-3">Buscar</button>
@@ -299,7 +298,7 @@
 
                                         @if (item.ESTADO)
                                         {
-                                            <form asp-action="Desactivar" asp-route-id="@item.ID_MARCA" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas desactivar esta marca?');">
+                                            <form asp-action="Desactivar" asp-route-id="@item.ID_MARCA" method="post" class="d-inline form-desactivar">
                                                 <button type="submit" class="btn-action btn-delete" title="Desactivar">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -384,6 +383,9 @@
                             <option value="true">Activo</option>
                             <option value="false">Inactivo</option>
                         </select>
+                        <small id="alertaEstado" class="d-none mt-2 d-flex align-items-center gap-1" style="color: var(--warning-base); font-size: 0.8rem; font-weight: bold;">
+                            <i class="bi bi-exclamation-triangle"></i> ¡Ojo! Si tiene productos activos, el sistema bloqueará la acción.
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex justify-content-end gap-2">
@@ -401,23 +403,60 @@
              document.getElementById('editIdMarca').value = id;
              document.getElementById('editNombreMarca').value = nombre;
              document.getElementById('editEstadoMarca').value = estado.toLowerCase();
+
+             // Ocultamos la alerta por si acaso abren el modal y estaba visible
+             document.getElementById('alertaEstado').classList.add('d-none');
          }
 
-         // Usamos una variable para el elemento para no repetir código
-         const linkPdf = document.getElementById("linkPdf");
-         const txtBuscar = document.getElementById("txtBuscar");
+         document.addEventListener('DOMContentLoaded', function () {
+             // Lógica del PDF
+             const linkPdf = document.getElementById("linkPdf");
+             const txtBuscar = document.getElementById("txtBuscar");
 
-         if (linkPdf && txtBuscar) {
-             linkPdf.addEventListener("click", function (e) {
-                 // Obtenemos el valor actual o un string vacío si no hay nada
-                 const busqueda = txtBuscar.value || "";
-                
-                 // Construimos la URL dinámica
-                 const urlBase = "@Url.Action("DescargarPdf", "Marca")";
-                 this.href = `${urlBase}?busqueda=${encodeURIComponent(busqueda)}`;
-                
-                 console.log("Generando reporte para:", busqueda); // Útil para debugear en consola
+             if (linkPdf && txtBuscar) {
+                 linkPdf.addEventListener("click", function (e) {
+                     const busqueda = txtBuscar.value || "";
+                     const urlBase = "@Url.Action("DescargarPdf", "Marca")";
+                     this.href = `${urlBase}?busqueda=${encodeURIComponent(busqueda)}`;
+                 });
+             }
+
+             // 🔥 MAGIA: Mostrar alerta si seleccionan Inactivo en el modal de Editar
+             const selectEstadoMarca = document.getElementById('editEstadoMarca');
+             const alertaEstado = document.getElementById('alertaEstado');
+
+             if(selectEstadoMarca) {
+                 selectEstadoMarca.addEventListener('change', function() {
+                     if(this.value === 'false') {
+                         alertaEstado.classList.remove('d-none');
+                     } else {
+                         alertaEstado.classList.add('d-none');
+                     }
+                 });
+             }
+
+             // 🔥 MAGIA: SweetAlert para el botón de la basura (Desactivar)
+             const formsDesactivar = document.querySelectorAll('.form-desactivar');
+             formsDesactivar.forEach(form => {
+                 form.addEventListener('submit', function(e) {
+                     e.preventDefault(); // Detenemos el envío automático
+
+                     Swal.fire({
+                        title: '¿Desactivar Marca?',
+                        text: "Si esta marca tiene productos activos asociados, el sistema bloqueará la acción por seguridad. ¿Deseas intentarlo?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EE5D50', // Rojo peligro
+                        cancelButtonColor: '#707EAE', // Gris cancelar
+                        confirmButtonText: 'Sí, intentar desactivar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); // Ahora sí, mandamos el form al Controller
+                        }
+                    });
+                 });
              });
-         }
+         });
     </script>
 }
